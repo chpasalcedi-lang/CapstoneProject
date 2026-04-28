@@ -1,0 +1,436 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: #f0f0ee;
+  color: #1a1a1a;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.booking-page {
+  width: 100%;
+  max-width: 1700px;
+  margin: 0 auto;
+}
+
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 1700px;
+  margin: 0 auto;
+}
+
+.booking-navbar,
+.booking-calendar,
+.booking-search-wrap,
+.booking-results-area,
+.booking-nav-content,
+.booking-search-bar,
+.booking-results-grid {
+  width: 100%;
+  max-width: 1700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.booking-navbar {
+  background: #f0f0ee;
+  padding: 0 56px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.booking-nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* NAV */
+.booking-navbar {
+background: #f0f0ee;
+padding: 0 56px;
+height: 80px;
+display: flex;
+align-items: center;
+width: 1430px;
+border-bottom: 1px solid #ddd;
+}
+
+.booking-nav-content {
+display: flex;
+align-items: center;
+justify-content: space-between;
+width: 100%;
+}
+
+.logo h1 {
+font-family: 'Playfair Display', serif;
+font-size: 1.6rem;
+font-weight: 700;
+color: #1a1a1a;
+letter-spacing: 0.02em;
+}
+
+.booking-nav-links {
+list-style: none;
+display: flex;
+gap: 48px;
+align-items: center;
+}
+
+.booking-nav-links li a,
+.booking-nav-links li {
+text-decoration: none;
+font-size: 0.8rem;
+font-weight: 500;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: #1a1a1a;
+cursor: pointer;
+}
+
+.booking-nav-links li:last-child {
+font-weight: 700;
+}
+
+/* HERO */
+.booking-calendar {
+background: #0f1e2e;
+padding: 80px 56px 120px;
+margin-bottom: -220px;
+}
+
+.booking-eyebrow {
+display: block;
+font-size: 0.72rem;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: #C89A2A;
+font-weight: 600;
+margin-bottom: 16px;
+
+}
+
+.booking-text h1 {
+font-family: 'Montserrat', sans-serif;
+font-size: 3.2rem;
+font-weight: 400;
+color: #ffffff;
+line-height: 1.1;
+padding-bottom: 130px;
+}
+
+.booking-text h1 strong {
+font-family: 'Playfair Display', serif;
+font-style: italic;
+font-weight: 700;
+color: #C89A2A;
+}
+
+/* SEARCH BAR */
+.booking-search-wrap {
+padding: 0 56px;
+margin-top: -48px;
+position: relative;
+z-index: 10;
+}
+
+.booking-search-bar {
+background: #ffffff;
+border-radius: 16px;
+padding: 32px 40px;
+display: flex;
+align-items: center;
+gap: 0;
+box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+.booking-field {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 8px;
+padding: 0 24px;
+}
+
+.booking-field:first-child { padding-left: 0; }
+
+.booking-field-label {
+font-size: 0.68rem;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: #666;
+font-weight: 600;
+}
+
+.booking-input {
+
+font-family: 'Montserrat', sans-serif;
+font-size: 0.95rem;
+color: #ffffff;
+
+cursor: pointer;
+
+}
+
+.booking-divider {
+width: 1px;
+height: 40px;
+background: #e0e0e0;
+flex-shrink: 0;
+}
+
+.booking-btn {
+background: #C89A2A;
+color: #ffffff;
+border: none;
+border-radius: 10px;
+padding: 16px 40px;
+font-family: 'Montserrat', sans-serif;
+font-size: 0.85rem;
+font-weight: 700;
+letter-spacing: 0.04em;
+cursor: pointer;
+white-space: nowrap;
+margin-left: 32px;
+transition: background 0.2s;
+}
+
+.booking-btn:hover { background: #D4A83A; }
+
+/* RESULTS */
+.booking-results-area {
+height: 100%;
+margin-top: -60px;
+background-color: #ffffff;
+padding: 64px 56px 80px;
+}
+
+.booking-results-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 32px;
+padding-top: 30px;
+}
+
+.booking-room-card {
+background: #ffffff;
+border-radius: 12px;
+overflow: hidden;
+box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+display: flex;
+flex-direction: column;
+}
+
+.booking-room-card-img {
+position: relative;
+height: 240px;
+overflow: hidden;
+
+}
+
+.booking-room-card-img img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+display: block;
+}
+
+.booking-room-badge {
+position: absolute;
+top: 14px;
+left: 14px;
+background: #C89A2A;
+color: #ffffff;
+font-size: 0.65rem;
+font-weight: 700;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+padding: 5px 12px;
+border-radius: 4px;
+}
+
+.booking-room-rating {
+position: absolute;
+bottom: 14px;
+right: 14px;
+background: rgba(0,0,0,0.55);
+color: #ffffff;
+font-size: 0.78rem;
+font-weight: 600;
+padding: 5px 12px;
+border-radius: 6px;
+}
+
+.booking-room-card-body {
+padding: 24px 24px 20px;
+display: flex;
+flex-direction: column;
+flex: 1;
+}
+
+.booking-room-card-body h3 {
+font-family: 'Playfair Display', serif;
+font-size: 1.25rem;
+font-weight: 700;
+margin-bottom: 12px;
+color: #1a1a1a;
+}
+
+.booking-room-card-body p {
+font-size: 0.82rem;
+color: #666;
+line-height: 1.55;
+flex: 1;
+display: -webkit-box;
+-webkit-box-orient: vertical;
+overflow: hidden;
+}
+
+.booking-room-card-footer {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-top: 16px;
+padding-top: 16px;
+border-top: 1px solid #eee;
+}
+
+.booking-room-price {
+display: flex;
+flex-direction: column;
+}
+
+.booking-room-price-amount {
+font-weight: 700;
+font-size: 1.1rem;
+color: #1a1a1a;
+}
+
+.booking-room-price-night {
+font-size: 0.72rem;
+color: #666;
+}
+
+.booking-room-book-btn {
+background: #0f1e2e;
+color: #ffffff;
+border: none;
+border-radius: 8px;
+padding: 10px 20px;
+font-family: 'Montserrat', sans-serif;
+font-size: 0.78rem;
+font-weight: 600;
+cursor: pointer;
+transition: background 0.2s;
+}
+
+.booking-room-book-btn:hover { background: #C89A2A; }
+
+/* NO RESULTS */
+.booking-no-results {
+  text-align: center;
+  margin: 2rem auto;
+  color: black;
+  max-width: 420px;
+  height: 200px;
+  font-weight: 600;
+}
+
+/* ===================== RESPONSIVE ===================== */
+
+/* Tablet landscape */
+@media (max-width: 1100px) {
+.booking-navbar { padding: 0 32px; }
+.booking-calendar { padding: 64px 32px 100px; }
+.booking-search-wrap { padding: 0 32px; }
+.booking-results-area { padding: 64px 32px 80px; }
+.booking-results-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+}
+
+/* Tablet portrait */
+@media (max-width: 900px) {
+.booking-navbar {
+padding: 0 24px;
+height: 68px;
+}
+.booking-nav-links { gap: 28px; }
+.booking-calendar { padding: 56px 24px 100px; }
+.booking-text h1 { font-size: 2.4rem; }
+.booking-search-wrap { padding: 0 24px; margin-top: -44px; }
+.booking-search-bar { padding: 24px 28px; gap: 4px; }
+.booking-field { padding: 0 16px; }
+.booking-btn { padding: 14px 24px; margin-left: 20px; }
+.booking-results-area { padding: 56px 24px 64px; }
+.booking-results-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+}
+
+/* Large mobile */
+@media (max-width: 700px) {
+.booking-navbar { padding: 0 20px; }
+.booking-nav-links { gap: 18px; }
+.booking-nav-links li a,
+.booking-nav-links li { font-size: 0.7rem; letter-spacing: 0.08em; }
+.booking-calendar { padding: 48px 20px 110px; }
+.booking-text h1 { font-size: 2rem; }
+.booking-search-wrap { padding: 0 20px; margin-top: -40px; }
+.booking-search-bar {
+flex-direction: column;
+align-items: stretch;
+padding: 24px 20px;
+gap: 0;
+border-radius: 12px;
+}
+.booking-field {
+padding: 14px 0;
+flex-direction: row;
+align-items: center;
+gap: 12px;
+}
+.booking-field-label {
+min-width: 80px;
+margin-bottom: 0;
+}
+.booking-divider {
+width: 100%;
+height: 1px;
+margin: 0;
+}
+.booking-btn {
+margin-left: 0;
+margin-top: 20px;
+width: 100%;
+padding: 16px;
+border-radius: 10px;
+text-align: center;
+}
+.booking-results-area { padding: 48px 20px 56px; }
+.booking-results-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; padding-top: 20px; }
+.booking-room-card-img { height: 180px; }
+.booking-room-card-body { padding: 16px 16px 14px; }
+.booking-room-card-body h3 { font-size: 1rem; margin-bottom: 8px; }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+.booking-navbar { padding: 0 16px; }
+.booking-nav-links { gap: 14px; }
+.booking-calendar { padding: 40px 16px 100px; }
+.booking-text h1 { font-size: 1.75rem; }
+.booking-search-wrap { padding: 0 16px; margin-top: -36px; }
+.booking-search-bar { padding: 20px 16px; }
+.booking-results-area { padding: 40px 16px 48px; }
+.booking-results-grid { grid-template-columns: 1fr; gap: 20px; }
+.booking-room-card-img { height: 220px; }
+}

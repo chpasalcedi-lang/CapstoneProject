@@ -88,7 +88,7 @@ function AdminRooms() {
                                         <button className="rooms-room-book-btn" onClick={() => handleEdit(room)}>
                                             Edit
                                         </button>
-                                        <button className="rooms-room-book-btn" onClick={() => handleDelete(room.id)}>
+                                        <button className="rooms-room-book-btn" onClick={() => handleDelete(room.id). alert("Reservation added successfully!")}>
                                             Delete
                                         </button>
                                     </div>

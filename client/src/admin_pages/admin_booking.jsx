@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "../admincss/admin_boking.css";
+import ViewBookingModal from "../Modals/view_booking_modal.jsx";
 
 function AdminBooking() {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [viewModal, setViewModal] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState(null);
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -28,18 +31,46 @@ function AdminBooking() {
         return b.check_in_date.slice(0, 10) === today;
     }).length;
 
-    const pendingCount = bookings.filter((b) => b.status?.toLowerCase() === 'pending').length;
+    const pendingCount = bookings.filter((b) => b.res_status?.toLowerCase() === 'pending').length;
 
-    
+    const handleView = (booking) => {
+        setSelectedBooking(booking);
+        setViewModal(true);
+    };
+
+    const handleConfirm = async (id) => {
+        try {
+            await axios.post(`http://localhost:3000/update_reservation/${id}`, { status: 'confirmed' });
+            // Refetch bookings
+            const res = await axios.get('http://localhost:3000/get_reservations');
+            setBookings(res.data);
+        } catch (err) {
+            console.error("Error confirming booking:", err);
+            alert("Failed to confirm booking");
+        }
+    };
+
+    const handleCancel = async (id) => {
+        if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+        try {
+            await axios.post(`http://localhost:3000/update_reservation/${id}`, { status: 'cancelled' });
+            // Refetch bookings
+            const res = await axios.get('http://localhost:3000/get_reservations');
+            setBookings(res.data);
+        } catch (err) {
+            console.error("Error cancelling booking:", err);
+            alert("Failed to cancel booking");
+        }
+    };
 
     return (
         <div>
-            <nav className="admin-booking-navbar">
-                <div className="admin-booking-nav-content">
-                    <div className="admin-booking-logo">
+            <nav className="guests-navbar">
+                <div className="guests-nav-content">
+                    <div className="guests-logo">
                         <h1>Messiah</h1>
                     </div>
-                    <ul className="admin-booking-nav-links">
+                    <ul className="guests-nav-links">
                         <li><Link to="/Dashboard">Dashboard</Link></li>
                         <li><Link to="/Rooms">Rooms</Link></li>
                         <li className="active"><Link to="/Booking">Booking</Link></li>
@@ -49,14 +80,14 @@ function AdminBooking() {
                 </div>
             </nav>
 
-            <section className="admin-booking-main">
-                <div className="admin-booking-main-content">
+            <section className="guests-main">
+                <div className="guests-main-content">
 
-                    <div className="admin-booking-topbar">
+                    <div className="guests-topbar">
                         <h1>Booking Management</h1>
                     </div>
 
-                    <div className="admin-booking-stats-grid">
+                    <div className="guests-stats-grid">
                         <div className="booking-stat-card">
                             <p className="booking-stat-label">Total Bookings</p>
                             <p className="booking-stat-value">{bookings.length}</p>
@@ -71,16 +102,14 @@ function AdminBooking() {
                         </div>
                     </div>
 
-                    <div className="bookings-table-wrap">
-                        <div className="bookings-table-header">
-                            <p>Recent Bookings</p>
-                        </div>
+                    <div className="guests-table-container">
+                        <h1>Recent Bookings</h1>
                         {loading ? (
                             <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>Loading bookings...</p>
                         ) : bookings.length === 0 ? (
                             <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>No bookings found.</p>
                         ) : (
-                            <table>
+                            <table className="guests-table">
                                 <thead>
                                     <tr>
                                         <th>Guest</th>
@@ -88,7 +117,7 @@ function AdminBooking() {
                                         <th>Check-in</th>
                                         <th>Check-out</th>
                                         <th>Status</th>
-                                        <th style={{ textAlign: 'center' }}>Actions</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -99,18 +128,18 @@ function AdminBooking() {
                                             <td>{booking.check_in_date}</td>
                                             <td>{booking.check_out_date}</td>
                                             <td>
-                                                <span className={`booking-status ${booking.status?.toLowerCase()}`}>
-                                                    {booking.status || 'pending'}
+                                                <span className={`status-${(booking.res_status || 'pending').toLowerCase()}`}>
+                                                    {booking.res_status || 'pending'}
                                                 </span>
                                             </td>
                                             <td>
-                                                <button  className="btn guest btn-primary">
+                                                <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
                                                     view
                                                 </button>
-                                                <button className="btn guest btn-primary">
+                                                <button className="btn guest btn-primary" onClick={() => handleConfirm(booking.id)}>
                                                     confirm
                                                 </button>
-                                                <button className="btn guest btn-danger">
+                                                <button className="btn guest btn-danger" onClick={() => handleCancel(booking.id)}>
                                                     cancel
                                                 </button>
                                             </td>
@@ -123,6 +152,12 @@ function AdminBooking() {
 
                 </div>
             </section>
+
+            <ViewBookingModal 
+                show={viewModal} 
+                onClose={() => setViewModal(false)} 
+                booking={selectedBooking} 
+            />
         </div>
     );
 }

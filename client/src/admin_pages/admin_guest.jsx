@@ -51,7 +51,9 @@ function AdminGuest() {
                                         <td>2023-10-15</td>
                                         <td>2023-10-20</td>
                                         <td>
-                                            <button className="btn guest btn-primary">view</button>
+                                            <button className="btn guest btn-primary" onClick={() => handleView(guest)}>
+                                                    view
+                                                </button>
                                             <button className="btn guest btn-primary">Edit</button>
                                             <button className="btn guest btn-danger">Delete</button>
                                         </td>

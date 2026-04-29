@@ -120,7 +120,7 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
                         <button type="button" className="add-room-btn-cancel" onClick={closeModal}>
                             Cancel
                         </button>
-                        <button type="submit" className="add-room-btn-save">
+                        <button type="submit" className="add-room-btn-save" onClick={() => alert("Room added successfully!")}>
                             Save Room
                         </button>
                     </div>

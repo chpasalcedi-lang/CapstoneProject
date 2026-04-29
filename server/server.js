@@ -153,6 +153,28 @@ app.post('/update_reservation/:id', (req, res) => {
     });
 });
 
+app.get('/get_dashboard_stats', (req, res) => {
+    // Query to get all dashboard statistics using the database date
+    const sql = `
+        SELECT
+            (SELECT COUNT(*) FROM rooms WHERE room_status = 'available') as total_rooms,
+            (SELECT COUNT(*) FROM reservations WHERE res_status IN ('confirmed', 'pending') AND DATE(check_in_date) = CURDATE()) as todays_checkins,
+            (SELECT COUNT(*) FROM reservations WHERE res_status = 'pending') as pending_bookings,
+            (SELECT COALESCE(SUM(r.num_guests), 0) FROM reservations r WHERE r.res_status IN ('confirmed', 'pending')) as total_guests,
+            (SELECT COALESCE(SUM(rm.room_price), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed') as total_profit,
+            (SELECT COALESCE(SUM(rm.room_price), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed' AND DATE(r.check_in_date) = CURDATE()) as todays_profit,
+            (SELECT COALESCE(SUM(rm.room_price), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'pending') as booking_profit
+    `;
+
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error("Error fetching dashboard stats:", err);
+            return res.status(500).json({ error: "Database query error!" });
+        }
+        return res.status(200).json(data[0]); // Return the first row since it's aggregate data
+    });
+});
+
 
 
 app.listen(3000, () => {

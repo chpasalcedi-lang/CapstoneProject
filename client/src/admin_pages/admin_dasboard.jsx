@@ -1,8 +1,39 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import "../admincss/admin_dashboard.css";
 
 function AdminDashboard() {
+  const [stats, setStats] = useState({
+    total_rooms: 0,
+    todays_checkins: 0,
+    pending_bookings: 0,
+    total_guests: 0,
+    total_profit: 0,
+    todays_profit: 0,
+    booking_profit: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/get_dashboard_stats');
+        setStats(res.data);
+      } catch (err) {
+        console.error("Error fetching dashboard stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const formatCurrency = (amount) => {
+    return `₱${amount.toLocaleString()}`;
+  };
+
   return (
     <div className="wrap">
       <nav className="dashboard-navbar">
@@ -39,7 +70,9 @@ function AdminDashboard() {
                 </span>
               </div>
               <div>
-                <h2 className="dashboard-stat-title">₱84,200</h2>
+                <h2 className="dashboard-stat-title">
+                  {loading ? "..." : formatCurrency(stats.total_profit)}
+                </h2>
                 <p className="dashboard-stat-eyebrow">Total profit</p>
               </div>
             </div>
@@ -51,7 +84,9 @@ function AdminDashboard() {
                 </span>
               </div>
               <div>
-                <h2 className="dashboard-stat-title">₱6,480</h2>
+                <h2 className="dashboard-stat-title">
+                  {loading ? "..." : formatCurrency(stats.todays_profit)}
+                </h2>
                 <p className="dashboard-stat-eyebrow">Today's profit</p>
               </div>
             </div>
@@ -63,7 +98,9 @@ function AdminDashboard() {
                 </span>
               </div>
               <div>
-                <h2 className="dashboard-stat-title">₱3,120</h2>
+                <h2 className="dashboard-stat-title">
+                  {loading ? "..." : formatCurrency(stats.booking_profit)}
+                </h2>
                 <p className="dashboard-stat-eyebrow">Booking profit</p>
               </div>
             </div>
@@ -82,7 +119,9 @@ function AdminDashboard() {
                 </span>
               </div>
               <div>
-                <h2 className="dashboard-stat-title">120</h2>
+                <h2 className="dashboard-stat-title">
+                  {loading ? "..." : stats.total_rooms}
+                </h2>
                 <p className="dashboard-stat-eyebrow">Total rooms</p>
               </div>
             </div>
@@ -94,7 +133,9 @@ function AdminDashboard() {
                 </span>
               </div>
               <div>
-                <h2 className="dashboard-stat-title">15</h2>
+                <h2 className="dashboard-stat-title">
+                  {loading ? "..." : stats.todays_checkins}
+                </h2>
                 <p className="dashboard-stat-eyebrow">Today's check-ins</p>
               </div>
             </div>
@@ -106,7 +147,9 @@ function AdminDashboard() {
                 </span>
               </div>
               <div>
-                <h2 className="dashboard-stat-title">8</h2>
+                <h2 className="dashboard-stat-title">
+                  {loading ? "..." : stats.pending_bookings}
+                </h2>
                 <p className="dashboard-stat-eyebrow">Pending bookings</p>
               </div>
             </div>
@@ -118,7 +161,9 @@ function AdminDashboard() {
                 </span>
               </div>
               <div>
-                <h2 className="dashboard-stat-title">350</h2>
+                <h2 className="dashboard-stat-title">
+                  {loading ? "..." : stats.total_guests}
+                </h2>
                 <p className="dashboard-stat-eyebrow">Total guests</p>
               </div>
             </div>

@@ -74,12 +74,14 @@ justify-content: space-between;
 width: 100%;
 }
 
-.logo h1 {
+.logo img {
 font-family: 'Playfair Display', serif;
 font-size: 1.6rem;
 font-weight: 700;
 color: #1a1a1a;
 letter-spacing: 0.02em;
+height: 40px;
+width: auto;
 }
 
 .booking-nav-links {
@@ -175,13 +177,26 @@ font-weight: 600;
 }
 
 .booking-input {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 12px 14px;
+  width: 100%;
+  min-height: 44px;
+  cursor: pointer;
+}
 
-font-family: 'Montserrat', sans-serif;
-font-size: 0.95rem;
-color: #ffffff;
+.booking-input::placeholder {
+  color: #999;
+}
 
-cursor: pointer;
-
+.booking-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
 .booking-divider {

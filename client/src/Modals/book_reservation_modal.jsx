@@ -27,6 +27,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId }) 
         axios.post('http://localhost:3000/add_reservation', { ...values, room_id: roomId })
             .then((res) => {
                 console.log("Success: ", res.data);
+                alert("Reservation added Successfully");
                 setShowModal(false);
                 setValues({
                     last_name: "",
@@ -101,7 +102,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId }) 
 
                 <div className="book-reservation-modal-footer">
                   <button type="button" className="book-reservation-btn-cancel" onClick={closeModal}>Cancel</button>
-                  <button type="submit" className="book-reservation-btn-save"> Save Reservation</button>
+                  <button type="submit" className="book-reservation-btn-save">Save Reservation</button>
                 </div>
                 </form>
 

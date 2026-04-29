@@ -48,7 +48,7 @@ function ResBook() {
       <nav className="booking-navbar">
         <div className="booking-nav-content">
           <div className="logo">
-            <h1>Messiah</h1>
+            <h1>MESSIAH</h1>
           </div>
           <ul className="booking-nav-links">
             <li className=""><Link to="/">Home</Link></li>

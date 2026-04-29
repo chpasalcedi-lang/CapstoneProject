@@ -10,7 +10,7 @@ function LandingPage() {
       <nav className="landing-navbar">
         <div className="landing-nav-content">
           <div className="logo">
-            <h1>Messiah</h1>
+            <h1>MESSIAH</h1>
           </div>
           <ul className="landing-nav-links">
             <li className=""><Link to="/">Home</Link></li>
@@ -85,7 +85,7 @@ function LandingPage() {
 
       <footer className="landing-footer">
         <div className="landing-footer-content">
-          <p className="landing-footer-brand">Messiah</p>
+          <p className="landing-footer-brand">MESSIAH</p>
           
           <p>© 2026 Messiah. All rights reserved.</p>
         </div>

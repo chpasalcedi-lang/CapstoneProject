@@ -56,7 +56,10 @@ function AdminDashboard() {
 
           <div className="dashboard-topbar1">
             <h1>Dashboard</h1>
-            <button className="dashboard-topbar-btn1">Add Guest</button>
+            <div className="dashboard-topbar-btns">
+                <Link className="dashboard-topbar-btn1" to="/Walkin">Walk in</Link>
+                <Link className="dashboard-topbar-btn1" to="/AddGuest">Add Guest</Link>
+            </div>
           </div>
 
           {/* Revenue Overview */}

@@ -26,14 +26,16 @@ function AdminGuest() {
                         <h1>Guest Management</h1>
                     </div>
                 
-
-                    <p className="Guest-section-label">Booking list</p>
+                    <div className="guests-booking-header">
+                        <p className="Guest-section-label">Booking list</p>
+                        <input type="text" className="search-input" placeholder="Search Name..." />
+                    </div>
                     <div className="guests-bokking-container">
                         <div className="guests-booking-table">
                             <table className="booking-table">
                                 <thead>
                                     <tr>
-                                        <th>Room Number</th>
+                                        <th>Room No.</th>
                                         <th>Guest Name</th>
                                         <th>Number</th>
                                         <th>Email</th>
@@ -50,10 +52,8 @@ function AdminGuest() {
                                         <td>john.doe@example.com</td>
                                         <td>2023-10-15</td>
                                         <td>2023-10-20</td>
-                                        <td>
-                                            <button className="btn guest btn-primary" onClick={() => handleView(guest)}>
-                                                    view
-                                                </button>
+                                        <td className="actions-cell">
+                                            <button className="btn guest btn-primary">View</button>
                                             <button className="btn guest btn-primary">Edit</button>
                                             <button className="btn guest btn-danger">Delete</button>
                                         </td>
@@ -69,6 +69,7 @@ function AdminGuest() {
                             <thead className="guests-table-header">
                                 <tr>
                                     <th>Number of Guests</th>
+                                    <th>Foods</th>
                                     <th>Price</th>
                                     <th>Time & Date</th>
                                     <th>Actions</th>
@@ -77,9 +78,10 @@ function AdminGuest() {
                             <tbody className="guests-table-body">
                                 <tr>
                                     <td>2</td>
+                                    <td>500</td>
                                     <td>$100.00</td>
                                     <td>2023-10-15 14:30</td>
-                                    <td>
+                                    <td className="actions-cell">
                                         <button className="btn guest btn-primary">Edit</button>
                                         <button className="btn guest btn-danger">Delete</button>
                                     </td>

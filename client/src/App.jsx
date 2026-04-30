@@ -7,6 +7,8 @@ import Dashboard from './admin_pages/admin_dasboard';
 import Rooms from './admin_pages/admin_rooms';
 import Booking from './admin_pages/admin_booking';
 import Guest from './admin_pages/admin_guest';
+import AdminAddGuest from './admin_pages/admin_addGuest';
+import AdminWalkin from './admin_pages/admin_walkin';
 
 
 
@@ -26,6 +28,8 @@ function App() {
         <Route path="/Rooms" element={<Rooms/>} />
         <Route path="/Booking" element={<Booking />} />
         <Route path="/Guest" element={<Guest />} />
+        <Route path="/AddGuest" element={<AdminAddGuest />} />
+        <Route path="/Walkin" element={<AdminWalkin />} />
 
       
 

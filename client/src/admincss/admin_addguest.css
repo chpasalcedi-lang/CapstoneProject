@@ -1,0 +1,175 @@
+.dashboard-main1 {
+  width: calc(100vw - 220px);
+  margin-left: 220px;
+  min-height: 100vh;
+  background: #080808;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.dashboard-main-content1 {
+  width: 100%;
+  max-width: 1280px;
+  padding: 56px 48px 96px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════ */
+.dashboard-topbar1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dashboard-topbar1 h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #f0ede8;
+  line-height: 1;
+}
+
+.dashboard-topbar-btn1 {
+  background: transparent;
+  color: #c8a96e;
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  padding: 10px 24px;
+  border-radius: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dashboard-topbar-btn1:hover {
+  background: rgba(200, 169, 110, 0.1);
+  border-color: #c8a96e;
+  color: #bbad90;
+  box-shadow: 0 0 18px rgba(200, 169, 110, 0.12);
+}
+
+.dashboard-topbar-btns {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.add-guest-container {
+  display: flex;
+  justify-content: center;
+}
+
+.add-guest-form {
+  width: 100%;
+  max-width: 560px;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.add-guest-form h2 {
+  color: #f5f3ee;
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.add-guest-form p {
+  color: #b8b8b8;
+  margin-bottom: 28px;
+  line-height: 1.65;
+}
+
+.add-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.add-form-group label {
+  color: #d5d5d5;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.add-form-group.add-form-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.add-form-group.add-form-checkbox label {
+  margin-bottom: 0;
+  font-size: 14px;
+  text-transform: none;
+  color: #f5f3ee;
+}
+
+.add-form-group input[type="number"],
+.add-form-group input[type="text"],
+.add-form-group input[type="email"],
+.add-form-group input[type="tel"] {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: #121212;
+  color: #f5f3ee;
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+.add-form-group input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: #c8a96e;
+  cursor: pointer;
+}
+
+.add-form-group.add-form-checkbox input[type="checkbox"] {
+  margin: 0;
+}
+.add-guest-form button[type="submit"] {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 14px;
+  background: #c8a96e;
+  color: #111111;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.add-guest-form button[type="submit"]:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.add-guest-form-note {
+  color: #b8b8b8;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+@media (max-width: 720px) {
+  .dashboard-main1 {
+    padding: 24px 16px;
+  }
+
+  .add-guest-form {
+    padding: 24px;
+  }
+}

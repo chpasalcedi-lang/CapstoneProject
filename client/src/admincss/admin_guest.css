@@ -155,16 +155,51 @@ body {
 }
 
 /* ═══════════════════════════════════════════════
-   SECTION LABEL — no extra padding, inherits from .guests-main-content
+   BOOKING HEADER — label + search bar row
+═══════════════════════════════════════════════ */
+.guests-booking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 32px 0 12px;
+}
+
+/* ═══════════════════════════════════════════════
+   SECTION LABEL
 ═══════════════════════════════════════════════ */
 .Guest-section-label {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #555;
-  margin: 32px 0 12px;
   font-weight: 500;
+  margin: 0;
   padding: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   SEARCH BAR
+═══════════════════════════════════════════════ */
+.search-input {
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  padding: 8px 14px;
+  color: #f0ede8;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  outline: none;
+  width: 220px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input::placeholder {
+  color: #444;
+}
+
+.search-input:focus {
+  border-color: rgba(200, 169, 110, 0.4);
+  box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.06);
 }
 
 /* ═══════════════════════════════════════════════
@@ -178,7 +213,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════
-   BOOKING CONTAINER — no extra indent
+   BOOKING CONTAINER
 ═══════════════════════════════════════════════ */
 .guests-bokking-container {
   padding: 0;
@@ -192,33 +227,41 @@ body {
   overflow: hidden;
 }
 
-.guests-booking-table h1 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #555;
-  font-weight: 500;
-  padding: 18px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  margin: 0;
+/* ── Scrollable wrapper ── */
+.booking-table-wrapper {
+  overflow-y: auto;
+  max-height: 480px;
 }
 
 .booking-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
+/* Column widths — add up to 100% */
+.booking-table col:nth-child(1) { width: 5%; }
+.booking-table col:nth-child(2) { width: 17%; }
+.booking-table col:nth-child(3) { width: 13%; }
+.booking-table col:nth-child(4) { width: 20%; }
+.booking-table col:nth-child(5) { width: 10%; }
+.booking-table col:nth-child(6) { width: 10%; }
+.booking-table col:nth-child(7) { width: 25%; }
+
 .booking-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   text-align: left;
-  padding: 12px 24px;
-  font-size: 10.5px;
+  padding: 11px 12px;
+  font-size: 10px;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #3f3f3f;
   background: #0f0f0f;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
 }
 
 .booking-table tbody tr {
@@ -235,9 +278,13 @@ body {
 }
 
 .booking-table td {
-  padding: 14px 24px;
-  font-size: 12.5px;
+  padding: 11px 12px;
+  font-size: 12px;
   color: #777;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .booking-table td:first-child {
@@ -245,27 +292,25 @@ body {
   font-weight: 500;
 }
 
+/* ── Actions cell: flex row, no wrap ── */
+.booking-table .actions-cell {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
 /* ═══════════════════════════════════════════════
-   GUEST LIST TABLE — no extra indent
+   GUEST LIST TABLE
 ═══════════════════════════════════════════════ */
 .guests-table-container {
   background: #0f0f0f;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   overflow: hidden;
-  margin: 0;
-}
-
-.guests-table-container h1 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #555;
-  font-weight: 500;
-  padding: 18px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  margin: 0;
+  margin: 12px 0 0;
 }
 
 .guests-table {
@@ -302,6 +347,7 @@ body {
   padding: 14px 24px;
   font-size: 12.5px;
   color: #777;
+  vertical-align: middle;
 }
 
 .guests-table td:first-child {
@@ -309,21 +355,30 @@ body {
   font-weight: 500;
 }
 
+.guests-table .actions-cell {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
 /* ═══════════════════════════════════════════════
    SHARED BUTTONS
 ═══════════════════════════════════════════════ */
 .btn.guest {
   display: inline-block;
-  padding: 5px 13px;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 10.5px;
   font-weight: 500;
   letter-spacing: 0.05em;
   border: none;
   cursor: pointer;
-  margin-right: 6px;
   font-family: 'DM Sans', sans-serif;
   transition: opacity 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn.guest:hover {
@@ -387,6 +442,8 @@ body {
   .guests-main { width: 100%; margin-left: 0; }
   .guests-main-content { padding: 26px 16px 48px; }
   .guests-topbar { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 32px; }
+  .guests-booking-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .search-input { width: 100%; }
   .guests-stats-grid { grid-template-columns: 1fr; gap: 10px; }
   .guests-bokking-container { overflow-x: auto; }
   .guests-table-container { overflow-x: auto; }

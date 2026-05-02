@@ -17,9 +17,7 @@ body {
   display: flex;
 }
 
-/* ═══════════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════════ */
+/* SIDEBAR */
 .guests-navbar {
   width: 220px;
   min-height: 100vh;
@@ -95,9 +93,7 @@ body {
   padding-left: 14px;
 }
 
-/* ═══════════════════════════════════════════════
-   MAIN AREA
-═══════════════════════════════════════════════ */
+/* MAIN AREA */
 .guests-main {
   width: calc(100vw - 220px);
   margin-left: 220px;
@@ -114,9 +110,9 @@ body {
   margin: 0 auto;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    TOPBAR
-═══════════════════════════════════════════════ */
+ */
 .guests-topbar {
   display: flex;
   align-items: center;
@@ -158,9 +154,9 @@ body {
   box-shadow: 0 0 18px rgba(200,169,110,0.12);
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    STATS GRID
-═══════════════════════════════════════════════ */
+ */
 .guests-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -202,9 +198,9 @@ body {
   color: #c8a96e;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    TABLE
-═══════════════════════════════════════════════ */
+ */
 .guests-table-container {
   background: #0f0f0f;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -266,9 +262,9 @@ body {
   font-weight: 500;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    SHARED BUTTONS
-═══════════════════════════════════════════════ */
+ */
 .btn.guest {
   display: inline-block;
   padding: 5px 13px;
@@ -297,9 +293,9 @@ body {
   color: #e07070;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    STATUS COLORS
-═══════════════════════════════════════════════ */
+ */
 .status-pending {
   color: #c8a96e;
   font-weight: 500;
@@ -315,9 +311,9 @@ body {
   font-weight: 500;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    RESPONSIVE
-═══════════════════════════════════════════════ */
+ */
 @media (max-width: 1100px) {
   .guests-main-content { padding: 44px 32px 72px; }
   .guests-stats-grid { gap: 14px; }

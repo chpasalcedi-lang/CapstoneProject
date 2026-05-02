@@ -13,9 +13,9 @@ body {
   display: flex;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    SIDEBAR
-═══════════════════════════════════════════════ */
+ */
 .guests-navbar {
   width: 220px;
   min-height: 100vh;
@@ -91,9 +91,9 @@ body {
   padding-left: 14px;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    MAIN AREA
-═══════════════════════════════════════════════ */
+ */
 .guests-main {
   width: calc(100vw - 220px);
   margin-left: 220px;
@@ -110,9 +110,9 @@ body {
   margin: 0 auto;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    TOPBAR
-═══════════════════════════════════════════════ */
+ */
 .guests-topbar {
   display: flex;
   align-items: center;
@@ -154,9 +154,9 @@ body {
   box-shadow: 0 0 18px rgba(200,169,110,0.12);
 }
 
-/* ═══════════════════════════════════════════════
-   BOOKING HEADER — label + search bar row
-═══════════════════════════════════════════════ */
+/* 
+   BOOKING HEADER 
+ */
 .guests-booking-header {
   display: flex;
   align-items: center;
@@ -164,9 +164,9 @@ body {
   margin: 32px 0 12px;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    SECTION LABEL
-═══════════════════════════════════════════════ */
+ */
 .Guest-section-label {
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -177,9 +177,9 @@ body {
   padding: 0;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    SEARCH BAR
-═══════════════════════════════════════════════ */
+ */
 .search-input {
   background: #0f0f0f;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -202,9 +202,9 @@ body {
   box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.06);
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    STATS GRID
-═══════════════════════════════════════════════ */
+ */
 .guests-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -212,9 +212,9 @@ body {
   margin-bottom: 32px;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    BOOKING CONTAINER
-═══════════════════════════════════════════════ */
+*/
 .guests-bokking-container {
   padding: 0;
   margin-bottom: 28px;

@@ -9,9 +9,9 @@ function AdminDashboard() {
     todays_checkins: 0,
     pending_bookings: 0,
     total_guests: 0,
-    total_profit: 0,
-    todays_profit: 0,
-    booking_profit: 0
+    total_revenue: 0,
+    todays_sales: 0,
+    booking_sales: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -19,9 +19,11 @@ function AdminDashboard() {
     const fetchStats = async () => {
       try {
         const res = await axios.get('http://localhost:3000/get_dashboard_stats');
+        console.log("Fetched dashboard stats:", res.data);
         setStats(res.data);
       } catch (err) {
         console.error("Error fetching dashboard stats:", err);
+        alert("Failed to fetch dashboard statistics. Please check the server connection.");
       } finally {
         setLoading(false);
       }
@@ -30,8 +32,9 @@ function AdminDashboard() {
     fetchStats();
   }, []);
 
-  const formatCurrency = (amount) => {
-    return `₱${amount.toLocaleString()}`;
+  const formatCurrency = (amount = 0) => {
+    const value = Number(amount || 0);
+    return `₱${value.toLocaleString()}`;
   };
 
   return (
@@ -74,9 +77,9 @@ function AdminDashboard() {
               </div>
               <div>
                 <h2 className="dashboard-stat-title">
-                  {loading ? "..." : formatCurrency(stats.total_profit)}
+                  {loading ? "..." : formatCurrency(stats.total_revenue)}
                 </h2>
-                <p className="dashboard-stat-eyebrow">Total profit</p>
+                <p className="dashboard-stat-eyebrow">Total revenue</p>
               </div>
             </div>
 
@@ -88,9 +91,9 @@ function AdminDashboard() {
               </div>
               <div>
                 <h2 className="dashboard-stat-title">
-                  {loading ? "..." : formatCurrency(stats.todays_profit)}
+                  {loading ? "..." : formatCurrency(stats.todays_sales)}
                 </h2>
-                <p className="dashboard-stat-eyebrow">Today's profit</p>
+                <p className="dashboard-stat-eyebrow">Today's sales</p>
               </div>
             </div>
 
@@ -102,9 +105,9 @@ function AdminDashboard() {
               </div>
               <div>
                 <h2 className="dashboard-stat-title">
-                  {loading ? "..." : formatCurrency(stats.booking_profit)}
+                  {loading ? "..." : formatCurrency(stats.booking_sales)}
                 </h2>
-                <p className="dashboard-stat-eyebrow">Booking profit</p>
+                <p className="dashboard-stat-eyebrow">Booking sales</p>
               </div>
             </div>
 
@@ -172,7 +175,198 @@ function AdminDashboard() {
             </div>
 
           </div>
-        </div>
+        
+          
+          <p className="section-label">Calendar</p>
+
+          <div className="calendar-overview">
+            <div className="calendar-side-info-container">
+              <div className="calendar-side-header">
+                <h3>Calendar</h3>
+                <button className="calendar-button calendar-edit-button">Update</button>
+              </div>
+              
+              <div className="calendar-legend-box">
+                <div className="calendar-side-info">
+                  <p><span className="calendar-legend confirmed"></span> Confirmed</p>
+                  <p><span className="calendar-legend pending"></span> Pending</p>
+                  <p><span className="calendar-legend maintenance"></span> Maintenance</p>
+                  <p><span className="calendar-legend closed"></span> Closed</p>
+                </div>
+              </div>
+              
+              <div className="calendar-legend-box-bottom">
+                <div className="calendar-side-title">
+                  <h1>name: junard</h1>
+                  <p>room: 101</p>
+                </div>
+                <div className="calendar-side-title">
+                  <h1>name: junard</h1>
+                  <p>room: 101</p>
+                </div>
+                <div className="calendar-side-title">
+                  <h1>name: junard</h1>
+                  <p>room: 101</p>
+                </div>
+                <div className="calendar-side-title">
+                  <h1>name: junard</h1>
+                  <p>room: 101</p>
+                </div>
+                <div className="calendar-side-title">
+                  <h1>name: junard</h1>
+                  <p>room: 101</p>
+                </div>  
+              </div>
+            </div>
+            <div className="calendar-box container">
+              <div className="calendar-action">
+                
+                <p>june</p>
+                <div className="calendar-action-btns">
+                <button className="calendar-btn">Prev</button>
+                <button className="calendar-btn">Today</button>
+                <button className="calendar-btn">Next</button>
+              
+              </div>
+              </div>
+              
+            <div className="calendar-container">
+              <div className="sperate-calendar-table">
+                <table>
+                <thead>
+                  <tr>
+                    <th>Sun</th>  
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="calendar-day">1 
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">2
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">3
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">4
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">5
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">6
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">7
+                      <p>ano</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="calendar-day">8
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">9
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">10
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">11
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">12
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">13
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">14
+                      <p>ano</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="calendar-day">15
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">16
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">17
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">18
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">19
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">20
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">21
+                      <p>ano</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="calendar-day">22
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">23
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">24
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">25
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">26
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">27
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">28
+                      <p>ano</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="calendar-day">29
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">30
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">31
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">
+                      <p>ano</p>
+                    </td>
+                    <td className="calendar-day">
+                      <p>ano</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              </div>
+            </div>
+          </div>
+          </div>
+          </div>
       </section>
     </div>
   );

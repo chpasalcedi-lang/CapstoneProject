@@ -1,9 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import "../admincss/admin_guest.css";
 
 
-function AdminGuest() {   
+function AdminGuest() {
+    const [bookings, setBookings] = useState([]);
+    const [loadingBookings, setLoadingBookings] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                const res = await axios.get("http://localhost:3000/get_reservations");
+                setBookings(res.data);
+            } catch (err) {
+                console.error("Error fetching bookings:", err);
+            } finally {
+                setLoadingBookings(false);
+            }
+        };
+
+        fetchBookings();
+    }, []);
+
+    const filteredBookings = bookings.filter((booking) => {
+        const query = searchTerm.toLowerCase();
+        return (
+            booking.first_name?.toLowerCase().includes(query) ||
+            booking.last_name?.toLowerCase().includes(query) ||
+            booking.room_number?.toString().toLowerCase().includes(query) ||
+            booking.phone_number?.toLowerCase().includes(query) ||
+            booking.email?.toLowerCase().includes(query)
+        );
+    });
+
     return (
         <div>
             <nav className="guests-navbar">
@@ -28,7 +59,13 @@ function AdminGuest() {
                 
                     <div className="guests-booking-header">
                         <p className="Guest-section-label">Booking list</p>
-                        <input type="text" className="search-input" placeholder="Search Name..." />
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Search by guest, room, phone, or email..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                     <div className="guests-bokking-container">
                         <div className="guests-booking-table">
@@ -45,20 +82,36 @@ function AdminGuest() {
                                     </tr>
                                 </thead>    
                                 <tbody>
+                                {loadingBookings ? (
                                     <tr>
-                                        <td>101</td>
-                                        <td>John Doe</td>
-                                        <td>123-456-7890</td>
-                                        <td>john.doe@example.com</td>
-                                        <td>2023-10-15</td>
-                                        <td>2023-10-20</td>
-                                        <td className="actions-cell">
-                                            <button className="btn guest btn-primary">View</button>
-                                            <button className="btn guest btn-primary">Edit</button>
-                                            <button className="btn guest btn-danger">Delete</button>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                            Loading bookings...
                                         </td>
                                     </tr>
-                                </tbody>
+                                ) : bookings.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                            No bookings found.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredBookings.map((booking) => (
+                                        <tr key={booking.id}>
+                                            <td>{booking.room_number || 'N/A'}</td>
+                                            <td>{booking.first_name} {booking.last_name}</td>
+                                            <td>{booking.phone_number || 'N/A'}</td>
+                                            <td>{booking.email || 'N/A'}</td>
+                                            <td>{booking.check_in_date || 'N/A'}</td>
+                                            <td>{booking.check_out_date || 'N/A'}</td>
+                                            <td className="actions-cell">
+                                                <button className="btn guest btn-primary">View</button>
+                                                <button className="btn guest btn-primary">Edit</button>
+                                                <button className="btn guest btn-danger">Delete</button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
                             </table>
                         </div>
                     </div>

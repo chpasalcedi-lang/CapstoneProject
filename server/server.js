@@ -157,13 +157,13 @@ app.get('/get_dashboard_stats', (req, res) => {
     // Query to get all dashboard statistics using the database date
     const sql = `
         SELECT
-            (SELECT COUNT(*) FROM rooms WHERE room_status = 'available') as total_rooms,
+            (SELECT COUNT(*) FROM rooms) as total_rooms,
             (SELECT COUNT(*) FROM reservations WHERE res_status IN ('confirmed', 'pending') AND DATE(check_in_date) = CURDATE()) as todays_checkins,
             (SELECT COUNT(*) FROM reservations WHERE res_status = 'pending') as pending_bookings,
             (SELECT COALESCE(SUM(r.num_guests), 0) FROM reservations r WHERE r.res_status IN ('confirmed', 'pending')) as total_guests,
-            (SELECT COALESCE(SUM(rm.room_price), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed') as total_profit,
-            (SELECT COALESCE(SUM(rm.room_price), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed' AND DATE(r.check_in_date) = CURDATE()) as todays_profit,
-            (SELECT COALESCE(SUM(rm.room_price), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'pending') as booking_profit
+            (SELECT COALESCE(SUM(rm.room_price * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed') as total_revenue,
+            (SELECT COALESCE(SUM(rm.room_price * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed' AND DATE(r.check_in_date) = CURDATE()) as todays_sales,
+            (SELECT COALESCE(SUM(rm.room_price * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'pending') as booking_sales
     `;
 
     db.query(sql, (err, data) => {
@@ -171,12 +171,13 @@ app.get('/get_dashboard_stats', (req, res) => {
             console.error("Error fetching dashboard stats:", err);
             return res.status(500).json({ error: "Database query error!" });
         }
-        return res.status(200).json(data[0]); // Return the first row since it's aggregate data
+        console.log("Dashboard stats:", data[0]);
+        return res.status(200).json(data[0]); 
     });
 });
 
 
 
 app.listen(3000, () => {
-    console.log("Server is running on http://localhost:3000");
+    console.log("Server is running ");
 });

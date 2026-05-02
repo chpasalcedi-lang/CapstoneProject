@@ -13,9 +13,9 @@ body {
   display: flex;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    SIDEBAR
-═══════════════════════════════════════════════ */
+ */
 .rooms-navbar {
   width: 220px;
   min-height: 100vh;
@@ -91,9 +91,9 @@ body {
   padding-left: 14px;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    MAIN AREA
-═══════════════════════════════════════════════ */
+ */
 .rooms-main {
   width: calc(100vw - 220px);
   margin-left: 220px;
@@ -110,9 +110,9 @@ body {
   margin: 0 auto;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    TOPBAR
-═══════════════════════════════════════════════ */
+ */
 .rooms-topbar {
   display: flex;
   align-items: center;
@@ -144,7 +144,7 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
-  white-space: nowrap;      
+  white-space: nowrap;    
 }
 
 .rooms-topbar-btn:hover {
@@ -154,9 +154,9 @@ body {
   box-shadow: 0 0 18px rgba(200,169,110,0.12);
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    GRID
-═══════════════════════════════════════════════ */
+ */
 .rooms-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -164,9 +164,9 @@ body {
   width: 100%;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    CARD
-═══════════════════════════════════════════════ */
+ */
 .rooms-stat-card {
   background: #111111;
   border: 1px solid rgba(255,255,255,0.06);
@@ -198,9 +198,9 @@ body {
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    CARD IMAGE
-═══════════════════════════════════════════════ */
+ */
 .rooms-room-card-img {
   position: relative;
   height: 160px;             
@@ -251,9 +251,9 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    CARD BODY
-═══════════════════════════════════════════════ */
+ */
 .rooms-room-card-body {
   padding: 16px 16px 14px;
   display: flex;
@@ -355,9 +355,9 @@ body {
   box-shadow: 0 4px 12px rgba(224,85,85,0.12);
 }
 
-/* ═══════════════════════════════════════════════
+/* 
    RESPONSIVE
-═══════════════════════════════════════════════ */
+ */
 
 /* Large desktops — still 3 cols but breathing room */
 @media (max-width: 1400px) {
@@ -409,7 +409,6 @@ body {
     flex-wrap: wrap;
   }
 
-  /* ✅ key reset: full width, no sidebar offset */
   .rooms-main {
     width: 100%;
     margin-left: 0;

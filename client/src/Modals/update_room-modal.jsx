@@ -58,7 +58,7 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
         
         console.log("Sending update for room:", values.id, updateData);
         
-        axios.post(`http://localhost:3000/update_rooms/${values.id}`, updateData)
+        axios.post(`http://localhost:3001/update_rooms/${values.id}`, updateData)
             .then((res) => {
                 console.log("Updated:", res.data);
                 alert("Room updated successfully!");

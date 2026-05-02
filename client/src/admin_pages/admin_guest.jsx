@@ -6,13 +6,15 @@ import "../admincss/admin_guest.css";
 
 function AdminGuest() {
     const [bookings, setBookings] = useState([]);
+    const [guestArrivals, setGuestArrivals] = useState([]);
     const [loadingBookings, setLoadingBookings] = useState(true);
+    const [loadingGuests, setLoadingGuests] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const res = await axios.get("http://localhost:3000/get_reservations");
+                const res = await axios.get("http://localhost:3001/get_reservations");
                 setBookings(res.data);
             } catch (err) {
                 console.error("Error fetching bookings:", err);
@@ -21,7 +23,19 @@ function AdminGuest() {
             }
         };
 
+        const fetchGuestArrivals = async () => {
+            try {
+                const res = await axios.get("http://localhost:3001/get_guest_arrivals");
+                setGuestArrivals(res.data);
+            } catch (err) {
+                console.error("Error fetching guest arrivals:", err);
+            } finally {
+                setLoadingGuests(false);
+            }
+        };
+
         fetchBookings();
+        fetchGuestArrivals();
     }, []);
 
     const filteredBookings = bookings.filter((booking) => {
@@ -122,23 +136,39 @@ function AdminGuest() {
                             <thead className="guests-table-header">
                                 <tr>
                                     <th>Number of Guests</th>
-                                    <th>Foods</th>
-                                    <th>Price</th>
+                                    <th>Food Service</th>
+                                    <th>Total Price</th>
                                     <th>Time & Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="guests-table-body">
-                                <tr>
-                                    <td>2</td>
-                                    <td>500</td>
-                                    <td>$100.00</td>
-                                    <td>2023-10-15 14:30</td>
-                                    <td className="actions-cell">
-                                        <button className="btn guest btn-primary">Edit</button>
-                                        <button className="btn guest btn-danger">Delete</button>
-                                    </td>
-                                </tr>
+                                {loadingGuests ? (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                                            Loading guest arrivals...
+                                        </td>
+                                    </tr>
+                                ) : guestArrivals.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                                            No guest records found.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    guestArrivals.map((guest) => (
+                                        <tr key={guest.id}>
+                                            <td>{guest.number_of_guests}</td>
+                                            <td>{guest.food_service}</td>
+                                            <td>₱{parseFloat(guest.total_price).toFixed(2)}</td>
+                                            <td>{guest.created_at}</td>
+                                            <td className="actions-cell">
+                                                <button className="btn guest btn-primary">Edit</button>
+                                                <button className="btn guest btn-danger">Delete</button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>

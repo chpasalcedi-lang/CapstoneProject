@@ -15,7 +15,7 @@ function ResBook() {
   const [roomType, setRoomType] = useState('');
 
     const fetchData = () => {
-        axios.get('http://localhost:3000/get_rooms')
+        axios.get('http://localhost:3001/get_rooms')
             .then((res) => {
                 setData(res.data);
                 setFilteredData(res.data); 

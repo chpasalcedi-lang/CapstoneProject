@@ -24,7 +24,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId }) 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post('http://localhost:3000/add_reservation', { ...values, room_id: roomId })
+        axios.post('http://localhost:3001/add_reservation', { ...values, room_id: roomId })
             .then((res) => {
                 console.log("Success: ", res.data);
                 alert("Reservation added Successfully");

@@ -42,15 +42,15 @@ function AdminAddGuest() {
     setStatusMessage("Adding guest...");
 
     const totalPrice = calculateTotalPrice();
-    const arrivalTime = new Date().toTimeString().split(' ')[0];
     const payload = {
-      number_of_guests: parseInt(values.number_of_guests),
-      foods: values.foods,
-      price: parseFloat(totalPrice),
-      time_ar: arrivalTime
+      number_of_guests: parseInt(values.number_of_guests, 10),
+      food_service: values.foods,
+      total_price: parseFloat(totalPrice),
+      created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
     };
 
-    axios.post('http://localhost:3000/add_guest_arrival', payload)
+    console.log('Submitting add guest payload:', payload);
+    axios.post('http://localhost:3001/add_guest_arrival', payload)
       .then((res) => {
         console.log("Success: ", res.data);
         setStatusMessage(`✓ Guest arrival recorded successfully! ID: ${res.data.guestId}`);
@@ -61,7 +61,7 @@ function AdminAddGuest() {
       .catch((err) => {
         console.error("Error: ", err);
         const errorMsg = err.response?.data?.error || err.response?.statusText || "Network error";
-        setStatusMessage(`Error: ${errorMsg}. Make sure server is running on http://localhost:3000/add_guest_arrival`);
+        setStatusMessage(`Error: ${errorMsg}. Make sure server is running on http://localhost:3001/add_guest_arrival`);
       });
   };
 
@@ -135,7 +135,7 @@ function AdminAddGuest() {
                           <p className="summary-price-total">₱{calculateTotalPrice()}</p> 
                         </div>
                       </div>
-                      <button type="submit" > Confirm </button>
+                      <button type="submit"> Confirm </button>
                     </form>
                     {statusMessage && (
                       <p className={`add-status-message ${statusMessage.includes('✓') ? 'success' : 'error'}`}>

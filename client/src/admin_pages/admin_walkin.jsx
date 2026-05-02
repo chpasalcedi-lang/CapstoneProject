@@ -22,7 +22,7 @@ function AdminWalkin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:3000/get_rooms")
+    axios.get("http://localhost:3001/get_rooms")
       .then((res) => {
         const sortedRooms = [...res.data].sort((a, b) => {
           const roomA = parseInt(a.room_number, 10);
@@ -64,7 +64,7 @@ function AdminWalkin() {
     }
 
     axios
-      .post("http://localhost:3000/add_reservation", {
+      .post("http://localhost:3001/add_reservation", {
         ...values,
         room_id: selectedRoom.id,
       })

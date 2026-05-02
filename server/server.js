@@ -21,6 +21,19 @@ db.connect((err) => {
         process.exit(1);
     }
     console.log('Connected to database');
+
+    db.query(`CREATE TABLE IF NOT EXISTS guest (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        number_of_guests INT NOT NULL,
+        food_service VARCHAR(10) NOT NULL,
+        total_price DECIMAL(10,2) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`, (tableErr) => {
+        if (tableErr) {
+            console.error('Error ensuring guest table exists:', tableErr);
+            process.exit(1);
+        }
+    });
 }); 
 
 
@@ -133,6 +146,40 @@ app.get('/get_reservations', (req, res) => {
     });
 });
 
+app.post('/add_guest_arrival', (req, res) => {
+    console.log('Received add_guest_arrival payload:', req.body);
+    const sql = "INSERT INTO guest (number_of_guests, food_service, total_price, created_at) VALUES (?, ?, ?, ?)";
+    const values = [
+        req.body.number_of_guests,
+        req.body.food_service,
+        req.body.total_price,
+        req.body.created_at || new Date()
+    ];
+
+    db.query(sql, values, (err, data) => {
+        if (err) {
+            console.error("Error inserting guest arrival:", err);
+            return res.status(500).json({ error: "Database query error!", details: err.message });
+        }
+        return res.status(200).json({ message: "Guest arrival recorded successfully!", guestId: data.insertId });
+    });
+});
+
+app.get('/get_guest_arrivals', (req, res) => {
+    const sql = "SELECT * FROM guest ORDER BY created_at DESC";
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error("Error fetching guest arrivals:", err);
+            return res.status(500).json({ error: "Database query error!" });
+        }
+        return res.status(200).json(data);
+    });
+});
+
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', message: 'Guest arrival backend is running' });
+});
+
 app.post('/update_reservation/:id', (req, res) => {
     const reservationId = parseInt(req.params.id);
     const { status } = req.body;
@@ -178,6 +225,7 @@ app.get('/get_dashboard_stats', (req, res) => {
 
 
 
-app.listen(3000, () => {
-    console.log("Server is running ");
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });

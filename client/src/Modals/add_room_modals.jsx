@@ -27,7 +27,7 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post('http://localhost:3000/add_rooms', values)
+        axios.post('http://localhost:3001/add_rooms', values)
             .then((res) => {
                 console.log("Success: ", res.data);
                 setShowModal(false);

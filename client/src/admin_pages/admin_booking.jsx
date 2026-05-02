@@ -13,7 +13,7 @@ function AdminBooking() {
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const res = await axios.get('http://localhost:3000/get_reservations');
+                const res = await axios.get('http://localhost:3001/get_reservations');
                 setBookings(res.data);
             } catch (err) {
                 console.error("Error fetching bookings:", err);
@@ -40,9 +40,9 @@ function AdminBooking() {
 
     const handleConfirm = async (id) => {
         try {
-            await axios.post(`http://localhost:3000/update_reservation/${id}`, { status: 'confirmed' });
+            await axios.post(`http://localhost:3001/update_reservation/${id}`, { status: 'confirmed' });
             // Refetch bookings
-            const res = await axios.get('http://localhost:3000/get_reservations');
+            const res = await axios.get('http://localhost:3001/get_reservations');
             setBookings(res.data);
         } catch (err) {
             console.error("Error confirming booking:", err);
@@ -53,9 +53,9 @@ function AdminBooking() {
     const handleCancel = async (id) => {
         if (!window.confirm("Are you sure you want to cancel this booking?")) return;
         try {
-            await axios.post(`http://localhost:3000/update_reservation/${id}`, { status: 'cancelled' });
+            await axios.post(`http://localhost:3001/update_reservation/${id}`, { status: 'cancelled' });
             // Refetch bookings
-            const res = await axios.get('http://localhost:3000/get_reservations');
+            const res = await axios.get('http://localhost:3001/get_reservations');
             setBookings(res.data);
         } catch (err) {
             console.error("Error cancelling booking:", err);

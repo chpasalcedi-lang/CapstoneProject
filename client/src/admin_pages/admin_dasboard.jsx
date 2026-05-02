@@ -18,7 +18,7 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/get_dashboard_stats');
+        const res = await axios.get('http://localhost:3001/get_dashboard_stats');
         console.log("Fetched dashboard stats:", res.data);
         setStats(res.data);
       } catch (err) {

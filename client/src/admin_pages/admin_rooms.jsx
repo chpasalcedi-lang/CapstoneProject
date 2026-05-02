@@ -12,7 +12,7 @@ function AdminRooms() {
     const [data, setData] = useState([]);
 
     const fetchData = () => {
-        axios.get("http://localhost:3000/get_rooms")
+        axios.get("http://localhost:3001/get_rooms")
             .then((res) => setData(res.data))
             .catch((err) => console.error("Error sa pagkuha sang data:", err));
     };
@@ -28,7 +28,7 @@ function AdminRooms() {
 
     const handleDelete = (roomId) => {
         if (window.confirm("Are you sure you want to delete this room?")) {
-            axios.delete(`http://localhost:3000/delete_room/${roomId}`)
+            axios.delete(`http://localhost:3001/delete_room/${roomId}`)
                 .then((res) => {
                     console.log("Deleted:", res.data);
                     setData((prev) => prev.filter((room) => room.id !== roomId));

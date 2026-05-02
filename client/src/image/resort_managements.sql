@@ -87,6 +87,23 @@ CREATE TABLE `rooms` (
   `room_label` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `guest`
+--
+
+CREATE TABLE `guest` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `number_of_guests` int(11) NOT NULL,
+  `food_service` varchar(10) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
 --
 -- Dumping data for table `rooms`
 --

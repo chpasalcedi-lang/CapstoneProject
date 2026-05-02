@@ -8,7 +8,7 @@ function AdminAddGuest() {
       <nav className="dashboard-navbar">
         <div className="dashboard-nav-content">
           <div className="dashboard-logo">
-            <h1>Messiah</h1>
+            <a href="/Dashboard"><h1>Messiah</h1></a>
           </div>
           <ul className="dashboard-nav-links">
             <li className="active"><Link to="/Dashboard">Dashboard</Link></li>

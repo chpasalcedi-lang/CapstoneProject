@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../admincss/admin_walkin.css";
 
@@ -18,10 +18,33 @@ const initialValues = {
 function AdminWalkin() {
   const [values, setValues] = useState(initialValues);
   const [statusMessage, setStatusMessage] = useState("");
+  const [rooms, setRooms] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get("http://localhost:3000/get_rooms")
+      .then((res) => {
+        const sortedRooms = [...res.data].sort((a, b) => {
+          const roomA = parseInt(a.room_number, 10);
+          const roomB = parseInt(b.room_number, 10);
+
+          if (!Number.isNaN(roomA) && !Number.isNaN(roomB)) {
+            return roomA - roomB;
+          }
+
+          return String(a.room_number).localeCompare(String(b.room_number));
+        });
+        setRooms(sortedRooms);
+      })
+      .catch((err) => {
+        console.error("Error fetching rooms:", err);
+      });
+  }, []);
 
   const handleCancel = () => {
     setValues(initialValues);
     setStatusMessage("");
+    navigate('/Dashboard');
   };
 
   const handleChange = (e) => {
@@ -33,15 +56,23 @@ function AdminWalkin() {
     e.preventDefault();
     setStatusMessage("Saving reservation...");
 
+    // Find the room id based on room_number
+    const selectedRoom = rooms.find(room => String(room.room_number) === String(values.room_number));
+    if (!selectedRoom) {
+      setStatusMessage("Room number not found!");
+      return;
+    }
+
     axios
       .post("http://localhost:3000/add_reservation", {
         ...values,
-        room_id: values.room_number,
+        room_id: selectedRoom.id,
       })
       .then((res) => {
         console.log("Success:", res.data);
-        setStatusMessage("Reservation added successfully.");
         setValues(initialValues);
+        navigate('/Dashboard');
+        alert("Walk-in reservation saved successfully!");
       })
       .catch((err) => {
         console.error("Error sa pag-save:", err);
@@ -54,7 +85,7 @@ function AdminWalkin() {
       <nav className="dashboard-navbar">
         <div className="dashboard-nav-content">
           <div className="dashboard-logo">
-            <h1>Messiah</h1>
+            <a href="/Dashboard"><h1>Messiah</h1></a>
           </div>
           <ul className="dashboard-nav-links">
             <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
@@ -98,7 +129,14 @@ function AdminWalkin() {
                             </div>
                             <div className="walkin-reservation-form-group">
                             <label>Room Number</label>
-                            <input type="text" name="room_number" required value={values.room_number} onChange={handleChange} placeholder="e.g. 101" />
+                            <select name="room_number" required value={values.room_number} onChange={handleChange}>
+                              <option value="">Select Room</option>
+                              {rooms.map(room => (
+                                <option key={room.id} value={String(room.room_number)}>
+                                  {room.room_number} - {room.room_name} ({room.room_type})
+                                </option>
+                              ))}
+                            </select>
                             </div>
                         </div>
                         <div className="walkin-reservation-form-group">
@@ -132,7 +170,6 @@ function AdminWalkin() {
                             <button type="submit" className="walkin-reservation-btn-save">Save Reservation</button>
                         </div>
                         </form>
-                        {statusMessage && <p className="walkin-status-message">{statusMessage}</p>}
                     </div>
                 </div>
             </div>

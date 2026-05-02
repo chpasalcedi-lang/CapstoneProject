@@ -68,7 +68,7 @@ function AdminBooking() {
             <nav className="guests-navbar">
                 <div className="guests-nav-content">
                     <div className="guests-logo">
-                        <h1>Messiah</h1>
+                        <a href="/Dashboard"><h1>Messiah</h1></a>
                     </div>
                     <ul className="guests-nav-links">
                         <li><Link to="/Dashboard">Dashboard</Link></li>

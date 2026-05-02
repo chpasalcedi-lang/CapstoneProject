@@ -45,7 +45,7 @@ function AdminRooms() {
             <nav className="rooms-navbar">
                 <div className="rooms-nav-content">
                     <div className="rooms-logo">
-                        <h1>Messiah</h1>
+                       <a href="/Dashboard"><h1>Messiah</h1></a>
                     </div>
                     <ul className="rooms-nav-links">
                         <li><Link to="/Dashboard">Dashboard</Link></li>

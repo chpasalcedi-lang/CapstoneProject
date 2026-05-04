@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "../admincss/admin_guest.css";
+import EditBookingModal from '../Modals/Edit_booking_modal';
+import ViewBookingModal from '../Modals/view_booking_modal';
 
 
 function AdminGuest() {
@@ -10,6 +12,21 @@ function AdminGuest() {
     const [loadingBookings, setLoadingBookings] = useState(true);
     const [loadingGuests, setLoadingGuests] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [viewModal, setViewModal] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [editModal, setEditModal] = useState(false);
+    const [selectedEditBooking, setSelectedEditBooking] = useState(null);
+
+
+    const handleView = (booking) => {
+        setSelectedBooking(booking);
+        setViewModal(true);
+    };
+
+    const handleEdit = (booking) => {
+        setSelectedEditBooking(booking);
+        setEditModal(true);
+    };
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -48,6 +65,19 @@ function AdminGuest() {
             booking.email?.toLowerCase().includes(query)
         );
     });
+
+    const handleCancel = async (id) => {
+        if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+        try {
+            await axios.post(`http://localhost:3000/update_reservation/${id}`, { status: 'cancelled' });
+            // Refetch bookings
+            const res = await axios.get('http://localhost:3000/get_reservations');
+            setBookings(res.data);
+        } catch (err) {
+            console.error("Error cancelling booking:", err);
+            alert("Failed to cancel booking");
+        }
+    };
 
     return (
         <div>
@@ -118,9 +148,15 @@ function AdminGuest() {
                                             <td>{booking.check_in_date || 'N/A'}</td>
                                             <td>{booking.check_out_date || 'N/A'}</td>
                                             <td className="actions-cell">
-                                                <button className="btn guest btn-primary">View</button>
-                                                <button className="btn guest btn-primary">Edit</button>
-                                                <button className="btn guest btn-danger">Delete</button>
+                                                <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                    view
+                                                </button>
+                                                <button className="btn guest btn-primary" onClick={() => handleEdit(booking.id)}>
+                                                    edit
+                                                </button>
+                                                <button className="btn guest btn-danger" onClick={() => handleCancel(booking.id)}>
+                                                    cancel
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
@@ -174,6 +210,20 @@ function AdminGuest() {
                     </div>
                 </div>
             </section>
+            <EditBookingModal 
+                show={editModal} 
+                onClose={() => setEditModal(false)} 
+                booking={selectedEditBooking} 
+                onUpdate={() => {
+                    // Refetch bookings after update
+                    axios.get("http://localhost:3000/get_reservations").then(res => setBookings(res.data));
+                }}
+            />
+            <ViewBookingModal 
+                show={viewModal} 
+                onClose={() => setViewModal(false)} 
+                booking={selectedBooking} 
+            />
         </div>
     );
 }

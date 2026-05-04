@@ -67,28 +67,43 @@
 .walkin-container {
   display: flex;
   justify-content: center;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.walkin-modal.modal-visible {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.walkin-modal.modal-hidden {
+  display: none;
 }
 
 .walkin-form-card {
   background: #111111;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.35);
-  width: min(680px, 100%);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  width: min(720px, 100%);
   margin: 0 auto;
-  padding: 32px;
+  padding: 36px;
 }
 
 .walkin-form-card h2 {
   color: #f5f3ee;
   margin-bottom: 8px;
-  font-size: 24px;
+  font-size: 26px;
 }
 
 .walkin-form-card p {
-  color: #a7a7a7;
+  color: #b8b8b8;
   margin-bottom: 24px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .walkin-reservation-modal-body {
@@ -120,7 +135,8 @@
 }
 
 .walkin-reservation-form-group input,
-.walkin-reservation-form-group textarea {
+.walkin-reservation-form-group textarea,
+.walkin-reservation-form-group select {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
@@ -129,11 +145,12 @@
   padding: 14px 16px;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .walkin-reservation-form-group input:focus,
-.walkin-reservation-form-group textarea:focus {
+.walkin-reservation-form-group textarea:focus,
+.walkin-reservation-form-group select:focus {
   border-color: rgba(200, 169, 110, 0.45);
   box-shadow: 0 0 0 4px rgba(200, 169, 110, 0.08);
 }
@@ -183,6 +200,10 @@
   margin-top: 18px;
   color: #c8a96e;
   font-size: 14px;
+  background: rgba(200, 169, 110, 0.1);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  border-radius: 14px;
+  padding: 12px 14px;
 }
 
 @media (max-width: 780px) {

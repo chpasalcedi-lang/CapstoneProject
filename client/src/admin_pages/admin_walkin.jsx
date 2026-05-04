@@ -169,6 +169,9 @@ function AdminWalkin() {
                             <button type="button" className="walkin-reservation-btn-cancel" onClick={handleCancel}>Cancel</button>
                             <button type="submit" className="walkin-reservation-btn-save">Save Reservation</button>
                         </div>
+                        {statusMessage && (
+                          <p className="walkin-status-message">{statusMessage}</p>
+                        )}
                         </form>
                     </div>
                 </div>

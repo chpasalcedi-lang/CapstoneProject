@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "../admincss/admin_dashboard.css";
+import UpdateCalendarModal from '../Modals/update_calendar_modals';
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -14,6 +15,11 @@ function AdminDashboard() {
     booking_sales: 0
   });
   const [loading, setLoading] = useState(true);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [selectedCalendarEvent] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarWeeks, setCalendarWeeks] = useState([]);
+
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -31,11 +37,71 @@ function AdminDashboard() {
 
     fetchStats();
   }, []);
-
+  
   const formatCurrency = (amount = 0) => {
     const value = Number(amount || 0);
     return `₱${value.toLocaleString()}`;
   };
+
+  
+
+  const monthNames = Array.from({ length: 12 }, (_, i) =>
+    new Date(0, i).toLocaleString("default", { month: "long" })
+  );
+
+  const handleMonthChange = (e) => {
+    const month = Number(e.target.value);
+    setCurrentDate((prev) => new Date(prev.getFullYear(), month, 1));
+  };
+
+  const buildCalendarWeeks = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const weeks = [];
+    let day = 1;
+
+    while (day <= daysInMonth) {
+      const week = [];
+      for (let i = 0; i < 7; i += 1) {
+        if (weeks.length === 0 && i < firstDayIndex) {
+          week.push(null);
+        } else if (day > daysInMonth) {
+          week.push(null);
+        } else {
+          week.push(day);
+          day += 1;
+        }
+      }
+      weeks.push(week);
+    }
+
+    return weeks;
+  };
+
+  const handlePrevMonth = () => {
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const handleToday = () => {
+    setCurrentDate(new Date());
+  };
+
+  const isToday = (day) => {
+    const today = new Date();
+    return today.getFullYear() === currentDate.getFullYear() &&
+           today.getMonth() === currentDate.getMonth() &&
+           today.getDate() === day;
+  };
+
+  useEffect(() => {
+    setCalendarWeeks(buildCalendarWeeks(currentDate));
+  }, [currentDate]);
 
   return (
     <div className="wrap">
@@ -45,11 +111,26 @@ function AdminDashboard() {
             <a href="/Dashboard"><h1>Messiah</h1></a>
           </div>
           <ul className="dashboard-nav-links">
+            <p>dashboard</p>
             <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+            <li><Link to="">User</Link></li>
+            <li><Link to="">Sales</Link></li>
+            <p>management</p>
             <li><Link to="/Rooms">Rooms</Link></li>
             <li><Link to="/Booking">Booking</Link></li>
             <li><Link to="/Guest">Guest</Link></li>
-            <li><span>Settings</span></li>
+            <p>reports</p>
+            <li><Link to="">Active logs</Link></li>
+
+            <div className="dasboard-admin-status">
+              <div className="dasboard-admin-status-content">
+                <h1>System addmin</h1>
+                <p className="admin-status ">admiin</p>
+              </div>
+                <div className="dasboard-admin-profile">
+                  Ap
+                </div>
+            </div>
           </ul>
         </div>
       </nav>
@@ -65,7 +146,6 @@ function AdminDashboard() {
             </div>
           </div>
 
-          {/* Revenue Overview */}
           <p className="section-label">Revenue overview</p>
           <div className="dashboard-stats-grid">
 
@@ -183,14 +263,13 @@ function AdminDashboard() {
             <div className="calendar-side-info-container">
               <div className="calendar-side-header">
                 <h3>Calendar</h3>
-                <button className="calendar-button calendar-edit-button">Update</button>
+                <button className="calendar-button calendar-edit-button" onClick={() => setShowUpdateModal(true)}>Update</button>
               </div>
               
               <div className="calendar-legend-box">
                 <div className="calendar-side-info">
                   <p><span className="calendar-legend confirmed"></span> Confirmed</p>
                   <p><span className="calendar-legend pending"></span> Pending</p>
-                  <p><span className="calendar-legend maintenance"></span> Maintenance</p>
                   <p><span className="calendar-legend closed"></span> Closed</p>
                 </div>
               </div>
@@ -220,154 +299,68 @@ function AdminDashboard() {
             </div>
             <div className="calendar-box container">
               <div className="calendar-action">
-                
-                <p>june</p>
+                <select className="calendar-select" name="calendarmonth" id="calendar" value={currentDate.getMonth()} onChange={handleMonthChange}>
+                  {monthNames.map((monthName, index) => (
+                    <option key={monthName} value={index}>{monthName}</option>
+                  ))}
+                </select>
+
                 <div className="calendar-action-btns">
-                <button className="calendar-btn">Prev</button>
-                <button className="calendar-btn">Today</button>
-                <button className="calendar-btn">Next</button>
-              
+                  <button className="calendar-btn" onClick={handlePrevMonth}>Prev</button>
+                  <button className="calendar-btn" onClick={handleToday}>Today</button>
+                  <button className="calendar-btn" onClick={handleNextMonth}>Next</button>
+                </div>
               </div>
-              </div>
-              
-            <div className="calendar-container">
-              <div className="sperate-calendar-table">
-                <table>
-                <thead>
-                  <tr>
-                    <th>Sun</th>  
-                    <th>Mon</th>
-                    <th>Tue</th>
-                    <th>Wed</th>
-                    <th>Thu</th>
-                    <th>Fri</th>
-                    <th>Sat</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="calendar-day">1 
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">2
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">3
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">4
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">5
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">6
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">7
-                      <p>ano</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="calendar-day">8
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">9
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">10
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">11
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">12
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">13
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">14
-                      <p>ano</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="calendar-day">15
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">16
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">17
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">18
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">19
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">20
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">21
-                      <p>ano</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="calendar-day">22
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">23
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">24
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">25
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">26
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">27
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">28
-                      <p>ano</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="calendar-day">29
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">30
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">31
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">
-                      <p>ano</p>
-                    </td>
-                    <td className="calendar-day">
-                      <p>ano</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+
+              <div className="calendar-container">
+                <div className="sperate-calendar-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Sun</th>
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thu</th>
+                        <th>Fri</th>
+                        <th>Sat</th>
+                      </tr>
+                    </thead>
+                    <tbody className="calendar-body">
+                      {calendarWeeks.map((week, weekIndex) => (
+                        <tr key={weekIndex}>
+                          {week.map((day, dayIndex) => {
+                            return (
+                              <td key={dayIndex} className={`calendar-day ${day ? 'active' : 'empty'} ${isToday(day) ? 'today' : ''}`}>
+                                {day ? (
+                                  <div className="calendar-day-content">
+                                    <div className="calendar-day-number">{day}</div>
+                                    <div className="calendar-day-bookings">
+                                      <div className="calendar-booking confirmed"></div>
+                                      <div className="calendar-booking pending"></div>
+                                      <div className="calendar-booking closed"></div>
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
           </div>
-          </div>
       </section>
+      <UpdateCalendarModal 
+        showModal={showUpdateModal} 
+        setShowModal={setShowUpdateModal} 
+        refreshData={() => {}} 
+        calendarData={selectedCalendarEvent} 
+      />
     </div>
   );
 }

@@ -45,7 +45,7 @@ function ViewBookingModal({ show, onClose, booking }) {
                         <p className={`status ${booking.res_status?.toLowerCase()}`}>{booking.res_status || 'pending'}</p>
                     </div>
                     {booking.notes && (
-                        <div className="booking-detail">
+                        <div className="booking-detail-notes">
                             <label>Notes:</label>
                             <p>{booking.notes}</p>
                         </div>

@@ -1,0 +1,123 @@
+.edit-booking-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.edit-booking-modal-content {
+    background: #111111;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.edit-booking-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.edit-booking-modal-header h2 {
+    margin: 0;
+    color: #f5f3ee;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #f5f3ee;
+    cursor: pointer;
+    padding: 0;
+}
+
+.edit-booking-modal-body {
+    padding: 20px;
+}
+
+.edit-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.edit-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-form-group label {
+    color: #d3d3d3;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.edit-form-group input,
+.edit-form-group textarea,
+.edit-form-group select {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: #111111;
+    color: #f5f3ee;
+    padding: 12px;
+    font-size: 14px;
+}
+
+.edit-form-group input:focus,
+.edit-form-group textarea:focus,
+.edit-form-group select:focus {
+    border-color: #c8a96e;
+    outline: none;
+}
+
+.edit-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.edit-btn-cancel,
+.edit-btn-save {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.edit-btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: #d3d3d3;
+}
+
+.edit-btn-save {
+    background: #c8a96e;
+    color: #111111;
+}
+
+.edit-status-message {
+    margin-top: 16px;
+    color: #c8a96e;
+    font-size: 14px;
+    background: rgba(200, 169, 110, 0.1);
+    border: 1px solid rgba(200, 169, 110, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+}

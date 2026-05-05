@@ -134,8 +134,12 @@ app.post('/add_reservation', (req, res) => {
         req.body.check_out_date,
         req.body.notes,
         req.body.status || 'pending',
+<<<<<<< Updated upstream
         req.body.room_id || null,
         Number.isNaN(normalizedRoomPrice) ? null : normalizedRoomPrice
+=======
+        req.body.room_id 
+>>>>>>> Stashed changes
     ];
     db.query(sql, values, (err, data) => {
         if (err) {

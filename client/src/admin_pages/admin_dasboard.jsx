@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import "../admincss/admin_dashboard.css";
 import UpdateCalendarModal from '../Modals/update_calendar_modals';
+import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -16,6 +17,7 @@ function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showWalkinModal, setShowWalkinModal] = useState(false);
   const [selectedCalendarEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarWeeks, setCalendarWeeks] = useState([]);
@@ -121,33 +123,32 @@ function AdminDashboard() {
   return (
     <div className="wrap">
       <nav className="dashboard-navbar">
-        <div className="dashboard-nav-content">
-          <div className="dashboard-logo">
-            <a href="/Dashboard"><h1>Messiah</h1></a>
-          </div>
-          <ul className="dashboard-nav-links">
-            <p>dashboard</p>
-            <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
-            <li><Link to="">User</Link></li>
-            <li><Link to="">Sales</Link></li>
-            <p>management</p>
-            <li><Link to="/Rooms">Rooms</Link></li>
-            <li><Link to="/Booking">Booking</Link></li>
-            <li><Link to="/Guest">Guest</Link></li>
-            <p>reports</p>
-            <li><Link to="">Active logs</Link></li>
-
-            <div className="dasboard-admin-status">
-              <div className="dasboard-admin-status-content">
-                <h1>System addmin</h1>
-                <p className="admin-status ">admiin</p>
+          <div className="dashboard-nav-content">
+              <div className="dashboard-logo">
+                  <a href="/Dashboard"><h1>Messiah</h1></a>
               </div>
-                <div className="dasboard-admin-profile">
-                  Ap
-                </div>
-            </div>
-          </ul>
-        </div>
+                  <ul className="dashboard-nav-links">
+                      <p>dashboard</p>
+                      <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+                      <li><Link to="/Users">User</Link></li>
+                      <li><Link to="">Sales</Link></li>
+                      <p>management</p>
+                      <li><Link to="/Rooms">Rooms</Link></li>
+                      <li><Link to="/Booking">Booking</Link></li>
+                      <li><Link to="/Guest">Guest</Link></li>
+                      <p>reports</p>
+                      <li><Link to="/Logs">Active logs</Link></li>
+                      <div className="dasboard-admin-status">
+                          <Link to="/Profile">
+                              <div className="dasboard-admin-status-content">
+                                  <h1>System admin</h1>
+                                  <p className="admin-status ">admin</p>
+                              </div>
+                              <div className="dasboard-admin-profile"> Ap </div>
+                          </Link>
+                      </div>
+                </ul>
+          </div>
       </nav>
 
       <section className="dashboard-main1">
@@ -156,7 +157,7 @@ function AdminDashboard() {
           <div className="dashboard-topbar1">
             <h1>Dashboard</h1>
             <div className="dashboard-topbar-btns">
-                <Link className="dashboard-topbar-btn1" to="/Walkin">Walk in</Link>
+                <button className="dashboard-topbar-btn1" onClick={() => setShowWalkinModal(true)}>Walk in</button>
                 <Link className="dashboard-topbar-btn1" to="/AddGuest">Add Guest</Link>
             </div>
           </div>
@@ -376,6 +377,7 @@ function AdminDashboard() {
         refreshData={() => {}} 
         calendarData={selectedCalendarEvent} 
       />
+      <AdminWalkinModal show={showWalkinModal} onClose={() => setShowWalkinModal(false)} />
     </div>
   );
 }

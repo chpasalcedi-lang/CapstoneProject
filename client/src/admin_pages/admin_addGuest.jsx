@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "../admincss/admin_addguest.css";
+import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
+
 
 const PRICE_PER_GUEST = 150;
 const FOOD_CHARGE = 500;
@@ -12,6 +14,7 @@ function AdminAddGuest() {
     foods: "No",
   });
   const [statusMessage, setStatusMessage] = useState("");
+  const [showWalkinModal, setShowWalkinModal] = useState(false);
 
 
   const handleChange = (e) => {
@@ -88,7 +91,7 @@ function AdminAddGuest() {
           <div className="dashboard-topbar1">
             <h1>Dashboard</h1>
             <div className="dashboard-topbar-btns">
-                <Link className="dashboard-topbar-btn1" to="/Walkin">Walk in</Link>
+                <button className="dashboard-topbar-btn1" onClick={() => setShowWalkinModal(true)}>Walk in</button>
                 <Link className="dashboard-topbar-btn1" to="/AddGuest">Add Guest</Link>
             </div>
           </div>
@@ -146,6 +149,7 @@ function AdminAddGuest() {
             </div>
         </div>
       </section>
+      <AdminWalkinModal show={showWalkinModal} onClose={() => setShowWalkinModal(false)} />
     </div>
   );
 }

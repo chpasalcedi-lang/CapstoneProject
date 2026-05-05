@@ -8,7 +8,10 @@ import Rooms from './admin_pages/admin_rooms';
 import Booking from './admin_pages/admin_booking';
 import Guest from './admin_pages/admin_guest';
 import AdminAddGuest from './admin_pages/admin_addGuest';
-import AdminWalkin from './admin_pages/admin_walkin';
+import AdminUsersAcc from './admin_pages/admin_usersAcc';
+import AdminProfile from './admin_pages/admin_profile';
+import AdminLogs from './admin_pages/admin_logs';
+
 
 
 
@@ -22,6 +25,7 @@ function App() {
         <Route path="/Home" element={<Home />} />
         <Route path="/Reservation" element={<Reservation />} />
         <Route path="/About" element={<About />} />
+        
 
 
         <Route path="/Dashboard" element={<Dashboard />} />
@@ -29,7 +33,9 @@ function App() {
         <Route path="/Booking" element={<Booking />} />
         <Route path="/Guest" element={<Guest />} />
         <Route path="/AddGuest" element={<AdminAddGuest />} />
-        <Route path="/Walkin" element={<AdminWalkin />} />
+        <Route path="/Users" element={<AdminUsersAcc />} />
+        <Route path="/Profile" element={<AdminProfile />} />
+        <Route path="/Logs" element={<AdminLogs />} />
 
       
 

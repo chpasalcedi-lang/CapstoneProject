@@ -13,29 +13,7 @@ body {
   display: flex;
 }
 
-.calendar-overview {
-  width: 100%;
-  max-width: 1700px; 
-  margin: 0 auto;
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-}
-.calendar-side-info-container {
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  padding: 20px;
-  margin-top: 20px;
-  width: 300px;
-}
-.calendar-side-info p {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: #f0ede8;
-}
+
 
 /* SIDEBAR */
 .dashboard-navbar {
@@ -120,13 +98,26 @@ body {
   left: 0;
   width: 100%;
   height: 60px;
-  padding: 10px 16px;
-  background: #0a0a0a;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
-  gap: 12px;
+  padding: 0 16px;
+  background: #0a0a0a;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.dasboard-admin-status-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dasboard-admin-status a {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
 }
 
 .dasboard-admin-status h1 {
@@ -137,18 +128,6 @@ body {
   margin: 0;
 }
 
-.dasboard-admin-status  {
-  font-size: 10px;
-  color: #888;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.dasboard-admin-status h1,
-.dasboard-admin-status.admin-status {
-  line-height: 1.2;
-}
 
 .dasboard-admin-profile {
   width: 36px;
@@ -164,6 +143,7 @@ body {
   flex-shrink: 0; 
   cursor: pointer;
   transition: all 0.25s ease;
+  flex-shrink: 0;
 }
 
 .dashboard-nav-links p {
@@ -488,6 +468,29 @@ body {
   transition: background 0.2s;
 }
 
+.calendar-overview {
+  width: 100%;
+  max-width: 1700px; 
+  margin: 0 auto;
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.calendar-side-info-container {
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 20px;
+  width: 300px;
+}
+.calendar-side-info p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #f0ede8;
+}
 .calendar-btn:hover {
   background: rgba(200, 169, 110, 0.2);
 }

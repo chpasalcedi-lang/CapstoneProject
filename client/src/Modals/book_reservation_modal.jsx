@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../Modalscss/book_reservation_modal.css";
 
 
-function BookReservationModal({ showModal, setShowModal, refreshData, roomId }) {
+function BookReservationModal({ showModal, setShowModal, refreshData, roomId, roomPrice }) {
 
     const [values, setValues] = useState({
         last_name: "",
@@ -14,8 +14,17 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId }) 
         check_in_date: "",
         check_out_date: "",
         notes: "",
-        room_id: roomId || null
+        room_id: roomId || null,
+        room_price: roomPrice || null
     });
+
+    useEffect(() => {
+        setValues((prev) => ({
+            ...prev,
+            room_id: roomId || null,
+            room_price: roomPrice || null
+        }));
+    }, [roomId, roomPrice]);
 
     const closeModal = () => {
         setShowModal(false);
@@ -24,7 +33,13 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId }) 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post('http://localhost:3001/add_reservation', { ...values, room_id: roomId })
+        const normalizedPrice = roomPrice ? parseFloat(String(roomPrice).replace(/,/g, '')) : null;
+
+        axios.post('http://localhost:3001/add_reservation', { 
+            ...values, 
+            room_id: roomId,
+            room_price: normalizedPrice
+        })
             .then((res) => {
                 console.log("Success: ", res.data);
                 alert("Reservation added Successfully");
@@ -38,8 +53,10 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId }) 
                     check_in_date: "",
                     check_out_date: "",
                     notes: "",
-                    room_id: null
+                    room_id: null,
+                    room_price: null
                 });
+                localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
                 if (refreshData) refreshData();
             })
             .catch((err) => {
@@ -92,9 +109,12 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId }) 
                         <input type="date" name="check_out_date" required onChange={(e)=> setValues({...values, check_out_date: e.target.value})} className="book-input" />
                       </div>
                   </div>
-                  
-                  
-
+                  <div className="book-reservation-form-row">
+                    <div className="book-reservation-form-group">
+                      <label>Room Price</label>
+                      <input type="text" disabled value={roomPrice ? `₱${roomPrice}` : "N/A"} className="book-input" />
+                    </div>
+                  </div>
                   <div className="book-reservation-form-group">
                     <label>Notes <span>Optional</span></label>
                     <textarea name="notes" rows="3" onChange={(e)=> setValues({...values, notes: e.target.value})} placeholder="..."></textarea>

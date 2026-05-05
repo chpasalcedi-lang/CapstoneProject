@@ -8,6 +8,7 @@ function ResBook() {
 
   const [BookshowModal, setBookShowModal] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
+  const [selectedRoomPrice, setSelectedRoomPrice] = useState(null);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [checkIn, setCheckIn] = useState('');
@@ -130,7 +131,7 @@ function ResBook() {
                         <span className="booking-room-price-amount">₱{room.room_price}</span>
                         <span className="booking-room-price-night">per night</span>
                       </div>
-                      <button className="booking-room-book-btn" onClick={() => { setSelectedRoomId(room.id); setBookShowModal(true); }}>Book Now</button>
+                      <button className="booking-room-book-btn" onClick={() => { setSelectedRoomId(room.id); setSelectedRoomPrice(room.room_price); setBookShowModal(true); }}>Book Now</button>
                     </div>
                   </div>
                 </div>
@@ -138,7 +139,7 @@ function ResBook() {
             </div>
           )}
       </div>
-      <BookReservationModal showModal={BookshowModal} setShowModal={setBookShowModal} roomId={selectedRoomId}  />
+      <BookReservationModal showModal={BookshowModal} setShowModal={setBookShowModal} roomId={selectedRoomId} roomPrice={selectedRoomPrice} />
     </div>
   );
 }   

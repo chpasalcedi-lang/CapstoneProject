@@ -34,6 +34,14 @@ db.connect((err) => {
             process.exit(1);
         }
     });
+
+    // Add room_price column to reservations table if it doesn't exist
+    db.query(`ALTER TABLE reservations ADD COLUMN room_price DECIMAL(10,2) AFTER room_id`, (alterErr) => {
+        // Ignore error if column already exists
+        if (alterErr && alterErr.code !== 'ER_DUP_FIELDNAME') {
+            console.log('Note: room_price column may already exist or other schema update');
+        }
+    });
 }); 
 
 
@@ -113,7 +121,9 @@ app.delete('/delete_room/:id', (req, res) => {
 
 
 app.post('/add_reservation', (req, res) => {
-    const sql = "INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const sql = "INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const rawRoomPrice = req.body.room_price;
+    const normalizedRoomPrice = rawRoomPrice != null ? parseFloat(String(rawRoomPrice).replace(/,/g, '')) : null;
     const values = [
         req.body.last_name,
         req.body.first_name,
@@ -124,7 +134,8 @@ app.post('/add_reservation', (req, res) => {
         req.body.check_out_date,
         req.body.notes,
         req.body.status || 'pending',
-        req.body.room_id || null
+        req.body.room_id || null,
+        Number.isNaN(normalizedRoomPrice) ? null : normalizedRoomPrice
     ];
     db.query(sql, values, (err, data) => {
         if (err) {
@@ -136,7 +147,19 @@ app.post('/add_reservation', (req, res) => {
 });
 
 app.get('/get_reservations', (req, res) => {
-    const sql = "SELECT r.*, COALESCE(rm.room_number, 'N/A') AS room_number FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id ORDER BY r.id DESC";
+    const sql = `
+        SELECT
+            r.*,
+            COALESCE(r.room_price, rm.room_price) AS room_price,
+            COALESCE(rm.room_number, 'N/A') AS room_number,
+            rm.room_name,
+            rm.room_label,
+            GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS nights,
+            COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS total_price
+        FROM reservations r
+        LEFT JOIN rooms rm ON r.room_id = rm.id
+        ORDER BY r.id DESC
+    `;
     db.query(sql, (err, data) => {
         if (err) {
             console.error("Error fetching reservations:", err);
@@ -187,7 +210,10 @@ app.post('/update_reservation/:id', (req, res) => {
         return res.status(400).json({ error: 'Invalid status.' });
     }
 
-    const sql = "UPDATE reservations SET res_status = ? WHERE id = ?";
+    const sql = `UPDATE reservations
+                 SET res_status = ?,
+                     room_price = COALESCE(room_price, (SELECT room_price FROM rooms WHERE id = room_id))
+                 WHERE id = ?`;
     db.query(sql, [status, reservationId], (err, result) => {
         if (err) {
             console.error('Error updating reservation status:', err);
@@ -208,9 +234,9 @@ app.get('/get_dashboard_stats', (req, res) => {
             (SELECT COUNT(*) FROM reservations WHERE res_status IN ('confirmed', 'pending') AND DATE(check_in_date) = CURDATE()) as todays_checkins,
             (SELECT COUNT(*) FROM reservations WHERE res_status = 'pending') as pending_bookings,
             (SELECT COALESCE(SUM(r.num_guests), 0) FROM reservations r WHERE r.res_status IN ('confirmed', 'pending')) as total_guests,
-            (SELECT COALESCE(SUM(rm.room_price * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed') as total_revenue,
-            (SELECT COALESCE(SUM(rm.room_price * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed' AND DATE(r.check_in_date) = CURDATE()) as todays_sales,
-            (SELECT COALESCE(SUM(rm.room_price * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'pending') as booking_sales
+            (SELECT COALESCE(SUM(COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed') as total_revenue,
+            (SELECT COALESCE(SUM(COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed' AND DATE(r.check_in_date) = CURDATE()) as todays_sales,
+            (SELECT COALESCE(SUM(COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'pending') as booking_sales
     `;
 
     db.query(sql, (err, data) => {

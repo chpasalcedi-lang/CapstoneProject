@@ -36,6 +36,21 @@ function AdminDashboard() {
     };
 
     fetchStats();
+
+    const interval = setInterval(fetchStats, 5000);
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'dashboardRefreshTrigger') {
+        fetchStats();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
   
   const formatCurrency = (amount = 0) => {

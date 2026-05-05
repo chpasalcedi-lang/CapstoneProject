@@ -44,6 +44,7 @@ function AdminBooking() {
             // Refetch bookings
             const res = await axios.get('http://localhost:3001/get_reservations');
             setBookings(res.data);
+            localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
         } catch (err) {
             console.error("Error confirming booking:", err);
             alert("Failed to confirm booking");
@@ -57,6 +58,7 @@ function AdminBooking() {
             // Refetch bookings
             const res = await axios.get('http://localhost:3001/get_reservations');
             setBookings(res.data);
+            localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
         } catch (err) {
             console.error("Error cancelling booking:", err);
             alert("Failed to cancel booking");
@@ -116,6 +118,7 @@ function AdminBooking() {
                                         <th>Room</th>
                                         <th>Check-in</th>
                                         <th>Check-out</th>
+                                        <th>Price</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -127,6 +130,7 @@ function AdminBooking() {
                                             <td>{booking.room_number}</td>
                                             <td>{booking.check_in_date}</td>
                                             <td>{booking.check_out_date}</td>
+                                            <td>₱{Number(booking.room_price || 0).toLocaleString()}</td>
                                             <td>
                                                 <span className={`status-${(booking.res_status || 'pending').toLowerCase()}`}>
                                                     {booking.res_status || 'pending'}

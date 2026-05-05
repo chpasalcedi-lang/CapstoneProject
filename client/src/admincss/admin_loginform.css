@@ -1,0 +1,104 @@
+/* PAGE */
+.admin-login-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('https://image2url.com/r2/default/images/1772332199936-491a3025-c124-4928-a38c-faad063cc82a.jpg') center / cover no-repeat;
+}
+
+
+.admin-login-card {
+  position: relative; 
+  width: 340px;
+  padding: 35px 30px;
+  background: #1c1c1c;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.admin-login-header h2 {
+  color: #fff;
+  font-size: 22px;
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+}
+
+.admin-login-header p {
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.admin-form-group label {
+  font-size: 11px;
+  margin-bottom: 6px;
+  color: #aaa;
+  letter-spacing: 0.05em;
+}
+
+.admin-form-group input {
+  padding: 9px 10px;
+  border: 1px solid #333;
+  background: #000;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.admin-form-group input:hover {
+  border-color: #555;
+}
+
+.admin-form-group input:focus {
+  outline: none;
+  border-color: #fff;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: 0.2s;
+}
+
+.login-btn:hover {
+  background: #ddd;
+}
+
+/* FOOTER */
+.admin-login-footer {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.admin-login-footer p {
+  font-size: 10px;
+  color: #666;
+  letter-spacing: 0.05em;
+}

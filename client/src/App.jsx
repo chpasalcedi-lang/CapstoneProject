@@ -11,6 +11,7 @@ import AdminAddGuest from './admin_pages/admin_addGuest';
 import AdminUsersAcc from './admin_pages/admin_usersAcc';
 import AdminProfile from './admin_pages/admin_profile';
 import AdminLogs from './admin_pages/admin_logs';
+import AdminLoginForm from './admin_pages/admin_loginform';
 
 
 
@@ -25,7 +26,8 @@ function App() {
         <Route path="/Home" element={<Home />} />
         <Route path="/Reservation" element={<Reservation />} />
         <Route path="/About" element={<About />} />
-        
+
+        <Route path="/AdminLogin" element={<AdminLoginForm />} />
 
 
         <Route path="/Dashboard" element={<Dashboard />} />
@@ -36,6 +38,8 @@ function App() {
         <Route path="/Users" element={<AdminUsersAcc />} />
         <Route path="/Profile" element={<AdminProfile />} />
         <Route path="/Logs" element={<AdminLogs />} />
+
+        
 
       
 

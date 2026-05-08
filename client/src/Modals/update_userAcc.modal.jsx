@@ -27,6 +27,10 @@ function UpdateAccountModal({ show, onClose }) {
                             <input type="password" name="password"  placeholder="e.g. ********" />
                         </div>
                         <div className="update-acc-form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" name="confirmPassword"  placeholder="e.g. ********" />
+                        </div>
+                        <div className="update-acc-form-group">
                             <label>Role</label>
                             <select name="role" required>
                                 <option value="">-- choose --</option>

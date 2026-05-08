@@ -19,6 +19,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
     });
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setValues((prev) => ({
             ...prev,
             room_id: roomId || null,
@@ -120,12 +121,12 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                     <textarea name="notes" rows="3" onChange={(e)=> setValues({...values, notes: e.target.value})} placeholder="..."></textarea>
                   </div>
 
+                
+                </form>
                 <div className="book-reservation-modal-footer">
                   <button type="button" className="book-reservation-btn-cancel" onClick={closeModal}>Cancel</button>
                   <button type="submit" className="book-reservation-btn-save">Save Reservation</button>
                 </div>
-                </form>
-
               </div>
         </div>
     );

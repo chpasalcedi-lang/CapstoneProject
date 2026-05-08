@@ -9,6 +9,8 @@ function AdminBooking() {
     const [loading, setLoading] = useState(true);
     const [viewModal, setViewModal] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
+    const [filterStatus, setFilterStatus] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -65,22 +67,65 @@ function AdminBooking() {
         }
     };
 
+    const handleFilterChange = (status) => {
+        setFilterStatus(status);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const filteredBookings = bookings.filter((booking) => {
+        const status = (booking.res_status || 'pending').toLowerCase();
+
+        if (filterStatus === 'completed' && status !== 'confirmed') return false;
+        if (filterStatus === 'pending' && status !== 'pending') return false;
+        if (filterStatus === 'cancelled' && status !== 'cancelled') return false;
+
+        if (!searchTerm) return true;
+
+        const search = searchTerm.toLowerCase();
+        const fullName = `${booking.first_name || ''} ${booking.last_name || ''}`.toLowerCase();
+        const roomNumber = (booking.room_number || '').toString().toLowerCase();
+        const bookingStatus = status;
+
+        return (
+            fullName.includes(search) ||
+            roomNumber.includes(search) ||
+            bookingStatus.includes(search)
+        );
+    });
+
     return (
         <div>
-            <nav className="guests-navbar">
-                <div className="guests-nav-content">
-                    <div className="guests-logo">
-                        <a href="/Dashboard"><h1>Messiah</h1></a>
-                    </div>
-                    <ul className="guests-nav-links">
-                        <li><Link to="/Dashboard">Dashboard</Link></li>
-                        <li><Link to="/Rooms">Rooms</Link></li>
-                        <li className="active"><Link to="/Booking">Booking</Link></li>
-                        <li><Link to="/Guest">Guest</Link></li>
-                        <li><span>Settings</span></li>
-                    </ul>
-                </div>
-            </nav>
+            <nav className="dashboard-navbar">
+                      <div className="dashboard-nav-content">
+                          <div className="dashboard-logo">
+                              <a href="/Dashboard"><h1>Messiah</h1></a>
+                          </div>
+                              <ul className="dashboard-nav-links">
+                                  <p>dashboard</p>
+                                  <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+                                  <li><Link to="/Users">User</Link></li>
+                                  <li><Link to="">Sales</Link></li>
+                                  <p>management</p>
+                                  <li><Link to="/Rooms">Rooms</Link></li>
+                                  <li><Link to="/Booking">Booking</Link></li>
+                                  <li><Link to="/Guest">Guest</Link></li>
+                                  <p>reports</p>
+                                  <li><Link to="/Logs">Active logs</Link></li>
+                                  <div className="dasboard-admin-status">
+                                      <Link to="/Profile">
+                                          <div className="dasboard-admin-status-content">
+                                              <h1>System admin</h1>
+                                              <p className="admin-status ">admin</p>
+                                          </div>
+                                          <div className="dasboard-admin-profile"> Ap </div>
+                                      </Link>
+                                  </div>
+                            </ul>
+                      </div>
+                  </nav>
 
             <section className="guests-main">
                 <div className="guests-main-content">
@@ -103,12 +148,37 @@ function AdminBooking() {
                             <p className="booking-stat-value">{pendingCount}</p>
                         </div>
                     </div>
+                    <div className="guests-booking-headers-status-bar">
+                        <div className="admin-booking-stats-bar">
+                            <div className="admin-booking-stats-bar-content">
+                                <div className="admin-booking-stats-card">
+                                    <input type="search" placeholder="Search bookings..." value={searchTerm} onChange={handleSearchChange}/>
+                                    <div className="admin-booking-filter-btns">
+                                        <button
+                                            type="button" className={filterStatus === 'all' ? 'active' : ''} onClick={() => handleFilterChange('all')}>
+                                            all
+                                        </button>
+                                        <button type="button" className={filterStatus === 'completed' ? 'active' : ''} onClick={() => handleFilterChange('completed')}>
+                                            Completed
+                                        </button>
+                                        <button type="button" className={filterStatus === 'pending' ? 'active' : ''}onClick={() => handleFilterChange('pending')}
+    >
+                                            Pending
+                                        </button>
+                                        <button type="button" className={filterStatus === 'cancelled' ? 'active' : ''} onClick={() => handleFilterChange('cancelled')}>
+                                            Cancelled
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div className="guests-table-container">
                         <h1>Recent Bookings</h1>
                         {loading ? (
                             <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>Loading bookings...</p>
-                        ) : bookings.length === 0 ? (
+                        ) : filteredBookings.length === 0 ? (
                             <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>No bookings found.</p>
                         ) : (
                             <table className="guests-table">
@@ -120,11 +190,11 @@ function AdminBooking() {
                                         <th>Check-out</th>
                                         <th>Price</th>
                                         <th>Status</th>
-                                        <th>Actions</th>
+                                        <th className="actions-header">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {bookings.map((booking) => (
+                                    {filteredBookings.map((booking) => (
                                         <tr key={booking.id}>
                                             <td>{booking.first_name} {booking.last_name}</td>
                                             <td>{booking.room_number}</td>
@@ -136,7 +206,7 @@ function AdminBooking() {
                                                     {booking.res_status || 'pending'}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td className="actions-cell">
                                                 <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
                                                     view
                                                 </button>

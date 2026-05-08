@@ -154,6 +154,72 @@ body {
   box-shadow: 0 0 18px rgba(200,169,110,0.12);
 }
 
+.guests-booking-headers-status-bar{
+  padding: 18px 0;
+}
+
+.admin-booking-stats-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-booking-stats-bar-content {
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.admin-booking-stats-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-booking-stats-card input {
+  width: 250px;
+  padding: 10px 14px;
+  background: #0c0c0c;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: #f0ede8;
+  font-size: 13px;
+}
+
+.admin-booking-stats-card input:focus {
+  outline: none;
+  border-color: #c8a96e;
+  box-shadow: 0 0 0 2px rgba(200,169,110,0.15);
+}
+.admin-booking-filter-btns {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.admin-booking-filter-btns button {
+  margin: 0;
+}
+
+.admin-booking-stats-card button {
+  font-size: 11px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #aaa;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.admin-booking-stats-card button:hover {
+  border-color: #c8a96e;
+  color: #c8a96e;
+  background: rgba(200,169,110,0.08);
+}
+
 /* 
    STATS GRID
  */
@@ -206,8 +272,11 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   overflow: hidden;
-  margin: 0;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
 }
+
 
 .guests-table-container h1 {
   font-family: 'DM Sans', sans-serif;
@@ -224,7 +293,31 @@ body {
 .guests-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
+
+
+.guests-table thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+
+.guests-table tbody {
+  display: block;
+  height: 420px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
+.guests-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
 
 .guests-table thead th {
   text-align: left;
@@ -238,59 +331,75 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.guests-table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  transition: background 0.15s;
-}
-
-.guests-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.guests-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
 
 .guests-table td {
   padding: 14px 24px;
   font-size: 12.5px;
   color: #777;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 
 .guests-table td:first-child {
   color: #f0ede8;
   font-weight: 500;
 }
 
-/* 
-   SHARED BUTTONS
- */
-.btn.guest {
-  display: inline-block;
-  padding: 5px 13px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  border: none;
-  cursor: pointer;
-  margin-right: 6px;
-  font-family: 'DM Sans', sans-serif;
-  transition: opacity 0.15s;
+
+.guests-table th:nth-child(1),
+.guests-table td:nth-child(1) {
+  width: 180px; }
+
+.guests-table th:nth-child(2),
+.guests-table td:nth-child(2) {
+  width: 100px; }
+
+.guests-table th:nth-child(3),
+.guests-table td:nth-child(3) {
+  width: 160px; }
+
+.guests-table th:nth-child(4),
+.guests-table td:nth-child(4) {
+  width: 160px; }
+
+.guests-table th:nth-child(5),
+.guests-table td:nth-child(5) {
+  width: 120px; }
+
+.guests-table th:nth-child(6) {
+  width: 130px;
+}
+.guests-table td:nth-child(6) {
+  width: 130px;
+  text-align: center;
+ }
+
+.guests-table th:nth-child(7),
+.guests-table td:nth-child(7) {
+  width: 220px;
+ }
+
+.actions-header {
+  text-align: center;
 }
 
-.btn.guest:hover {
-  opacity: 0.75;
+.actions-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
-.btn-primary.guest {
-  background: rgba(200, 169, 110, 0.12);
-  color: #c8a96e;
+.guests-table tbody::-webkit-scrollbar {
+  width: 6px;
 }
 
-.btn-danger.guest {
-  background: rgba(200, 80, 80, 0.1);
-  color: #e07070;
+.guests-table tbody::-webkit-scrollbar-thumb {
+  background: rgba(200, 169, 110, 0.3);
+  border-radius: 10px;
 }
 
 /* 

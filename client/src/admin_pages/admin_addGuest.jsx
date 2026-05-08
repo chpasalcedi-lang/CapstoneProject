@@ -71,19 +71,33 @@ function AdminAddGuest() {
   return (
     <div className="wrap">
       <nav className="dashboard-navbar">
-        <div className="dashboard-nav-content">
-          <div className="dashboard-logo">
-            <a href="/Dashboard"><h1>Messiah</h1></a>
-          </div>
-          <ul className="dashboard-nav-links">
-            <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
-            <li><Link to="/Rooms">Rooms</Link></li>
-            <li><Link to="/Booking">Booking</Link></li>
-            <li><Link to="/Guest">Guest</Link></li>
-            <li><span>Settings</span></li>
-          </ul>
-        </div>
-      </nav>
+                <div className="dashboard-nav-content">
+                    <div className="dashboard-logo">
+                        <a href="/Dashboard"><h1>Messiah</h1></a>
+                    </div>
+                        <ul className="dashboard-nav-links">
+                            <p>dashboard</p>
+                            <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+                            <li><Link to="/Users">User</Link></li>
+                            <li><Link to="">Sales</Link></li>
+                            <p>management</p>
+                            <li><Link to="/Rooms">Rooms</Link></li>
+                            <li><Link to="/Booking">Booking</Link></li>
+                            <li><Link to="/Guest">Guest</Link></li>
+                            <p>reports</p>
+                            <li><Link to="/Logs">Active logs</Link></li>
+                            <div className="dasboard-admin-status">
+                                <Link to="/Profile">
+                                    <div className="dasboard-admin-status-content">
+                                        <h1>System admin</h1>
+                                        <p className="admin-status ">admin</p>
+                                    </div>
+                                    <div className="dasboard-admin-profile"> Ap </div>
+                                </Link>
+                            </div>
+                      </ul>
+                </div>
+            </nav>
 
       <section className="dashboard-main1">
         <div className="dashboard-main-content1">

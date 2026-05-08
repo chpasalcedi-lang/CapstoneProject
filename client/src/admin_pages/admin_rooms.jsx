@@ -42,20 +42,34 @@ function AdminRooms() {
 
     return (
         <div>
-            <nav className="rooms-navbar">
-                <div className="rooms-nav-content">
-                    <div className="rooms-logo">
-                       <a href="/Dashboard"><h1>Messiah</h1></a>
-                    </div>
-                    <ul className="rooms-nav-links">
-                        <li><Link to="/Dashboard">Dashboard</Link></li>
-                        <li className="active"><Link to="/Rooms">Rooms</Link></li>
-                        <li><Link to="/Booking">Booking</Link></li>
-                        <li><Link to="/Guest">Guest</Link></li>
-                        <li><span>Settings</span></li>
-                    </ul>
-                </div>
-            </nav>
+            <nav className="dashboard-navbar">
+                      <div className="dashboard-nav-content">
+                          <div className="dashboard-logo">
+                              <a href="/Dashboard"><h1>Messiah</h1></a>
+                          </div>
+                              <ul className="dashboard-nav-links">
+                                  <p>dashboard</p>
+                                  <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+                                  <li><Link to="/Users">User</Link></li>
+                                  <li><Link to="">Sales</Link></li>
+                                  <p>management</p>
+                                  <li><Link to="/Rooms">Rooms</Link></li>
+                                  <li><Link to="/Booking">Booking</Link></li>
+                                  <li><Link to="/Guest">Guest</Link></li>
+                                  <p>reports</p>
+                                  <li><Link to="/Logs">Active logs</Link></li>
+                                  <div className="dasboard-admin-status">
+                                      <Link to="/Profile">
+                                          <div className="dasboard-admin-status-content">
+                                              <h1>System admin</h1>
+                                              <p className="admin-status ">admin</p>
+                                          </div>
+                                          <div className="dasboard-admin-profile"> Ap </div>
+                                      </Link>
+                                  </div>
+                            </ul>
+                      </div>
+                  </nav>
 
             <section className="rooms-main">
                 <div className="rooms-main-content">

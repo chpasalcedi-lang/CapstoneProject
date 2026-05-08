@@ -271,3 +271,323 @@
   color: #bbad90;
   box-shadow: 0 0 18px rgba(200,169,110,0.12);
 }
+
+.admin-profile-main {
+  width: calc(100vw - 220px);
+  margin-left: 220px;
+  min-height: 100vh;
+  background: #080808;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.admin-profile-main-content {
+  width: 100%;
+  max-width: 1280px;
+  padding: 56px 48px 60px;
+  margin: 0 auto;
+}
+
+.admin-profile-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 38px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.admin-profile-topbar h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #f0ede8;
+}
+
+.admin-profile-topbar-btn {
+  background: transparent;
+  color: #c8a96e;
+  border: 1px solid rgba(200,169,110,0.2);
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
+}
+
+.admin-profile-topbar-btn:hover {
+  background: rgba(200,169,110,0.08);
+  border-color: #c8a96e;
+  color: #e8d3a5;
+  transform: translateY(-1px);
+}
+
+.admin-profile-content {
+  margin-bottom: 28px;
+}
+
+.admin-profile-card {
+  background: #0f0f0f;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 22px;
+  padding: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+
+.admin-profile-card-left {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  position: relative;
+  z-index: 2;
+}
+
+.admin-profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border: 4px solid rgba(255,255,255,0.08);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #c8a96e, #bbad90);
+}
+
+.admin-profile-avatar:hover {
+  transform: scale(1.03);
+  transition: 0.3s ease;
+}
+
+
+.admin-profile-card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-profile-card-body h2 {
+  font-size: 34px;
+  color: #f0ede8;
+  margin-bottom: 8px;
+}
+
+.admin-profile-role {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #c8a96e;
+  margin-bottom: 20px;
+}
+
+.admin-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-profile-info p {
+  font-size: 14px;
+  color: #777;
+}
+
+.admin-profile-info span {
+  color: #f0ede8;
+  margin-left: 8px;
+}
+.admin-profile-stats {
+  display: flex;
+  gap: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.profile-stat-box {
+  width: 145px;
+  background: #111111;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 18px;
+  padding: 22px;
+  text-align: center;
+  transition: all 0.25s ease;
+}
+
+.profile-stat-box:hover {
+  border-color: rgba(200,169,110,0.2);
+  transform: translateY(-3px);
+}
+
+.profile-stat-box h3 {
+  font-size: 30px;
+  color: #c8a96e;
+  margin-bottom: 6px;
+}
+
+.profile-stat-box p {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #666;
+}
+.admin-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+
+.admin-profile-activity,
+.admin-profile-logs,
+.admin-profile-settings {
+  background: #0f0f0f;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 28px;
+  transition: all 0.25s ease;
+}
+
+.admin-profile-activity:hover,
+.admin-profile-logs:hover,
+.admin-profile-settings:hover {
+  border-color: rgba(200,169,110,0.15);
+  transform: translateY(-2px);
+}
+
+.admin-profile-activity h2,
+.admin-profile-logs h2,
+.admin-profile-settings h2 {
+  font-size: 18px;
+  color: #f0ede8;
+  margin-bottom: 22px;
+  position: relative;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(255,255,255,0.06);
+}
+
+
+.admin-profile-activity ul,
+.admin-profile-logs ul,
+.admin-profile-settings ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-profile-activity li,
+.admin-profile-logs li,
+.admin-profile-settings li {
+  background: #111111;
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: #8b8b8b;
+  font-size: 13px;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+}
+
+.admin-profile-activity li:hover,
+.admin-profile-logs li:hover,
+.admin-profile-settings li:hover {
+  background: #151515;
+  border-color: rgba(200,169,110,0.12);
+}
+
+.admin-profile-settings li a {
+  color: #c8a96e;
+  text-decoration: none;
+}
+
+.admin-profile-settings li a:hover {
+  color: #f0ede8;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+  .admin-profile-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-profile-settings {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 980px) {
+
+  .admin-profile-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-profile-stats {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .profile-stat-box {
+    flex: 1;
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .admin-profile-main {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .admin-profile-main-content {
+    padding: 28px 18px 40px;
+  }
+
+  .admin-profile-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .admin-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-profile-settings {
+    grid-column: span 1;
+  }
+
+  .admin-profile-card-left {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-profile-avatar {
+    width: 110px;
+    height: 110px;
+    font-size: 34px;
+  }
+
+  .admin-profile-card-body h2 {
+    font-size: 28px;
+  }
+}

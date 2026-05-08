@@ -5,8 +5,6 @@ import "../admincss/admin_profile.css";
 
 
 function AdminProfile() {
-
-
     return (
         <div>
             <nav className="dashboard-navbar">
@@ -53,23 +51,46 @@ function AdminProfile() {
                     <div className="admin-profile-content">
                         <div className="admin-profile-card">
                             <div className="admin-profile-card-img">
-                                <img src="https://i.pinimg.com/564x/1c/0b/8e/1c0b8e7a9d2f5a3c9e4b6a1d9c8f2e.jpg" alt="Admin Profile" />
+                                <div className="admin-profile-avatar"> Ap </div>
                             </div>
                             <div className="admin-profile-card-body">
-                                <h2>John Doe</h2>
+                                <h2>Admin User</h2>
                                 <p>Email:
                                     <span>
-                                        john.doe@example.com
+                                        admin@example.com
                                     </span>
                                 </p>
                             </div>
                         </div>
                     </div>
 
+                    <div className="admin-profile-grid">
+                        <div className="admin-profile-activity">
+                            <h2>Recent Activity</h2>
+                            <ul>
+                                <li>Updated room details for Room 101</li>
+                                <li>Confirmed booking for Jane Smith</li>
+                                <li>Added new user account for staff member</li>
+                                <li>Generated sales report for last month</li>
+                            </ul>
+                        </div>
 
-
-
-
+                        <div className="admin-profile-logs">
+                            <h2>Activity Logs</h2>
+                            <ul>
+                                <li>Logged in at 09:00 AM</li>
+                                <li>Logged out at 05:00 PM</li>
+                                <li>Updated profile information</li>
+                            </ul>
+                        </div>
+                        <div className="admin-profile-settings">
+                            <h2>Settings</h2>
+                            <ul>
+                                <li><Link to="">Change Password</Link></li>
+                                <li><Link to="">Notification Settings</Link></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>

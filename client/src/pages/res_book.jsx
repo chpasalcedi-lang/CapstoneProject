@@ -71,23 +71,12 @@ function ResBook() {
         <div className="booking-search-bar">
           <div className="booking-field">
             <label className="booking-field-label">Check-In</label>
-            <input
-              type="date"
-              className="booking-input"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              placeholder="Select check-in date"
-            />
+            <input type="date" className="booking-input" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} placeholder="Select check-in date"/>
           </div>
 
           <div className="booking-field">
             <label className="booking-field-label">Check-Out</label>
-            <input type="date"
-              className="booking-input"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              placeholder="Select check-out date"
-            />
+            <input type="date" className="booking-input" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} placeholder="Select check-out date"/>
           </div>
 
           <div className="booking-field">

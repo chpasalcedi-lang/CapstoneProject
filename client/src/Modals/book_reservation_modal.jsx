@@ -75,7 +75,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                   </div>
                   <button className="book-reservation-modal-close" onClick={closeModal}>X</button>
                 </div>
-                <form className="book-reservation-modal-body" onSubmit={handleSubmit}>
+                <form id="bookReservationForm" className="book-reservation-modal-body" onSubmit={handleSubmit}>
                   <div className="book-reservation-form-row">
                     <div className="book-reservation-form-group">
                       <label>Last Name</label>
@@ -125,7 +125,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                 </form>
                 <div className="book-reservation-modal-footer">
                   <button type="button" className="book-reservation-btn-cancel" onClick={closeModal}>Cancel</button>
-                  <button type="submit" className="book-reservation-btn-save">Save Reservation</button>
+                  <button type="submit" form="bookReservationForm" className="book-reservation-btn-save">Save Reservation</button>
                 </div>
               </div>
         </div>

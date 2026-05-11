@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 29, 2026 at 08:53 AM
+-- Generation Time: May 06, 2026 at 06:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,6 +43,27 @@ INSERT INTO `admin` (`id`, `email`, `password`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `guest`
+--
+
+CREATE TABLE `guest` (
+  `id` int(11) NOT NULL,
+  `number_of_guests` int(11) NOT NULL,
+  `food_service` varchar(10) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `guest`
+--
+
+INSERT INTO `guest` (`id`, `number_of_guests`, `food_service`, `total_price`, `created_at`) VALUES
+(1, 1, 'No', 150.00, '2026-05-02 11:32:39');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `reservations`
 --
 
@@ -57,18 +78,39 @@ CREATE TABLE `reservations` (
   `check_out_date` date NOT NULL,
   `res_status` varchar(100) NOT NULL,
   `notes` text DEFAULT NULL,
-  `room_id` int(11) DEFAULT NULL
+  `room_id` int(11) DEFAULT NULL,
+  `room_price` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `reservations`
 --
 
-INSERT INTO `reservations` (`id`, `last_name`, `first_name`, `num_guests`, `phone_number`, `email`, `check_in_date`, `check_out_date`, `res_status`, `notes`, `room_id`) VALUES
-(14, '', '', 0, '', '', '0000-00-00', '0000-00-00', 'cancelled', '', 16),
-(15, 'eqweqwe', '313123', 22, '-90980789768', 'lyle@gmail.com', '2026-04-30', '2026-05-01', 'confirmed', 'wqeqweqwe', 16),
-(16, '', '', 0, '', '', '0000-00-00', '0000-00-00', 'pending', '', 17),
-(17, 'eqwe', 'wqewqe', 213231, '878567563453', 'wqeq@gmail.com', '2026-05-01', '2026-05-02', 'pending', '978987', 16);
+INSERT INTO `reservations` (`id`, `last_name`, `first_name`, `num_guests`, `phone_number`, `email`, `check_in_date`, `check_out_date`, `res_status`, `notes`, `room_id`, `room_price`) VALUES
+(14, '', '', 0, '', '', '0000-00-00', '0000-00-00', 'cancelled', '', 16, NULL),
+(15, 'eqweqwe', '313123', 22, '-90980789768', 'lyle@gmail.com', '2026-04-30', '2026-05-01', 'confirmed', 'wqeqweqwe', 16, NULL),
+(16, '', '', 0, '', '', '0000-00-00', '0000-00-00', 'pending', '', 17, NULL),
+(17, 'eqwe', 'wqewqe', 213231, '878567563453', 'wqeq@gmail.com', '2026-05-01', '2026-05-02', 'pending', '978987', 16, NULL),
+(18, 'qweqw', 'ewqeq', 23, '0301230120', 'crumblle@gmail.com', '2026-05-02', '2026-05-03', 'pending', '', 1203021312, NULL),
+(19, 'wlyle', 'lyle', 2, '0993812839', 'crumblle@gmail.com', '2026-05-02', '2026-05-03', 'pending', '13123', 213, NULL),
+(20, 'fsjfuf', 'wqe', 1, '123213213123', 'earon@gmail.com', '2026-05-02', '2026-05-03', 'pending', '', 23, NULL),
+(21, '2wqeqweq', 'lellele', 12, '2103912390', 'eqweqwe@gmail.com', '2026-05-02', '2026-05-03', 'pending', '', 2147483647, NULL),
+(22, 'eqwe', 'qweqwe', 1, '0921939123', 'eqweqwe@gmail.com', '2026-05-02', '2026-05-03', 'confirmed', '', 2, NULL),
+(23, 'lyle', 'valderrama', 1, '0987737232', 'Lyle@gmail.com', '2026-05-02', '2026-05-03', 'cancelled', 'eqwekqweqe', 25, NULL),
+(24, 'qjeqwe', 'iqwie', 2, '098776361', 'wqeq@gmail.com', '2026-05-05', '2026-05-06', 'confirmed', '1213', 17, NULL),
+(25, '', '', 0, '', '', '0000-00-00', '0000-00-00', 'pending', '', 16, NULL),
+(26, 'uasjajkeaeu', 'EORWUEHJJ', 2, '012939012390', 'wqeq@gmail.com', '2026-05-05', '2026-05-06', 'confirmed', '1', 7, NULL),
+(27, '', '', 211, '', '', '0000-00-00', '0000-00-00', 'confirmed', '', 17, NULL),
+(28, 'lyle', 'valde', 2, '09761118543', 'lyle@gmail.com', '2026-05-05', '2026-05-06', 'confirmed', '', 16, 1.00),
+(29, 'lyle', 'vadl', 2, '2103213013', 'wqeq@gmail.com', '2026-05-06', '2026-05-07', 'confirmed', 'wqekq', 7, 1.00),
+(30, '', '', 0, '', '', '0000-00-00', '0000-00-00', 'confirmed', '', 7, 1.00),
+(31, 'lly', 'vale', 2, '098877231', 'lyle@gmail.com', '2026-05-06', '2026-05-06', 'confirmed', '1', 16, 1500.00),
+(32, 'jqejqwe', 'qlelqelq', 2, '09312831831', 'Lyle@gmail.com', '2026-05-06', '2026-05-07', 'confirmed', '1', 22, 9000.00),
+(33, 'lyle', 'VCALD', 2, '0988327371', 'Lyle@gmail.com', '2026-05-13', '2026-05-14', 'confirmed', '', 16, 1500.00),
+(34, 'janeo', 'earon', 2, '0987654321', 'earon@gmail.com', '2026-05-07', '2026-05-08', 'confirmed', '123123wqeqoqe', 7, 1500.00),
+(35, '', '', 0, '', '', '0000-00-00', '0000-00-00', 'confirmed', '', 19, 1800.00),
+(36, 'hehe', 'heheh', 2, '0982312332', 'lyle@gmail.com', '2026-05-07', '2026-05-07', 'confirmed', 'wqeqwe', 18, 1800.00),
+(37, 'valderrama', 'LYle', 2, '09886362637', 'lyle@gmail.com', '2026-05-07', '2026-05-08', 'confirmed', 'qrUWRUIWEUIR', 16, 1500.00);
 
 -- --------------------------------------------------------
 
@@ -86,23 +128,6 @@ CREATE TABLE `rooms` (
   `room_status` varchar(100) NOT NULL,
   `room_label` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `guest`
---
-
-CREATE TABLE `guest` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `number_of_guests` int(11) NOT NULL,
-  `food_service` varchar(10) NOT NULL,
-  `total_price` decimal(10,2) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
 
 --
 -- Dumping data for table `rooms`
@@ -134,6 +159,12 @@ ALTER TABLE `admin`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `guest`
+--
+ALTER TABLE `guest`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `reservations`
 --
 ALTER TABLE `reservations`
@@ -156,16 +187,22 @@ ALTER TABLE `admin`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `guest`
+--
+ALTER TABLE `guest`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `rooms`
 --
 ALTER TABLE `rooms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

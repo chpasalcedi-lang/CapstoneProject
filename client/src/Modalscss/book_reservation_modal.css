@@ -21,6 +21,8 @@
   visibility: visible;
 }
 
+
+
 .book-reservation.modal-hidden {
   display: none;
 }

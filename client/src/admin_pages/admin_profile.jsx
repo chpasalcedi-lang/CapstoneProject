@@ -84,10 +84,11 @@ function AdminProfile() {
                             </ul>
                         </div>
                         <div className="admin-profile-settings">
-                            <h2>Settings</h2>
+                            <h2>Sales</h2>
                             <ul>
-                                <li><Link to="">Change Password</Link></li>
-                                <li><Link to="">Notification Settings</Link></li>
+                                <li>Booking Sales + $1,200</li>
+                                <li>Guest Revenue + $2,500</li>
+                                <li>Monthly Sales + $3,700</li>
                             </ul>
                         </div>
                     </div>

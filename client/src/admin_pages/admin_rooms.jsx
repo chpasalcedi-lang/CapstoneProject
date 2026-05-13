@@ -49,11 +49,11 @@ function AdminRooms() {
                           </div>
                               <ul className="dashboard-nav-links">
                                   <p>dashboard</p>
-                                  <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+                                  <li><Link to="/Dashboard">Dashboard</Link></li>
                                   <li><Link to="/Users">User</Link></li>
                                   <li><Link to="">Sales</Link></li>
                                   <p>management</p>
-                                  <li><Link to="/Rooms">Rooms</Link></li>
+                                  <li className="active"><Link to="/Rooms">Rooms</Link></li>
                                   <li><Link to="/Booking">Booking</Link></li>
                                   <li><Link to="/Guest">Guest</Link></li>
                                   <p>reports</p>

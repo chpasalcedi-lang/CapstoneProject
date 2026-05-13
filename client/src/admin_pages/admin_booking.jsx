@@ -75,6 +75,18 @@ function AdminBooking() {
         setSearchTerm(e.target.value);
     };
 
+    const formatBookingDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) return '';
+
+        return date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+        });
+    };
+
     const filteredBookings = bookings.filter((booking) => {
         const status = (booking.res_status || 'pending').toLowerCase();
 
@@ -105,12 +117,12 @@ function AdminBooking() {
                           </div>
                               <ul className="dashboard-nav-links">
                                   <p>dashboard</p>
-                                  <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+                                  <li><Link to="/Dashboard">Dashboard</Link></li>
                                   <li><Link to="/Users">User</Link></li>
                                   <li><Link to="">Sales</Link></li>
                                   <p>management</p>
                                   <li><Link to="/Rooms">Rooms</Link></li>
-                                  <li><Link to="/Booking">Booking</Link></li>
+                                  <li  className="active"><Link to="/Booking">Booking</Link></li>
                                   <li><Link to="/Guest">Guest</Link></li>
                                   <p>reports</p>
                                   <li><Link to="/Logs">Active logs</Link></li>
@@ -198,8 +210,8 @@ function AdminBooking() {
                                         <tr key={booking.id}>
                                             <td>{booking.first_name} {booking.last_name}</td>
                                             <td>{booking.room_number}</td>
-                                            <td>{booking.check_in_date}</td>
-                                            <td>{booking.check_out_date}</td>
+                                            <td>{formatBookingDate(booking.check_in_date)}</td>
+                                            <td>{formatBookingDate(booking.check_out_date)}</td>
                                             <td>₱{Number(booking.room_price || 0).toLocaleString()}</td>
                                             <td>
                                                 <span className={`status-${(booking.res_status || 'pending').toLowerCase()}`}>

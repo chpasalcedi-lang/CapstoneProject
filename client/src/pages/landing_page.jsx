@@ -10,17 +10,21 @@ function LandingPage() {
     <div>
       <nav className="landing-navbar">
         <div className="landing-nav-content">
-          <div className="logo">
+            <div className="logo">
             <h1>MESSIAH</h1>
-          </div>
-          <ul className="landing-nav-links">
-            <li className=""><Link to="/">Home</Link></li>
-            <li className=""><Link to="/Reservation">Room</Link></li>
-            <li className=""><Link to="/About">About</Link></li>
-            <li className="">Settings</li>
-          </ul>
+            </div>
+            <ul className="landing-nav-links">
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/Reservation">Room</Link></li>
+            <li><Link to="/About">About</Link></li>
+            <li>
+                <button className="landing-btn">
+                    sign in
+                </button>
+            </li>
+            </ul>
         </div>
-      </nav>
+    </nav>
 
       <section className="landing-main">
         <div className="landing-main-content">
@@ -44,7 +48,7 @@ function LandingPage() {
           <div className="landing-info-grid">
             <div className="landing-info-content">
               <div className="landing-info-icon">
-                  <span><i class="fa-solid fa-water"></i></span>
+                  <span><i className="fa-solid fa-water"></i></span>
               </div>
              <h3>Pool</h3>
              <p>Dive into relaxation. Enjoy our refreshing pool with stunning views and curated amenities designed for your total peace of mind.</p>
@@ -52,7 +56,7 @@ function LandingPage() {
 
             <div className="landing-info-content">
               <div className="landing-info-icon">
-                  <span><i class="fa-regular fa-clock"></i></span>
+                  <span><i className="fa-regular fa-clock"></i></span>
               </div>
              <h3>24/7 Service</h3>
              <p>Rest easy knowing our dedicated team is here for you around the clock. From dawn until dusk, we are committed to your total comfort and satisfaction.</p>
@@ -60,7 +64,7 @@ function LandingPage() {
            
             <div className="landing-info-content">
               <div className="landing-info-icon">
-                  <span><i class="fa-regular fa-handshake"></i></span>
+                  <span><i className="fa-regular fa-handshake"></i></span>
               </div>
              <h3>Excellence Experience</h3>
              <p>Our commitment to excellence ensures every aspect of your stay is perfect.</p>
@@ -72,7 +76,7 @@ function LandingPage() {
        <span className="landing-map-eyebrow">Our Location</span>
         <div className="landing-map-content">
           <h1>Find Us</h1>
-          <p>Located in the heart of the city, Messiah is easily accessible and surrounded by vibrant culture and attractions.</p>
+          <p>Located in the heart of the city, Messiah is easily accessible and surrounded by attractions.</p>
           <div className="map-container">
             <iframe
               src="https://www.google.com/maps?q=Messiah+Inland+Resort+San+Miguel+Iloilo&output=embed"

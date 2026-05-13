@@ -3,10 +3,13 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import "../pagescss/res_book.css"; 
 import BookReservationModal from "../Modals/book_reservation_modal.jsx";
+import NoRoomsModal from "../Modals/no_rooms_modal.jsx";
+import "../pagescss/landing_page.css";
 
 function ResBook() {
 
   const [BookshowModal, setBookShowModal] = useState(false);
+  const [showNoResultsModal, setShowNoResultsModal] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [selectedRoomPrice, setSelectedRoomPrice] = useState(null);
   const [data, setData] = useState([]);
@@ -44,65 +47,75 @@ function ResBook() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roomType, data]);
 
+    useEffect(() => {
+        // Show modal when no results found
+        if (checkIn && checkOut && filteredData.length === 0) {
+            setShowNoResultsModal(true);
+        }
+    }, [filteredData, checkIn, checkOut]);
+
   return (
-    <div className="booking-page">
-      <nav className="booking-navbar">
-        <div className="booking-nav-content">
-          <div className="logo">
+    <div>
+      <nav className="landing-navbar">
+        <div className="landing-nav-content">
+            <div className="logo">
             <h1>MESSIAH</h1>
-          </div>
-          <ul className="booking-nav-links">
-            <li className=""><Link to="/">Home</Link></li>
-            <li className=""><Link to="/Reservation">Room</Link></li>
-            <li className=""><Link to="/About">About</Link></li>
-            <li className="">Settings</li>
-          </ul>
+            </div>
+            <ul className="landing-nav-links">
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/Reservation">Room</Link></li>
+            <li><Link to="/About">About</Link></li>
+            <li>
+                <button className="landing-btn">
+                    sign in
+                </button>
+            </li>
+            </ul>
         </div>
-      </nav>
+    </nav>
 
       <section className="booking-calendar">
         <div className="booking-text">
           <span className="booking-eyebrow">Find Your Perfect Room</span>
           <h1>Room <strong>Availability</strong></h1>
         </div>
+     
+        <div className="booking-search-wrap">
+          <div className="booking-search-bar">
+            <div className="booking-field">
+              <label className="booking-field-label">Check-In</label>
+              <input type="date" className="booking-input" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} placeholder="Select check-in date"/>
+            </div>
+
+            <div className="booking-field">
+              <label className="booking-field-label">Check-Out</label>
+              <input type="date" className="booking-input" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} placeholder="Select check-out date"/>
+            </div>
+
+            <div className="booking-field">
+              <label className="booking-field-label">Room Type</label>
+              <select 
+                className="booking-input booking-select"
+                value={roomType}
+                onChange={(e) => setRoomType(e.target.value)}
+              >
+                <option value="">All Types</option>
+                <option value="family">Family Room</option>
+                <option value="double">Double Room</option>
+                <option value="event">Event Room</option>
+              </select>
+            </div>
+            <div className="booking-field">
+              <button className="booking-btn" onClick={checkAvailability}>
+                check availability
+              </button>
+            </div>
+          </div>
+        </div> 
       </section>
-
-      <div className="booking-search-wrap">
-        <div className="booking-search-bar">
-          <div className="booking-field">
-            <label className="booking-field-label">Check-In</label>
-            <input type="date" className="booking-input" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} placeholder="Select check-in date"/>
-          </div>
-
-          <div className="booking-field">
-            <label className="booking-field-label">Check-Out</label>
-            <input type="date" className="booking-input" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} placeholder="Select check-out date"/>
-          </div>
-
-          <div className="booking-field">
-            <label className="booking-field-label">Room Type</label>
-            <select 
-              className="booking-input booking-select"
-              value={roomType}
-              onChange={(e) => setRoomType(e.target.value)}
-            >
-              <option value="">All Types</option>
-              <option value="family">Family Room</option>
-              <option value="double">Double Room</option>
-              <option value="event">Event Room</option>
-            </select>
-          </div>
-
-          <button className="booking-btn" onClick={checkAvailability}>
-            check availability
-          </button>
-        </div>
-      </div>
       <div className="booking-results-area">
-          { filteredData.length === 0 ? (
-            <p className="booking-no-results">
-              No rooms found.
-            </p>
+          {filteredData.length === 0 ? (
+            <div className="booking-results-grid"></div>
           ) : (
             <div className="booking-results-grid">
                {filteredData.map((room) => (
@@ -129,6 +142,7 @@ function ResBook() {
           )}
       </div>
       <BookReservationModal showModal={BookshowModal} setShowModal={setBookShowModal} roomId={selectedRoomId} roomPrice={selectedRoomPrice} />
+      <NoRoomsModal showModal={showNoResultsModal} setShowModal={setShowNoResultsModal} />
     </div>
   );
 }   

@@ -28,6 +28,37 @@ function AdminGuest() {
         setEditModal(true);
     };
 
+    const formatBookingDate = (dateString) => {
+        if (!dateString) return '';
+    const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+        });
+    };
+
+    const formatGuestDateTime = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) return '';
+
+        const monthDay = date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+        }).toUpperCase();
+
+        const time = date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        });
+
+        return `${monthDay} at ${time}`;
+    };
+
     useEffect(() => {
         const fetchBookings = async () => {
             try {
@@ -88,13 +119,13 @@ function AdminGuest() {
                     </div>
                         <ul className="dashboard-nav-links">
                             <p>dashboard</p>
-                            <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+                            <li><Link to="/Dashboard">Dashboard</Link></li>
                             <li><Link to="/Users">User</Link></li>
                             <li><Link to="">Sales</Link></li>
                             <p>management</p>
                             <li><Link to="/Rooms">Rooms</Link></li>
                             <li><Link to="/Booking">Booking</Link></li>
-                            <li><Link to="/Guest">Guest</Link></li>
+                            <li className="active"><Link to="/Guest">Guest</Link></li>
                             <p>reports</p>
                             <li><Link to="/Logs">Active logs</Link></li>
                             <div className="dasboard-admin-status">
@@ -157,8 +188,8 @@ function AdminGuest() {
                                             <td>{booking.first_name} {booking.last_name}</td>
                                             <td>{booking.phone_number || 'N/A'}</td>
                                             <td>{booking.email || 'N/A'}</td>
-                                            <td>{booking.check_in_date || 'N/A'}</td>
-                                            <td>{booking.check_out_date || 'N/A'}</td>
+                                            <td>{formatBookingDate(booking.check_in_date)}</td>
+                                            <td>{formatBookingDate(booking.check_out_date)}</td>
                                             <td className="actions-cell">
                                                 <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
                                                     view
@@ -210,7 +241,7 @@ function AdminGuest() {
                                                 <td>{guest.number_of_guests}</td>
                                                 <td>{guest.food_service}</td>
                                                 <td>₱{parseFloat(guest.total_price).toFixed(2)}</td>
-                                                <td>{guest.created_at}</td>
+                                                <td>{formatGuestDateTime(guest.created_at)}</td>
                                                 <td className="actions-cell">
                                                     <button className="btn guest btn-primary">Edit</button>
                                                     <button className="btn guest btn-danger">Delete</button>

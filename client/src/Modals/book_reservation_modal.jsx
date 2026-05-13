@@ -120,12 +120,10 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                     <label>Notes <span>Optional</span></label>
                     <textarea name="notes" rows="3" onChange={(e)=> setValues({...values, notes: e.target.value})} placeholder="..."></textarea>
                   </div>
-
-                
                 </form>
                 <div className="book-reservation-modal-footer">
                   <button type="button" className="book-reservation-btn-cancel" onClick={closeModal}>Cancel</button>
-                  <button type="submit" form="bookReservationForm" className="book-reservation-btn-save">Save Reservation</button>
+                  <button type="submit" className="book-reservation-btn-save" onClick={handleSubmit}>Save Reservation</button>
                 </div>
               </div>
         </div>

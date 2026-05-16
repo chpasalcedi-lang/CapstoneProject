@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import "../Modalscss/book_reservation_modal.css";
 
 
@@ -43,7 +44,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         })
             .then((res) => {
                 console.log("Success: ", res.data);
-                alert("Reservation added Successfully");
+                Swal.fire({ icon: 'success', title: 'Saved', text: 'Reservation added successfully.' });
                 setShowModal(false);
                 setValues({
                     last_name: "",
@@ -62,7 +63,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
             })
             .catch((err) => {
                 console.error("Error sa pag-save: ", err);
-                alert("May sala sa pag-save sang data!");
+                Swal.fire({ icon: 'error', title: 'Error', text: 'May sala sa pag-save sang data!' });
             });
     };
     return (

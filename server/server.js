@@ -34,7 +34,35 @@ db.connect((err) => {
             process.exit(1);
         }
     });
+    db.query(`CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role ENUM('admin','staff') NOT NULL DEFAULT 'staff',
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`, (userTableErr) => {
+        if (userTableErr) {
+            console.error('Error ensuring users table exists:', userTableErr);
+            process.exit(1);
+        }
 
+        db.query("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'", (countErr, rows) => {
+            if (!countErr && rows && rows[0] && rows[0].count === 0) {
+                db.query(
+                    'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+                    ['System Administrator', 'admin@example.com', 'admin123', 'admin'],
+                    (insertErr) => {
+                        if (insertErr) {
+                            console.error('Error inserting default admin user:', insertErr);
+                        } else {
+                            console.log('Created default admin user: admin@example.com / admin123');
+                        }
+                    }
+                );
+            }
+        });
+    });
     // Add room_price column to reservations table if it doesn't exist
     db.query(`ALTER TABLE reservations ADD COLUMN room_price DECIMAL(10,2) AFTER room_id`, (alterErr) => {
         // Ignore error if column already exists
@@ -119,6 +147,149 @@ app.delete('/delete_room/:id', (req, res) => {
 });
 
 
+
+app.get('/get_user_accounts', (req, res) => {
+    const sql = "SELECT id, name, email, role, created_at FROM users ORDER BY name ASC";
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error("Error fetching users:", err);
+            return res.status(500).json({ error: "Database query error!" });
+        }
+        return res.status(200).json(data);
+    });
+});
+
+app.get('/get_admin_users', (req, res) => {
+    const sql = "SELECT id, name, email, role, created_at FROM users WHERE role = 'admin' ORDER BY name ASC";
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error("Error fetching admin users:", err);
+            return res.status(500).json({ error: "Database query error!" });
+        }
+        return res.status(200).json(data);
+    });
+});
+
+app.post('/add_user_account', (req, res) => {
+    const sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
+    const values = [
+        req.body.name || '',
+        req.body.email || '',
+        req.body.password || '',
+        req.body.role || 'staff'
+    ];
+    db.query(sql, values, (err, data) => {
+        if (err) {
+            console.error("Error adding user account:", err);
+            return res.status(500).json({ error: "Database query error!", details: err.message });
+        }
+        return res.status(200).json({ message: "User account created successfully", id: data.insertId });
+    });
+});
+
+app.post('/update_user_account/:id', (req, res) => {
+    const userId = parseInt(req.params.id, 10);
+    const fields = [];
+    const values = [];
+
+    if (req.body.name) {
+        fields.push('name = ?');
+        values.push(req.body.name);
+    }
+    if (req.body.email) {
+        fields.push('email = ?');
+        values.push(req.body.email);
+    }
+    if (req.body.role) {
+        fields.push('role = ?');
+        values.push(req.body.role);
+    }
+    if (req.body.password) {
+        fields.push('password = ?');
+        values.push(req.body.password);
+    }
+
+    if (fields.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+    values.push(userId);
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            console.error("Error updating user account:", err);
+            return res.status(500).json({ error: "Database query error!", details: err.message });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "User account not found" });
+        }
+        return res.status(200).json({ message: "User account updated successfully" });
+    });
+});
+
+app.delete('/delete_user_account/:id', (req, res) => {
+    const userId = req.params.id;
+    const sql = "DELETE FROM users WHERE id = ?";
+    db.query(sql, [userId], (err, result) => {
+        if (err) {
+            console.error("Error deleting user account:", err);
+            return res.status(500).json({ error: "Database error!" });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "User account not found" });
+        }
+        return res.status(200).json({ message: "User account deleted successfully" });
+    });
+});
+
+app.post('/login', (req, res) => {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const sql = 'SELECT id, name, email, role FROM users WHERE email = ? AND password = ?';
+    db.query(sql, [email, password], (err, results) => {
+        if (err) {
+            console.error('Error during login:', err);
+            return res.status(500).json({ error: 'Database query error', details: err.message });
+        }
+
+        if (!results.length) {
+            db.query("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'", (countErr, countRows) => {
+                if (!countErr && countRows && countRows[0] && countRows[0].count === 0) {
+                    if (email === 'admin@example.com' && password === 'admin123') {
+                        const defaultEmail = 'admin@example.com';
+                        const defaultPassword = 'admin123';
+                        db.query(
+                            'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+                            ['System Administrator', defaultEmail, defaultPassword, 'admin'],
+                            (insertErr, insertResult) => {
+                                if (insertErr) {
+                                    console.error('Error creating default admin during login:', insertErr);
+                                    return res.status(500).json({ error: 'Database query error', details: insertErr.message });
+                                }
+                                return res.status(200).json({ message: 'Login successful', user: { id: insertResult.insertId, name: 'System Administrator', email: defaultEmail, role: 'admin' } });
+                            }
+                        );
+                    } else {
+                        return res.status(401).json({ error: 'No admin account found.' });
+                    }
+                } else {
+                    return res.status(401).json({ error: 'Invalid email or password' });
+                }
+            });
+            return;
+        }
+
+        const user = results[0];
+        if (user.role !== 'admin') {
+            return res.status(403).json({ error: 'Only admin users may access the dashboard' });
+        }
+
+        return res.status(200).json({ message: 'Login successful', user });
+    });
+});
 
 app.post('/add_reservation', (req, res) => {
     const rawRoomPrice = req.body.room_price;

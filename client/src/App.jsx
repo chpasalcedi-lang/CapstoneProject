@@ -16,7 +16,16 @@ import AdminLoginForm from './admin_pages/admin_loginform';
 
 
 
-import { BrowserRouter, Routes, Route, Navigate,} from "react-router-dom"; 
+
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+function RequireAuth({ children }) {
+  const adminUser = localStorage.getItem('adminUser');
+  if (!adminUser) {
+    return <Navigate to="/AdminLogin" replace />;
+  }
+  return children;
+}
 
 function App() {
   return (
@@ -29,15 +38,14 @@ function App() {
 
         <Route path="/AdminLogin" element={<AdminLoginForm />} />
 
-
-        <Route path="/Dashboard" element={<Dashboard />} />
-        <Route path="/Rooms" element={<Rooms/>} />
-        <Route path="/Booking" element={<Booking />} />
-        <Route path="/Guest" element={<Guest />} />
-        <Route path="/AddGuest" element={<AdminAddGuest />} />
-        <Route path="/Users" element={<AdminUsersAcc />} />
-        <Route path="/Profile" element={<AdminProfile />} />
-        <Route path="/Logs" element={<AdminLogs />} />
+        <Route path="/Dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+        <Route path="/Rooms" element={<RequireAuth><Rooms /></RequireAuth>} />
+        <Route path="/Booking" element={<RequireAuth><Booking /></RequireAuth>} />
+        <Route path="/Guest" element={<RequireAuth><Guest /></RequireAuth>} />
+        <Route path="/AddGuest" element={<RequireAuth><AdminAddGuest /></RequireAuth>} />
+        <Route path="/Users" element={<RequireAuth><AdminUsersAcc /></RequireAuth>} />
+        <Route path="/Profile" element={<RequireAuth><AdminProfile /></RequireAuth>} />
+        <Route path="/Logs" element={<RequireAuth><AdminLogs /></RequireAuth>} />
 
         
 

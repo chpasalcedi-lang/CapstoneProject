@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2";
 import "../admincss/admin_dashboard.css";
-import UpdateCalendarModal from '../Modals/update_calendar_modals';
 import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
 
 function AdminDashboard() {
@@ -18,10 +18,14 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
-  const [selectedCalendarEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarWeeks, setCalendarWeeks] = useState([]);
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    localStorage.removeItem('adminUser');
+    navigate('/AdminLogin');
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -31,7 +35,7 @@ function AdminDashboard() {
         setStats(res.data);
       } catch (err) {
         console.error("Error fetching dashboard stats:", err);
-        alert("Failed to fetch dashboard statistics. Please check the server connection.");
+        Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to fetch dashboard statistics. Please check the server connection.' });
       } finally {
         setLoading(false);
       }
@@ -159,6 +163,7 @@ function AdminDashboard() {
             <div className="dashboard-topbar-btns">
                 <button className="dashboard-topbar-btn1" onClick={() => setShowWalkinModal(true)}>Walk in</button>
                 <Link className="dashboard-topbar-btn1" to="/AddGuest">Add Guest</Link>
+                <button className="dashboard-topbar-btn1" onClick={handleLogout}>Logout</button>
             </div>
           </div>
 
@@ -269,114 +274,11 @@ function AdminDashboard() {
                 <p className="dashboard-stat-eyebrow">Total guests</p>
               </div>
             </div>
+            
 
           </div>
-        
-          
-          <p className="section-label">Calendar</p>
-
-          <div className="calendar-overview">
-            <div className="calendar-side-info-container">
-              <div className="calendar-side-header">
-                <h3>Calendar</h3>
-                <button className="calendar-button calendar-edit-button" onClick={() => setShowUpdateModal(true)}>Update</button>
-              </div>
-              
-              <div className="calendar-legend-box">
-                <div className="calendar-side-info">
-                  <p><span className="calendar-legend confirmed"></span> Confirmed</p>
-                  <p><span className="calendar-legend pending"></span> Pending</p>
-                  <p><span className="calendar-legend closed"></span> Closed</p>
-                </div>
-              </div>
-              
-              <div className="calendar-legend-box-bottom">
-                <div className="calendar-side-title">
-                  <h1>name: junard</h1>
-                  <p>room: 101</p>
-                </div>
-                <div className="calendar-side-title">
-                  <h1>name: junard</h1>
-                  <p>room: 101</p>
-                </div>
-                <div className="calendar-side-title">
-                  <h1>name: junard</h1>
-                  <p>room: 101</p>
-                </div>
-                <div className="calendar-side-title">
-                  <h1>name: junard</h1>
-                  <p>room: 101</p>
-                </div>
-                <div className="calendar-side-title">
-                  <h1>name: junard</h1>
-                  <p>room: 101</p>
-                </div>  
-              </div>
-            </div>
-            <div className="calendar-box container">
-              <div className="calendar-action">
-                <select className="calendar-select" name="calendarmonth" id="calendar" value={currentDate.getMonth()} onChange={handleMonthChange}>
-                  {monthNames.map((monthName, index) => (
-                    <option key={monthName} value={index}>{monthName}</option>
-                  ))}
-                </select>
-
-                <div className="calendar-action-btns">
-                  <button className="calendar-btn" onClick={handlePrevMonth}>Prev</button>
-                  <button className="calendar-btn" onClick={handleToday}>Today</button>
-                  <button className="calendar-btn" onClick={handleNextMonth}>Next</button>
-                </div>
-              </div>
-
-              <div className="calendar-container">
-                <div className="sperate-calendar-table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Sun</th>
-                        <th>Mon</th>
-                        <th>Tue</th>
-                        <th>Wed</th>
-                        <th>Thu</th>
-                        <th>Fri</th>
-                        <th>Sat</th>
-                      </tr>
-                    </thead>
-                    <tbody className="calendar-body">
-                      {calendarWeeks.map((week, weekIndex) => (
-                        <tr key={weekIndex}>
-                          {week.map((day, dayIndex) => {
-                            return (
-                              <td key={dayIndex} className={`calendar-day ${day ? 'active' : 'empty'} ${isToday(day) ? 'today' : ''}`}>
-                                {day ? (
-                                  <div className="calendar-day-content">
-                                    <div className="calendar-day-number">{day}</div>
-                                    <div className="calendar-day-bookings">
-                                      <div className="calendar-booking confirmed"></div>
-                                      <div className="calendar-booking pending"></div>
-                                      <div className="calendar-booking closed"></div>
-                                    </div>
-                                  </div>
-                                ) : null}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
+        </div>
       </section>
-      <UpdateCalendarModal 
-        showModal={showUpdateModal} 
-        setShowModal={setShowUpdateModal} 
-        refreshData={() => {}} 
-        calendarData={selectedCalendarEvent} 
-      />
       <AdminWalkinModal show={showWalkinModal} onClose={() => setShowWalkinModal(false)} />
     </div>
   );

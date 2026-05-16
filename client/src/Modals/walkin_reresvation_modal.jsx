@@ -1,7 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import "../Modalscss/walkin_reservation_modal.css";
+import axios from "axios";import Swal from 'sweetalert2';import "../Modalscss/walkin_reservation_modal.css";
 
 
 function AdminWalkinModal( { show, onClose }) {
@@ -72,7 +71,7 @@ function AdminWalkinModal( { show, onClose }) {
             console.log("Success:", res.data);
             setValues(initialValues);
             onClose();
-            alert("Walk-in reservation saved successfully!");
+            Swal.fire({ icon: 'success', title: 'Saved', text: 'Walk-in reservation saved successfully!' });
         })
         .catch((err) => {
             console.error("Error sa pag-save:", err);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import "../admincss/admin_guest.css";
 import EditBookingModal from '../Modals/Edit_booking_modal';
 import ViewBookingModal from '../Modals/view_booking_modal';
@@ -98,15 +99,25 @@ function AdminGuest() {
     });
 
     const handleCancel = async (id) => {
-        if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Cancel booking',
+            text: 'Are you sure you want to cancel this booking?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it',
+            cancelButtonText: 'Keep booking'
+        });
+
+        if (!result.isConfirmed) return;
+
         try {
             await axios.post(`http://localhost:3000/update_reservation/${id}`, { status: 'cancelled' });
-            // Refetch bookings
             const res = await axios.get('http://localhost:3000/get_reservations');
             setBookings(res.data);
+            Swal.fire({ icon: 'success', title: 'Cancelled', text: 'Booking cancelled successfully.' });
         } catch (err) {
             console.error("Error cancelling booking:", err);
-            alert("Failed to cancel booking");
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to cancel booking' });
         }
     };
 

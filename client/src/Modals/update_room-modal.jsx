@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import "../Modalscss/add_room_modal.css";
 
 function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
@@ -61,7 +62,7 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
         axios.post(`http://localhost:3001/update_rooms/${values.id}`, updateData)
             .then((res) => {
                 console.log("Updated:", res.data);
-                alert("Room updated successfully!");
+                Swal.fire({ icon: 'success', title: 'Saved', text: 'Room updated successfully!' });
                 setShowModal(false);
                 if (typeof refreshData === 'function') {
                     refreshData();
@@ -69,7 +70,7 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
             })
             .catch((err) => {
                 console.error("Error sa pag-update:", err.response?.data || err.message);
-                alert("Error: " + (err.response?.data?.error || err.message));
+                Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.error || err.message });
             });
     };
 

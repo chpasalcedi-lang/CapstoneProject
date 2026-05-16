@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import "../Modalscss/update_calendar_modal.css";
 
 function UpdateCalendarModal({ showModal, setShowModal, refreshData, calendarData }) {
@@ -47,7 +48,7 @@ function UpdateCalendarModal({ showModal, setShowModal, refreshData, calendarDat
             })
             .catch((err) => {
                 console.error("Error sa pag-save: ", err);
-                alert("May sala sa pag-save sang data!");
+                Swal.fire({ icon: 'error', title: 'Error', text: 'May sala sa pag-save sang data!' });
             });
     };
 

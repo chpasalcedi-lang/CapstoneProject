@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import "../Modalscss/add_room_modal.css";
 
 function AddRoomModal({ showModal, setShowModal, refreshData }) {
@@ -45,7 +46,7 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
             })
             .catch((err) => {
                 console.error("Error sa pag-save: ", err);
-                alert("May sala sa pag-save sang data!");
+                Swal.fire({ icon: 'error', title: 'Error', text: 'May sala sa pag-save sang data!' });
             });
     };
 
@@ -120,7 +121,7 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
                         <button type="button" className="add-room-btn-cancel" onClick={closeModal}>
                             Cancel
                         </button>
-                        <button type="submit" className="add-room-btn-save" onClick={() => alert("Room added successfully!")}>
+                        <button type="submit" className="add-room-btn-save">
                             Save Room
                         </button>
                     </div>

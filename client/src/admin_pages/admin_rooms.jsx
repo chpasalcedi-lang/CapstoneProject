@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import AddRoomModal from "../Modals/add_room_modals";
 import EditRoomModal from "../Modals/update_room-modal";
 import "../admincss/admin_rooms.css";
@@ -27,17 +28,27 @@ function AdminRooms() {
     };
 
     const handleDelete = (roomId) => {
-        if (window.confirm("Are you sure you want to delete this room?")) {
-            axios.delete(`http://localhost:3001/delete_room/${roomId}`)
-                .then((res) => {
-                    console.log("Deleted:", res.data);
-                    setData((prev) => prev.filter((room) => room.id !== roomId));
-                })
-                .catch((err) => {
-                    console.error("Error sa pag-delete:", err);
-                    alert("May sala sa pag-delete sang data!");
-                });
-        }
+        Swal.fire({
+            icon: 'warning',
+            title: 'Confirm delete',
+            text: 'Are you sure you want to delete this room?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`http://localhost:3001/delete_room/${roomId}`)
+                    .then((res) => {
+                        console.log("Deleted:", res.data);
+                        setData((prev) => prev.filter((room) => room.id !== roomId));
+                        Swal.fire({ icon: 'success', title: 'Deleted', text: 'Room deleted successfully.' });
+                    })
+                    .catch((err) => {
+                        console.error("Error sa pag-delete:", err);
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'May sala sa pag-delete sang data!' });
+                    });
+            }
+        });
     };
 
     return (
@@ -102,7 +113,7 @@ function AdminRooms() {
                                         <button className="rooms-room-book-btn" onClick={() => handleEdit(room)}>
                                             Edit
                                         </button>
-                                        <button className="rooms-room-book-btn" onClick={() => handleDelete(room.id). alert("Reservation added successfully!")}>
+                                        <button className="rooms-room-book-btn" onClick={() => handleDelete(room.id)}>
                                             Delete
                                         </button>
                                     </div>

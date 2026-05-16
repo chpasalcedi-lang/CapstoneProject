@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import "../admincss/admin_dashboard.css";
@@ -16,16 +16,8 @@ function AdminDashboard() {
     booking_sales: 0
   });
   const [loading, setLoading] = useState(true);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [calendarWeeks, setCalendarWeeks] = useState([]);
-  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminUser');
-    navigate('/AdminLogin');
-  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -64,72 +56,12 @@ function AdminDashboard() {
     return `₱${value.toLocaleString()}`;
   };
 
-  
-
-  const monthNames = Array.from({ length: 12 }, (_, i) =>
-    new Date(0, i).toLocaleString("default", { month: "long" })
-  );
-
-  const handleMonthChange = (e) => {
-    const month = Number(e.target.value);
-    setCurrentDate((prev) => new Date(prev.getFullYear(), month, 1));
-  };
-
-  const buildCalendarWeeks = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDayIndex = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const weeks = [];
-    let day = 1;
-
-    while (day <= daysInMonth) {
-      const week = [];
-      for (let i = 0; i < 7; i += 1) {
-        if (weeks.length === 0 && i < firstDayIndex) {
-          week.push(null);
-        } else if (day > daysInMonth) {
-          week.push(null);
-        } else {
-          week.push(day);
-          day += 1;
-        }
-      }
-      weeks.push(week);
-    }
-
-    return weeks;
-  };
-
-  const handlePrevMonth = () => {
-    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
-  };
-
-  const handleToday = () => {
-    setCurrentDate(new Date());
-  };
-
-  const isToday = (day) => {
-    const today = new Date();
-    return today.getFullYear() === currentDate.getFullYear() &&
-           today.getMonth() === currentDate.getMonth() &&
-           today.getDate() === day;
-  };
-
-  useEffect(() => {
-    setCalendarWeeks(buildCalendarWeeks(currentDate));
-  }, [currentDate]);
-
   return (
     <div className="wrap">
       <nav className="dashboard-navbar">
           <div className="dashboard-nav-content">
               <div className="dashboard-logo">
-                  <a href="/Dashboard"><h1>Messiah</h1></a>
+                  <Link to="/Dashboard"><h1>Messiah</h1></Link>
               </div>
                   <ul className="dashboard-nav-links">
                       <p>dashboard</p>
@@ -163,7 +95,6 @@ function AdminDashboard() {
             <div className="dashboard-topbar-btns">
                 <button className="dashboard-topbar-btn1" onClick={() => setShowWalkinModal(true)}>Walk in</button>
                 <Link className="dashboard-topbar-btn1" to="/AddGuest">Add Guest</Link>
-                <button className="dashboard-topbar-btn1" onClick={handleLogout}>Logout</button>
             </div>
           </div>
 

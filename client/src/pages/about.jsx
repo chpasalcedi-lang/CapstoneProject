@@ -48,9 +48,11 @@ function About() {
                     <li><Link to="/Reservation">Room</Link></li>
                     <li><Link to="/About">About</Link></li>
                     <li>
-                        <button className="landing-btn">
-                            sign in
-                        </button>
+                        <Link to="/Login">
+                            <button className="landing-btn">
+                                sign in
+                            </button>
+                        </Link>
                     </li>
                     </ul>
                 </div>

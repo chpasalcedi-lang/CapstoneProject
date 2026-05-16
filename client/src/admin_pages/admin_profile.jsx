@@ -1,16 +1,20 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../admincss/admin_profile.css";
 
-
-
 function AdminProfile() {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('adminUser');
+        navigate('/AdminLogin');
+    };
     return (
         <div>
             <nav className="dashboard-navbar">
                 <div className="dashboard-nav-content">
                     <div className="dashboard-logo">
-                        <a href="/Dashboard"><h1>Messiah</h1></a>
+                        <Link to="/Dashboard"><h1>Messiah</h1></Link>
                     </div>
                         <ul className="dashboard-nav-links">
                             <p>dashboard</p>
@@ -45,6 +49,7 @@ function AdminProfile() {
                             <button className="admin-profile-topbar-btn">
                                 Update Profile
                             </button>
+                            <button className="dashboard-topbar-btn1" onClick={handleLogout}>Logout</button>
                         </div>
                     </div>
 

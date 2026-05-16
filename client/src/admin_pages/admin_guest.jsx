@@ -126,7 +126,7 @@ function AdminGuest() {
             <nav className="dashboard-navbar">
                 <div className="dashboard-nav-content">
                     <div className="dashboard-logo">
-                        <a href="/Dashboard"><h1>Messiah</h1></a>
+                        <Link to="/Dashboard"><h1>Messiah</h1></Link>
                     </div>
                         <ul className="dashboard-nav-links">
                             <p>dashboard</p>

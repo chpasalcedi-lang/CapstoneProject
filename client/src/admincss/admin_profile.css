@@ -249,6 +249,12 @@
   line-height: 1;
 }
 
+.admin-profile-topbar > div {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .admin-profile-topbar-btn {
   background: transparent;
   color: #c8a96e;

@@ -16,7 +16,7 @@
   position: relative; 
   width: 340px;
   padding: 35px 30px;
-  background: #1c1c1c;
+  background: #bfbebe;
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow: 0 20px 40px rgba(0,0,0,0.7);
@@ -28,7 +28,7 @@
 }
 
 .admin-login-header h2 {
-  color: #fff;
+  color: #262525;
   font-size: 22px;
   margin-bottom: 5px;
   letter-spacing: 1px;
@@ -36,7 +36,7 @@
 
 .admin-login-header p {
   font-size: 11px;
-  color: #777;
+  color: #5f5d5d;
   text-transform: uppercase;
 }
 
@@ -49,56 +49,67 @@
 .admin-form-group label {
   font-size: 11px;
   margin-bottom: 6px;
-  color: #aaa;
+  color: #000000;
   letter-spacing: 0.05em;
 }
 
 .admin-form-group input {
-  padding: 9px 10px;
-  border: 1px solid #333;
-  background: #000;
-  color: #fff;
-  border-radius: 5px;
+  padding: 11px 12px;
+  border: 1px solid #b5b5b5;
+  background: #f4f4f4;
+  color: #1e1e1e;
+  border-radius: 6px;
   font-size: 13px;
-  transition: 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .admin-form-group input:hover {
-  border-color: #555;
+  border-color: #8a8a8a;
 }
 
 .admin-form-group input:focus {
   outline: none;
-  border-color: #fff;
+  border-color: #4d7cff;
+  box-shadow: 0 0 0 3px rgba(77, 124, 255, 0.16);
 }
 
 .login-btn {
   width: 100%;
   margin-top: 10px;
-  padding: 10px;
-  background: #fff;
-  color: #000;
+  padding: 12px;
+  background: #37466f;
+  color: #ffffff;
   border: none;
-  border-radius: 5px;
-  font-weight: 600;
-  font-size: 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
   cursor: pointer;
   text-transform: uppercase;
-  transition: 0.2s;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .login-btn:hover {
-  background: #ddd;
+  background: #3b61e0;
+  transform: translateY(-1px);
+}
+
+.admin-login-note {
+  width: 100%;
+  text-align: center;
+  color: #454545;
+  font-size: 12px;
+  margin-top: 10px;
+  line-height: 1.4;
 }
 
 /* FOOTER */
 .admin-login-footer {
-  margin-top: 18px;
+  margin-top: 10px;
   text-align: center;
 }
 
 .admin-login-footer p {
-  font-size: 10px;
+  font-size: 12px;
   color: #666;
   letter-spacing: 0.05em;
 }

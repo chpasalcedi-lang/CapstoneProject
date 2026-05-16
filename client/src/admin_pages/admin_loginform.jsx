@@ -66,23 +66,19 @@ function AdminLoginForm() {
                         <label>Email</label>
                         <input
                             type="email"
-                            placeholder="Enter email"
+                            placeholder="Enter your credentials email"
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
-                    <div className="admin-form-group">
-                        <p className="admin-login-note">
-                            {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
-                        </p>
-                    </div>
+                    
 
                     <div className="admin-form-group">
                         <label>Password</label>
                         <input
                             type="password"
-                            placeholder="Enter password"
+                            placeholder="Enter your password"
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -92,6 +88,11 @@ function AdminLoginForm() {
                     <button type="submit" className="login-btn" disabled={loading}>
                         {loading ? "Signing in..." : "access system"}
                     </button>
+                    <div className="admin-form-group">
+                        <p className="admin-login-note">
+                            {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
+                        </p>
+                    </div>
                 </form>
                 <div className="admin-login-footer">
                     <p>authorized users can access only</p>

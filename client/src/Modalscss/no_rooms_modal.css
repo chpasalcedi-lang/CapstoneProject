@@ -1,0 +1,97 @@
+.no-rooms-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.no-rooms-modal-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  width: 90%;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.no-rooms-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.no-rooms-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.no-rooms-modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  transition: color 0.2s;
+}
+
+.no-rooms-modal-close:hover {
+  color: #333;
+}
+
+.no-rooms-modal-body {
+  padding: 24px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.no-rooms-modal-body p {
+  margin: 12px 0;
+}
+
+.no-rooms-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.no-rooms-modal-btn {
+  background: #8B7355;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.no-rooms-modal-btn:hover {
+  background: #6d5644;
+}

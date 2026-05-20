@@ -23,7 +23,7 @@ function UpdateAccountModal({ show, onClose, onSave, initialData }) {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e && e.preventDefault) e.preventDefault();
         if (!formData.name || !formData.email || !formData.role) {
             return;
         }
@@ -72,13 +72,13 @@ function UpdateAccountModal({ show, onClose, onSave, initialData }) {
                                     <option value="staff">Staff</option>
                                 </select>
                             </div>
-                            <div className="update-acc-modal-footer">
-                                <button type="button" className="update-acc-btn-cancel" onClick={onClose}>Cancel</button>
-                                <button type="submit" className="update-acc-btn-save">Update Account</button>
-                            </div>
                         </form>
                     </div>
+                    <div className="update-acc-modal-footer">
+                        <button type="button" className="update-acc-btn-cancel" onClick={onClose}>Cancel</button>
+                        <button type="button" className="update-acc-btn-save" onClick={handleSubmit}>Update Account</button>
                 </div>
+            </div>
             </div>
         </div>
     );

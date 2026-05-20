@@ -20,12 +20,11 @@ function AdminProfile() {
                             <p>dashboard</p>
                             <li><Link to="/Dashboard">Dashboard</Link></li>
                             <li><Link to="/Users">User</Link></li>
-                            <li><Link to="">Sales</Link></li>
+                            <li><Link to="/Sales">Sales</Link></li>
                             <p>management</p>
                             <li><Link to="/Rooms">Rooms</Link></li>
                             <li><Link to="/Booking">Booking</Link></li>
                             <li><Link to="/Guest">Guest / Feedback</Link></li>
-                            <li><Link to="/Sales">Sales</Link></li>
                             <div className="dasboard-admin-status">
                                 <Link to="/Profile">
                                     <div className="dasboard-admin-status-content">
@@ -45,9 +44,6 @@ function AdminProfile() {
                     <div className="admin-profile-topbar">
                         <h1>Profile</h1>
                         <div>
-                            <button className="admin-profile-topbar-btn">
-                                Update Profile
-                            </button>
                             <button className="dashboard-topbar-btn1" onClick={handleLogout}>Logout</button>
                         </div>
                     </div>

@@ -479,3 +479,10 @@
 .admin-users-action-btn.delete:hover {
   background: rgba(255,80,80,0.2);
 }
+.admin-users-action-btn.accept {
+  background: rgba(72, 187, 120, 0.12);
+  color: #8ae69b;
+}
+.admin-users-action-btn.accept:hover {
+  background: rgba(72, 187, 120, 0.22);
+}

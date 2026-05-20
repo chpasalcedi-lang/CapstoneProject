@@ -146,6 +146,20 @@ app.delete('/delete_room/:id', (req, res) => {
     });
 });
 
+app.delete('/delete_guest_arrival/:id', (req, res) => {
+    const sql = "DELETE FROM guest WHERE id = ?";
+    const guestId = req.params.id;
+    db.query(sql, [guestId], (err, result) => {
+        if (err) {
+            console.error("Error deleting guest arrival:", err);
+            return res.status(500).json({ error: "Database error!" });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Guest arrival not found" });
+        }
+        return res.status(200).json({ message: "Guest arrival deleted successfully" });
+    });
+});
 
 
 app.get('/get_user_accounts', (req, res) => {
@@ -521,6 +535,25 @@ app.post('/update_reservation/:id', (req, res) => {
                 return res.status(200).json({ message: 'Reservation updated successfully.' });
             });
         }
+    });
+});
+
+app.delete('/delete_reservation/:id', (req, res) => {
+    const reservationId = parseInt(req.params.id, 10);
+    if (Number.isNaN(reservationId)) {
+        return res.status(400).json({ error: 'Invalid reservation ID.' });
+    }
+
+    const sql = 'DELETE FROM reservations WHERE id = ?';
+    db.query(sql, [reservationId], (err, result) => {
+        if (err) {
+            console.error('Error deleting reservation:', err);
+            return res.status(500).json({ error: 'Database error.' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Reservation not found.' });
+        }
+        return res.status(200).json({ message: 'Reservation deleted successfully.' });
     });
 });
 

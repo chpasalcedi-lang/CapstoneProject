@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../Modalscss/Edit_booking_modal.css';
+import '../Modalscss/walkin_reservation_modal.css';
 
 function EditBookingModal({ show, onClose, booking, onUpdate }) {
     const [values, setValues] = useState({
@@ -35,7 +36,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     }, [booking]);
 
     useEffect(() => {
-        axios.get("http://localhost:3000/get_rooms")
+        axios.get("http://localhost:3001/get_rooms")
             .then((res) => {
                 setRooms(res.data);
             })
@@ -43,6 +44,11 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                 console.error("Error fetching rooms:", err);
             });
     }, []);
+
+    const handleCancel = () => {
+        setStatusMessage("");
+        onClose();
+    };
 
     if (!show || !booking) return null;
 
@@ -62,7 +68,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         }
 
         axios
-            .post(`http://localhost:3000/update_reservation/${booking.id}`, {
+            .post(`http://localhost:3001/update_reservation/${booking.id}`, {
                 ...values,
                 room_id: selectedRoom.id,
             })
@@ -81,71 +87,74 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     };
 
     return (
-        <div className="edit-booking-modal-overlay" onClick={onClose}>
-            <div className="edit-booking-modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="edit-booking-modal-header">
-                    <h2>Edit Booking</h2>
-                    <button className="close-btn" onClick={onClose}>&times;</button>
-                </div>
-                <div className="edit-booking-modal-body">
-                    <form onSubmit={handleSubmit}>
-                        <div className="edit-form-row">
-                            <div className="edit-form-group">
-                                <label>Last Name</label>
-                                <input type="text" name="last_name" required value={values.last_name} onChange={handleChange} />
+        <div className={(show ? "walkin-modal modal-visible" : "walkin-modal modal-hidden")} id="modal">
+            <div className="walkin-container">
+                <div className="walkin-form-card">
+                    <div className="walkin-reservation-modal-header">
+                        <h2 className="walkin-reservation-modal-title">Edit Booking</h2>
+                        <button className="walkin-reservation-modal-close" onClick={handleCancel}>×</button>
+                    </div>
+                    <div className="walkin-reservation-modal-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="walkin-reservation-form-row">
+                                <div className="walkin-reservation-form-group">
+                                    <label>Last Name</label>
+                                    <input type="text" name="last_name" required value={values.last_name} onChange={handleChange} placeholder="e.g. Family Name" />
+                                </div>
+                                <div className="walkin-reservation-form-group">
+                                    <label>First Name</label>
+                                    <input type="text" name="first_name" required value={values.first_name} onChange={handleChange} placeholder="e.g. First Name" />
+                                </div>
                             </div>
-                            <div className="edit-form-group">
-                                <label>First Name</label>
-                                <input type="text" name="first_name" required value={values.first_name} onChange={handleChange} />
+                            <div className="walkin-reservation-form-row">
+                                <div className="walkin-reservation-form-group">
+                                    <label>No. of Guests</label>
+                                    <input type="number" name="num_guests" required value={values.num_guests} onChange={handleChange} placeholder="e.g. 2" />
+                                </div>
+                                <div className="walkin-reservation-form-group">
+                                    <label>Room Number</label>
+                                    <select name="room_number" required value={values.room_number} onChange={handleChange}>
+                                        <option value="">Select Room</option>
+                                        {rooms.map(room => (
+                                            <option key={room.id} value={String(room.room_number)}>
+                                                {room.room_number} - {room.room_name} ({room.room_type})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <div className="edit-form-row">
-                            <div className="edit-form-group">
-                                <label>No. of Guests</label>
-                                <input type="number" name="num_guests" required value={values.num_guests} onChange={handleChange} />
+                            <div className="walkin-reservation-form-group">
+                                <label>Phone Number</label>
+                                <input type="text" name="phone_number" required value={values.phone_number} onChange={handleChange} placeholder="e.g. 09XX XXX XXXX" />
                             </div>
-                            <div className="edit-form-group">
-                                <label>Room Number</label>
-                                <select name="room_number" required value={values.room_number} onChange={handleChange}>
-                                    <option value="">Select Room</option>
-                                    {rooms.map(room => (
-                                        <option key={room.id} value={String(room.room_number)}>
-                                            {room.room_number} - {room.room_name} ({room.room_type})
-                                        </option>
-                                    ))}
-                                </select>
+                            <div className="walkin-reservation-form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" required value={values.email} onChange={handleChange} placeholder="e.g. example@email.com" />
                             </div>
-                        </div>
-                        <div className="edit-form-group">
-                            <label>Phone Number</label>
-                            <input type="text" name="phone_number" required value={values.phone_number} onChange={handleChange} />
-                        </div>
-                        <div className="edit-form-group">
-                            <label>Email</label>
-                            <input type="email" name="email" required value={values.email} onChange={handleChange} />
-                        </div>
-                        <div className="edit-form-row">
-                            <div className="edit-form-group">
-                                <label>Check-in Date</label>
-                                <input type="date" name="check_in_date" required value={values.check_in_date} onChange={handleChange} />
+                            <div className="walkin-reservation-form-row">
+                                <div className="walkin-reservation-form-group">
+                                    <label>Check-in Date</label>
+                                    <input type="date" name="check_in_date" required value={values.check_in_date} onChange={handleChange} className="walkin-input" />
+                                </div>
+                                <div className="walkin-reservation-form-group">
+                                    <label>Check-out Date</label>
+                                    <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} className="walkin-input" />
+                                </div>
                             </div>
-                            <div className="edit-form-group">
-                                <label>Check-out Date</label>
-                                <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} />
+
+                            <div className="walkin-reservation-form-group">
+                                <label>Notes <span className="optional">Optional</span></label>
+                                <textarea name="notes" rows="3" value={values.notes} onChange={handleChange} placeholder="..."></textarea>
                             </div>
-                        </div>
-                        <div className="edit-form-group">
-                            <label>Notes</label>
-                            <textarea name="notes" rows="3" value={values.notes} onChange={handleChange}></textarea>
-                        </div>
-                        <div className="edit-modal-footer">
-                            <button type="button" className="edit-btn-cancel" onClick={onClose}>Cancel</button>
-                            <button type="submit" className="edit-btn-save">Update Reservation</button>
-                        </div>
+                        </form>
+                    </div>
+                    <div className="walkin-reservation-modal-footer">
+                        <button type="button" className="walkin-reservation-btn-cancel" onClick={handleCancel}>Cancel</button>
+                        <button type="submit" className="walkin-reservation-btn-save" onClick={handleSubmit}>Update Reservation</button>
                         {statusMessage && (
-                            <p className="edit-status-message">{statusMessage}</p>
+                          <p className="walkin-status-message">{statusMessage}</p>
                         )}
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

@@ -67,13 +67,11 @@ function AdminDashboard() {
                       <p>dashboard</p>
                       <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
                       <li><Link to="/Users">User</Link></li>
-                      <li><Link to="">Sales</Link></li>
+                      <li><Link to="/Sales">Sales</Link></li>
                       <p>management</p>
                       <li><Link to="/Rooms">Rooms</Link></li>
                       <li><Link to="/Booking">Booking</Link></li>
-                      <li><Link to="/Guest">Guest</Link></li>
-                      <p>reports</p>
-                      <li><Link to="/Logs">Active logs</Link></li>
+                      <li><Link to="/Guest">Guest / Feedback</Link></li>
                       <div className="dasboard-admin-status">
                           <Link to="/Profile">
                               <div className="dasboard-admin-status-content">

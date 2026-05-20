@@ -164,9 +164,7 @@ function AdminUsersAcc() {
             <p>management</p>
             <li><Link to="/Rooms">Rooms</Link></li>
             <li><Link to="/Booking">Booking</Link></li>
-            <li><Link to="/Guest">Guest</Link></li>
-            <p>reports</p>
-            <li><Link to="/Logs">Active logs</Link></li>
+            <li><Link to="/Guest">Guest / Feedback</Link></li>
             <div className="dasboard-admin-status">
               <Link to="/Profile">
                 <div className="dasboard-admin-status-content">
@@ -210,44 +208,51 @@ function AdminUsersAcc() {
           </div>
 
           <div className="admin-users-table-container">
-            <table className="admin-users-table">
-              <thead>
-                <tr>
-                  <th onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>Name{sortIndicator('name')}</th>
-                  <th onClick={() => handleSort('email')} style={{ cursor: 'pointer' }}>Email{sortIndicator('email')}</th>
-                  <th onClick={() => handleSort('role')} style={{ cursor: 'pointer' }}>Role{sortIndicator('role')}</th>
-                  <th className="action">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+            <h1>User Accounts</h1>
+            <div className="admin-users-table-wrapper">
+              <table className="admin-users-table">
+                <thead>
                   <tr>
-                    <td colSpan="4">Loading users...</td>
+                    <th onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>Name{sortIndicator('name')}</th>
+                    <th onClick={() => handleSort('email')} style={{ cursor: 'pointer' }}>Email{sortIndicator('email')}</th>
+                    <th onClick={() => handleSort('role')} style={{ cursor: 'pointer' }}>Role{sortIndicator('role')}</th>
+                    <th className="action">Actions</th>
                   </tr>
-                ) : visibleUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan="4">No user accounts found.</td>
-                  </tr>
-                ) : (
-                  visibleUsers.map((user) => (
-                    <tr key={user.id}>
-                      <td>
-                        <div className="user-name-cell">
-                          <div className="avatar">{user.name?.charAt(0) || 'U'}</div>
-                          <span>{user.name}</span>
-                        </div>
-                      </td>
-                      <td>{user.email}</td>
-                      <td>{formatRoleLabel(user.role)}</td>
-                      <td className="action">
-                        <button className="admin-users-action-btn edit" type="button" onClick={() => openEditUser(user)}>Edit</button>
-                        <button className="admin-users-action-btn delete" type="button" onClick={() => handleDeleteUser(user.id)}>Delete</button>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: 'center' }}>
+                        Loading users...
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : visibleUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: 'center' }}>
+                        No user accounts found.
+                      </td>
+                    </tr>
+                  ) : (
+                    visibleUsers.map((user) => (
+                      <tr key={user.id}>
+                        <td>
+                          <div className="user-name-cell">
+                            <div className="avatar">{user.name?.charAt(0) || 'U'}</div>
+                            <span>{user.name}</span>
+                          </div>
+                        </td>
+                        <td>{user.email}</td>
+                        <td>{formatRoleLabel(user.role)}</td>
+                        <td className="action">
+                          <button className="admin-users-action-btn edit" type="button" onClick={() => openEditUser(user)}>Edit</button>
+                          <button className="admin-users-action-btn delete" type="button" onClick={() => handleDeleteUser(user.id)}>Delete</button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

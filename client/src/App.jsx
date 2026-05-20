@@ -10,8 +10,8 @@ import Guest from './admin_pages/admin_guest';
 import AdminAddGuest from './admin_pages/admin_addGuest';
 import AdminUsersAcc from './admin_pages/admin_usersAcc';
 import AdminProfile from './admin_pages/admin_profile';
-import AdminLogs from './admin_pages/admin_logs';
 import AdminLoginForm from './admin_pages/admin_loginform';
+import AdminSales from './admin_pages/admin_sales';
 
 
 
@@ -45,7 +45,7 @@ function App() {
         <Route path="/AddGuest" element={<RequireAuth><AdminAddGuest /></RequireAuth>} />
         <Route path="/Users" element={<RequireAuth><AdminUsersAcc /></RequireAuth>} />
         <Route path="/Profile" element={<RequireAuth><AdminProfile /></RequireAuth>} />
-        <Route path="/Logs" element={<RequireAuth><AdminLogs /></RequireAuth>} />
+        <Route path="/Sales" element={<RequireAuth><AdminSales /></RequireAuth>} />
 
         
 

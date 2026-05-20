@@ -134,9 +134,7 @@ function AdminBooking() {
                                   <p>management</p>
                                   <li><Link to="/Rooms">Rooms</Link></li>
                                   <li  className="active"><Link to="/Booking">Booking</Link></li>
-                                  <li><Link to="/Guest">Guest</Link></li>
-                                  <p>reports</p>
-                                  <li><Link to="/Logs">Active logs</Link></li>
+                                  <li><Link to="/Guest">Guest / Feedback</Link></li>
                                   <div className="dasboard-admin-status">
                                       <Link to="/Profile">
                                           <div className="dasboard-admin-status-content">
@@ -204,48 +202,51 @@ function AdminBooking() {
                         ) : filteredBookings.length === 0 ? (
                             <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>No bookings found.</p>
                         ) : (
-                            <table className="guests-table">
-                                <thead>
-                                    <tr>
-                                        <th>Guest</th>
-                                        <th>Room</th>
-                                        <th>Check-in</th>
-                                        <th>Check-out</th>
-                                        <th>Price</th>
-                                        <th>Status</th>
-                                        <th className="actions-header">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredBookings.map((booking) => (
-                                        <tr key={booking.id}>
-                                            <td>{booking.first_name} {booking.last_name}</td>
-                                            <td>{booking.room_number}</td>
-                                            <td>{formatBookingDate(booking.check_in_date)}</td>
-                                            <td>{formatBookingDate(booking.check_out_date)}</td>
-                                            <td>₱{Number(booking.room_price || 0).toLocaleString()}</td>
-                                            <td>
-                                                <span className={`status-${(booking.res_status || 'pending').toLowerCase()}`}>
-                                                    {booking.res_status || 'pending'}
-                                                </span>
-                                            </td>
-                                            <td className="actions-cell">
-                                                <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
-                                                    view
-                                                </button>
-                                                <button className="btn guest btn-primary" onClick={() => handleConfirm(booking.id)}>
-                                                    confirm
-                                                </button>
-                                                <button className="btn guest btn-danger" onClick={() => handleCancel(booking.id)}>
-                                                    cancel
-                                                </button>
-                                            </td>
+                            <div className="guests-table-wrapper">
+                                <table className="guests-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Guest</th>
+                                            <th>Room</th>
+                                            <th>Check-in</th>
+                                            <th>Check-out</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th className="actions-header">Actions</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {filteredBookings.map((booking) => (
+                                            <tr key={booking.id}>
+                                                <td>{booking.first_name} {booking.last_name}</td>
+                                                <td>{booking.room_number}</td>
+                                                <td>{formatBookingDate(booking.check_in_date)}</td>
+                                                <td>{formatBookingDate(booking.check_out_date)}</td>
+                                                <td>₱{Number(booking.room_price || 0).toLocaleString()}</td>
+                                                <td>
+                                                    <span className={`status-${(booking.res_status || 'pending').toLowerCase()}`}>
+                                                        {booking.res_status || 'pending'}
+                                                    </span>
+                                                </td>
+                                                <td className="actions-cell">
+                                                    <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                        view
+                                                    </button>
+                                                    <button className="btn guest btn-primary" onClick={() => handleConfirm(booking.id)}>
+                                                        confirm
+                                                    </button>
+                                                    <button className="btn guest btn-danger" onClick={() => handleCancel(booking.id)}>
+                                                        cancel
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </div>
+                
 
                 </div>
             </section>

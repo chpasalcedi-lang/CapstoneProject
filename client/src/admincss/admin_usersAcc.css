@@ -280,24 +280,25 @@
 .admin-users-stats-bar-content {
   background: #111111;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 14px;
+  border-radius: 12px;
+  padding: 10px 18px;
 }
 
 .admin-users-stats-card {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .admin-users-stats-card input {
-  flex: 1;
-  min-width: 200px;
+  width: 250px;
+  min-width: 180px;
   padding: 10px 14px;
   background: #0c0c0c;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
   color: #f0ede8;
   font-size: 13px;
 }
@@ -307,15 +308,22 @@
   border-color: #c8a96e;
   box-shadow: 0 0 0 2px rgba(200,169,110,0.15);
 }
-.admin-users-stats-card button {
-  padding: 8px 14px;
-  font-size: 11px;
-  border-radius: 6px;
 
+.admin-users-filter-btns {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.admin-users-stats-card button {
+  padding: 10px 14px;
+  font-size: 9px;
+  border-radius: 6px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.08);
   color: #aaa;
-
   cursor: pointer;
   transition: all 0.15s ease;
   text-transform: uppercase;
@@ -327,103 +335,86 @@
   background: rgba(200,169,110,0.08);
 }
 
-/* active filter */
-.admin-users-stats-bar-content {
-  background: #111111;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 16px 18px;
-}
-
-.admin-users-stats-card{
-  display: flex;
-  align-items: center;
-  justify-content: space-between; 
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.admin-users-stats-card input {
-  width: 190px;
-  flex: none;
-  padding: 10px 14px;
-  background: #0c0c0c;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
-  color: #f0ede8;
-  font-size: 13px;
-}
-.admin-users-filter-btns {
-  display: flex;
-  gap: 8px; 
-  align-items: center;
-}
-
-
-.admin-users-stats-card button.active {
-  background: #c8a96e;
-  color: #111;
-  border-color: #c8a96e;
-}
-
 
 .admin-users-table-container {
-  background: #111111;
+  background: #0f0f0f;
   border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  padding: 0; 
-  overflow-x: auto;
-  max-height: 450px;
-  overflow-x: auto; 
-  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  overflow: hidden;
 }
-.admin-users-table-container::-webkit-scrollbar {
+
+.admin-users-table-container h1 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #555;
+  font-weight: 500;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin: 0;
+}
+
+.admin-users-table-wrapper {
+  max-height: 520px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.admin-users-table-wrapper::-webkit-scrollbar {
+  width: 6px;
   height: 6px;
 }
 
-.admin-users-table-container::-webkit-scrollbar-thumb {
-  background: #444;
-  border-radius: 4px;
+.admin-users-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(200, 169, 110, 0.35);
+  border-radius: 10px;
 }
-.admin-users-table-container h1 {
-  padding: 18px 20px;
-  margin: 0;
-  font-size: 15px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
 
 .admin-users-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 700px;
+  min-width: 900px;
 }
+
 .admin-users-table thead {
-  background: #0c0c0c;
-}
-.admin-users-table th {
-  text-align: left;
-  padding: 20px 30px;
-  font-size: 12px;
-  color: #777;
-  letter-spacing: 0.1em;
   position: sticky;
   top: 0;
-  background: #0c0c0c; 
   z-index: 2;
-  text-transform: uppercase;
 }
+
+.admin-users-table th {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #3f3f3f;
+  background: #0f0f0f;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+}
+
 .admin-users-table th.action {
   text-align: center;
 }
 
 .admin-users-table td {
-  padding: 14px 20px;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: #777;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
-.admin-users-table td.action {
-  text-align: center;
+.admin-users-table td:first-child {
+  color: #f0ede8;
+  font-weight: 500;
 }
+
 .admin-users-table td.action {
   display: flex;
   justify-content: center;
@@ -437,10 +428,12 @@
 .admin-users-table tbody tr:hover {
   background: rgba(255,255,255,0.04);
 }
+
 .admin-users-table td:last-child {
   text-align: right;
   white-space: nowrap;
 }
+
 .user-name-cell {
   display: flex;
   align-items: center;
@@ -459,6 +452,7 @@
   font-weight: 600;
   color: #111;
 }
+
 .admin-users-action-btn {
   padding: 6px 12px;
   font-size: 11px;
@@ -466,10 +460,8 @@
   border: none;
   margin-right: 6px;
   transition: all 0.15s ease;
-  
 }
 
-/* edit */
 .admin-users-action-btn.edit {
   background: rgba(200,169,110,0.1);
   color: #c8a96e;
@@ -479,7 +471,6 @@
   background: rgba(200,169,110,0.2);
 }
 
-/* delete */
 .admin-users-action-btn.delete {
   background: rgba(255,80,80,0.1);
   color: #ff6b6b;

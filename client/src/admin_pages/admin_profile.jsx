@@ -25,6 +25,7 @@ function AdminProfile() {
                             <li><Link to="/Rooms">Rooms</Link></li>
                             <li><Link to="/Booking">Booking</Link></li>
                             <li><Link to="/Guest">Guest / Feedback</Link></li>
+                            <li><Link to="/Sales">Sales</Link></li>
                             <div className="dasboard-admin-status">
                                 <Link to="/Profile">
                                     <div className="dasboard-admin-status-content">

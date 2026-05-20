@@ -407,9 +407,6 @@ body {
   background: rgba(200, 80, 80, 0.1);
   color: #e07070;
 }
-/* =========================
-   GUEST HEADER NAV SECTION
-========================= */
 
 .guests-headers {
   position: relative;
@@ -474,6 +471,44 @@ body {
 
 .guests-headers-links a:active {
   transform: scale(0.98);
+}
+
+.guests-up-btn {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(20px);
+
+  width: 52px;
+  height: 52px;
+  background: rgba(200, 169, 110, 0.12);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  color: #c8a96e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.guests-up-btn.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.guests-up-btn:hover {
+  background: rgba(200, 169, 110, 0.2);
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+.guests-up-btn i {
+  font-size: 18px;
 }
 
 @media (max-width: 768px) {

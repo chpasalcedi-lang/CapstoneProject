@@ -19,6 +19,7 @@ function AdminGuest() {
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [editModal, setEditModal] = useState(false);
     const [selectedEditBooking, setSelectedEditBooking] = useState(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
 
 
     const handleView = (booking) => {
@@ -137,6 +138,22 @@ function AdminGuest() {
         }
     };
 
+    useEffect(() => {
+    const handleScroll = () => {
+        if (window.scrollY > 400) {
+            setShowScrollTop(true);
+        } else {
+            setShowScrollTop(false);
+        }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+        window.removeEventListener("scroll", handleScroll);
+    };
+}, []);
+
     return (
         <div>
             <nav className="dashboard-navbar">
@@ -148,7 +165,7 @@ function AdminGuest() {
                             <p>dashboard</p>
                             <li><Link to="/Dashboard">Dashboard</Link></li>
                             <li><Link to="/Users">User</Link></li>
-                            <li><Link to="">Sales</Link></li>
+                            <li><Link to="/Sales">Sales</Link></li>
                             <p>management</p>
                             <li><Link to="/Rooms">Rooms</Link></li>
                             <li><Link to="/Booking">Booking</Link></li>
@@ -165,10 +182,13 @@ function AdminGuest() {
                         </ul>
                 </div>
             </nav>
+
+            <div className={`guests-up-btn ${showScrollTop ? "show" : ""}`} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+                <i className="fa-solid fa-angles-up"></i>
+            </div>
             
-                  
             <section className="guests-main">
-                <div className="guests-main-content">
+                <div className="guests-main-content" id="guests-up-btn">
                     <div className="guests-topbar">
                         <h1>Guest Management</h1>
                     </div>

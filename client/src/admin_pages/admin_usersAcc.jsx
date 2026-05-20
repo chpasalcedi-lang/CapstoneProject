@@ -160,7 +160,7 @@ function AdminUsersAcc() {
             <p>dashboard</p>
             <li><Link to="/Dashboard">Dashboard</Link></li>
             <li className="active"><Link to="/Users">User</Link></li>
-            <li><Link to="">Sales</Link></li>
+            <li><Link to="/Sales">Sales</Link></li>
             <p>management</p>
             <li><Link to="/Rooms">Rooms</Link></li>
             <li><Link to="/Booking">Booking</Link></li>

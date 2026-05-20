@@ -17,7 +17,9 @@
     width: 90%;
     max-width: 600px;
     max-height: 80vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
@@ -27,6 +29,7 @@
     align-items: center;
     padding: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex: 0 0 auto;
 }
 
 .edit-booking-modal-header h2 {
@@ -46,6 +49,9 @@
 
 .edit-booking-modal-body {
     padding: 20px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .edit-form-row {
@@ -90,7 +96,11 @@
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 20px;
+    margin-top: 0;
+    padding: 16px 20px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: #111111;
+    flex: 0 0 auto;
 }
 
 .edit-btn-cancel,

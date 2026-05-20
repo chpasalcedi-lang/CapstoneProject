@@ -115,26 +115,49 @@ function AdminGuest() {
         return guestMonth === parseInt(selectedMonthGuest);
     });
 
-    const handleCancel = async (id) => {
+    const handleDeleteBooking = async (id) => {
         const result = await Swal.fire({
             icon: 'warning',
-            title: 'Cancel booking',
-            text: 'Are you sure you want to cancel this booking?',
+            title: 'Delete booking',
+            text: 'Are you sure you want to delete this booking?',
             showCancelButton: true,
-            confirmButtonText: 'Yes, cancel it',
+            confirmButtonText: 'Yes, delete it',
             cancelButtonText: 'Keep booking'
         });
 
         if (!result.isConfirmed) return;
 
         try {
-            await axios.post(`http://localhost:3000/update_reservation/${id}`, { status: 'cancelled' });
-            const res = await axios.get('http://localhost:3000/get_reservations');
+            await axios.delete(`http://localhost:3001/delete_reservation/${id}`);
+            const res = await axios.get('http://localhost:3001/get_reservations');
             setBookings(res.data);
-            Swal.fire({ icon: 'success', title: 'Cancelled', text: 'Booking cancelled successfully.' });
+            Swal.fire({ icon: 'success', title: 'Deleted', text: 'Booking deleted successfully.' });
         } catch (err) {
-            console.error("Error cancelling booking:", err);
-            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to cancel booking' });
+            console.error("Error deleting booking:", err);
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to delete booking' });
+        }
+    };
+
+    const handleDeleteGuest = async (id) => {
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Delete guest record',
+            text: 'This will permanently remove the guest arrival record. Continue?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it',
+            cancelButtonText: 'Keep record'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await axios.delete(`http://localhost:3001/delete_guest_arrival/${id}`);
+            const res = await axios.get('http://localhost:3001/get_guest_arrivals');
+            setGuestArrivals(res.data);
+            Swal.fire({ icon: 'success', title: 'Deleted', text: 'Guest arrival record deleted successfully.' });
+        } catch (err) {
+            console.error("Error deleting guest arrival:", err);
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to delete guest arrival record.' });
         }
     };
 
@@ -265,11 +288,11 @@ function AdminGuest() {
                                                     <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
                                                         view
                                                     </button>
-                                                    <button className="btn guest btn-primary" onClick={() => handleEdit(booking.id)}>
+                                                    <button className="btn guest btn-primary" onClick={() => handleEdit(booking)}>
                                                         edit
                                                     </button>
-                                                    <button className="btn guest btn-danger" onClick={() => handleCancel(booking.id)}>
-                                                        cancel
+                                                    <button className="btn guest btn-danger" onClick={() => handleDeleteBooking(booking.id)}>
+                                                        delete
                                                     </button>
                                                 </td>
                                             </tr>
@@ -331,8 +354,7 @@ function AdminGuest() {
                                                     <td>₱{parseFloat(guest.total_price).toFixed(2)}</td>
                                                     <td>{formatGuestDateTime(guest.created_at)}</td>
                                                     <td className="actions-cell">
-                                                        <button className="btn guest btn-primary">Edit</button>
-                                                        <button className="btn guest btn-danger">Delete</button>
+                                                        <button className="btn guest btn-danger" onClick={() => handleDeleteGuest(guest.id)}>Delete</button>
                                                     </td>
                                                 </tr>
                                             ))
@@ -391,7 +413,7 @@ function AdminGuest() {
             <EditBookingModal 
                 show={editModal} onClose={() => setEditModal(false)} booking={selectedEditBooking} onUpdate={() => {
                     // Refetch bookings after update
-                    axios.get("http://localhost:3000/get_reservations").then(res => setBookings(res.data));
+                    axios.get("http://localhost:3001/get_reservations").then(res => setBookings(res.data));
                 }}/>
             <ViewBookingModal show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking}/>
         </div>

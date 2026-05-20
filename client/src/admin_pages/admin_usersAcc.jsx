@@ -65,7 +65,11 @@ function AdminUsersAcc() {
     users
       .filter((user) => {
         if (filterRole !== "all") {
-          return user.role === filterRole;
+          const roleValue = user.role?.toString().toLowerCase() || '';
+          if (filterRole === 'pending') {
+            return !roleValue || roleValue === 'pending';
+          }
+          return roleValue === filterRole;
         }
         return true;
       })
@@ -78,7 +82,7 @@ function AdminUsersAcc() {
   );
 
   const formatRoleLabel = (role) => {
-    if (!role) return "Staff";
+    if (!role || role.toLowerCase() === 'pending') return "Pending";
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
@@ -119,6 +123,19 @@ function AdminUsersAcc() {
     } catch (err) {
       console.error("Error updating user account:", err);
       Swal.fire({ icon: 'error', title: 'Update failed', text: err?.response?.data?.error || 'Unable to update user.' });
+    }
+  };
+
+  const isPendingUser = (user) => !user.role || user.role.toLowerCase() === 'pending';
+
+  const handleAcceptUser = async (id) => {
+    try {
+      await axios.post(`http://localhost:3001/update_user_account/${id}`, { role: 'staff' });
+      await fetchUsers();
+      Swal.fire({ icon: 'success', title: 'Accepted', text: 'User has been approved as staff.' });
+    } catch (err) {
+      console.error("Error accepting staff user:", err);
+      Swal.fire({ icon: 'error', title: 'Accept failed', text: err?.response?.data?.error || 'Unable to accept staff user.' });
     }
   };
 
@@ -202,6 +219,7 @@ function AdminUsersAcc() {
                   <button className={filterRole === 'all' ? 'active' : ''} type="button" onClick={() => handleFilterRole('all')}>all</button>
                   <button className={filterRole === 'admin' ? 'active' : ''} type="button" onClick={() => handleFilterRole('admin')}>Admin</button>
                   <button className={filterRole === 'staff' ? 'active' : ''} type="button" onClick={() => handleFilterRole('staff')}>Staff</button>
+                  <button className={filterRole === 'pending' ? 'active' : ''} type="button" onClick={() => handleFilterRole('pending')}>Pending</button>
                 </div>
               </div>
             </div>
@@ -244,6 +262,9 @@ function AdminUsersAcc() {
                         <td>{user.email}</td>
                         <td>{formatRoleLabel(user.role)}</td>
                         <td className="action">
+                          {isPendingUser(user) && (
+                            <button className="admin-users-action-btn accept" type="button" onClick={() => handleAcceptUser(user.id)}>Accept</button>
+                          )}
                           <button className="admin-users-action-btn edit" type="button" onClick={() => openEditUser(user)}>Edit</button>
                           <button className="admin-users-action-btn delete" type="button" onClick={() => handleDeleteUser(user.id)}>Delete</button>
                         </td>

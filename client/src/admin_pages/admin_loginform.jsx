@@ -19,17 +19,18 @@ function AdminLoginForm() {
             return;
         }
 
-        const fetchAdminUsers = async () => {
+        const fetchUsers = async () => {
             try {
-                const response = await axios.get("http://localhost:3001/get_admin_users");
+                // fetch all users so we can inform if any accounts exist (admin or staff)
+                const response = await axios.get("http://localhost:3001/get_user_accounts");
                 setAdminUsers(response.data || []);
             } catch (error) {
-                console.error("Failed to fetch admin users:", error);
+                console.error("Failed to fetch users:", error);
             } finally {
                 setAdminLoading(false);
             }
         };
-        fetchAdminUsers();
+        fetchUsers();
     }, [navigate]);
 
     const handleSubmit = async (e) => {
@@ -90,7 +91,7 @@ function AdminLoginForm() {
                     </button>
                     <div className="admin-form-group">
                         <p className="admin-login-note">
-                            {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
+                            {adminLoading ? "Loading accounts..." : adminUsers.length > 0 ? "Use your admin or staff credentials to access the dashboard." : "No accounts found. Please contact support."}
                         </p>
                     </div>
                 </form>

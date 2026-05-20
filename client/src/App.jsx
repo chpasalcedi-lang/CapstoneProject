@@ -1,7 +1,6 @@
 import React from 'react';
 import Home from './pages/landing_page';
 import Reservation from './pages/res_book';
-import About from './pages/about';
 import UserLogin from './admin_pages/user_login';
 
 import Dashboard from './admin_pages/admin_dasboard';
@@ -35,7 +34,6 @@ function App() {
         <Route path="/" element={<Navigate to="/Home" replace />} />
         <Route path="/Home" element={<Home />} />
         <Route path="/Reservation" element={<Reservation />} />
-        <Route path="/About" element={<About />} />
         <Route path="/Login" element={<UserLogin />} />
 
         <Route path="/AdminLogin" element={<AdminLoginForm />} />

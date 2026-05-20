@@ -401,6 +401,91 @@ body {
   letter-spacing: 0.02em;
 }
 
+.about-pool {
+  background: #0f1e2e;
+  padding: 96px 56px;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.about-pool-content {
+  display: grid;
+  grid-template-columns: 1.25fr 0.85fr;
+  gap: 48px;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+#carouselExampleDark {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.18);
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-pool-text {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 520px;
+}
+
+.about-pool-text h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  line-height: 1.05;
+  margin-bottom: 0;
+}
+
+.about-pool-text p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.8;
+}
+
+.about-btn-pool {
+  background: #C89A2A;
+  color: #0f1e2e;
+  border: none;
+  border-radius: 6px;
+  padding: 14px 32px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.about-btn-pool:hover {
+  background: #e0b14d;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 900px) {
+  .about-pool {
+    padding: 72px 32px;
+  }
+
+  .about-pool-content {
+    grid-template-columns: 1fr;
+  }
+
+  .about-pool-text {
+    text-align: center;
+  }
+}
+
 
 /* 
    MAP

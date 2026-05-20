@@ -50,7 +50,7 @@ function ResBook() {
             <ul className="landing-nav-links">
             <li><Link to="/">Home</Link></li>
             <li><Link to="/Reservation">Room</Link></li>
-            <li><Link to="/About">About</Link></li>
+            <li><Link to="/Home#about-pool">About</Link></li>
             <li>
                 <Link to="/Login">
                     <button className="landing-btn">

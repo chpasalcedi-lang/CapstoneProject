@@ -1,12 +1,21 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import "../pagescss/landing_page.css";
 
 
 function LandingPage() {
+  const location = useLocation();
 
+  useEffect(() => {
+    if (location.hash === "#about-pool") {
+      const section = document.getElementById("about-pool");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, [location]);
 
   return (
     <div>

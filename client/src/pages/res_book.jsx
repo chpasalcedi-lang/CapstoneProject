@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2";
 import "../pagescss/res_book.css"; 
 import BookReservationModal from "../Modals/book_reservation_modal.jsx";
 import "../pagescss/landing_page.css";
 
 function ResBook() {
+  const navigate = useNavigate();
+  const userEmail = localStorage.getItem('userEmail');
 
   const [BookshowModal, setBookShowModal] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -15,6 +18,23 @@ function ResBook() {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [roomType, setRoomType] = useState('');
+
+  const handleBookClick = (room) => {
+    if (!userEmail) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Login required',
+        text: 'Please log in with your email before booking.',
+      }).then(() => {
+        navigate('/Login');
+      });
+      return;
+    }
+
+    setSelectedRoomId(room.id);
+    setSelectedRoomPrice(room.room_price);
+    setBookShowModal(true);
+  };
 
     const fetchData = () => {
         axios.get('http://localhost:3001/get_rooms')
@@ -129,7 +149,7 @@ function ResBook() {
                             <span className="booking-room-price-amount">₱{room.room_price}</span>
                             <span className="booking-room-price-night">per night</span>
                           </div>
-                          <button className="booking-room-book-btn" onClick={() => { setSelectedRoomId(room.id); setSelectedRoomPrice(room.room_price); setBookShowModal(true); }}>Book Now</button>
+                          <button className="booking-room-book-btn" onClick={() => handleBookClick(room)}>{userEmail ? "Book Now" : "Login to Book"}</button>
                         </div>
                       </div>
                     </div>

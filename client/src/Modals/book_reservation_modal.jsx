@@ -5,13 +5,14 @@ import "../Modalscss/book_reservation_modal.css";
 
 
 function BookReservationModal({ showModal, setShowModal, refreshData, roomId, roomPrice }) {
+    const userEmail = localStorage.getItem('userEmail') || "";
 
     const [values, setValues] = useState({
         last_name: "",
         first_name: "",
         num_guests: "",
         phone_number: "",
-        email: "",
+        email: userEmail,
         check_in_date: "",
         check_out_date: "",
         notes: "",
@@ -24,9 +25,10 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         setValues((prev) => ({
             ...prev,
             room_id: roomId || null,
-            room_price: roomPrice || null
+            room_price: roomPrice || null,
+            email: userEmail || prev.email
         }));
-    }, [roomId, roomPrice]);
+    }, [roomId, roomPrice, userEmail]);
 
     const closeModal = () => {
         setShowModal(false);
@@ -99,7 +101,15 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                   </div>
                   <div className="book-reservation-form-group">
                       <label>Email</label>
-                      <input type="email" name="email" required onChange={(e)=> setValues({...values, email: e.target.value})} placeholder="e.g. example@email.com" />
+                      <input
+                        type="email"
+                        name="email"
+                        required
+                        value={values.email}
+                        onChange={(e)=> setValues({...values, email: e.target.value})}
+                        placeholder="e.g. example@email.com"
+                        disabled={Boolean(userEmail)}
+                      />
                   </div>
                   <div className="book-reservation-form-row">
                     <div className="book-reservation-form-group">

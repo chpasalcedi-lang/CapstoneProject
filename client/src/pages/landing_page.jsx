@@ -136,6 +136,50 @@ function LandingPage() {
         </div>
       </section>
 
+      <section className="landing-contact">
+        <div className="landing-contact-content-main">
+          <span className="landing-contact-eyebrow">Get in Touch</span>
+          <div className="landing-contact-content">
+            <h1>Contact Us</h1>
+            <p>
+              Have questions or need assistance? Our team is here to help.
+              Reach out to us anytime!
+            </p>
+            <div className="contact-info">
+              <p><i className="fa-solid fa-phone"></i> +63 912 345 6789</p>
+              <p>
+                <i className="fa-solid fa-envelope"></i>
+                <a href="mailto:info@messiahresort.com">
+                  info@messiahresort.com
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="landing-feedback">
+          <h1>Tell us about your experience</h1>
+          <p>
+            Your feedback helps us improve and provide the best
+            experience possible.
+          </p>
+
+          <label>Name</label>
+          <input type="text" placeholder="Your Name" />
+
+          <label>Email</label>
+          <input type="email" placeholder="Your Email" />
+
+          <label>Message</label>
+          <textarea className="message-box" placeholder="Your Message"></textarea>
+
+          <button className="landing-btn-feedback">
+            Submit Feedback
+          </button>
+        </div>
+
+      </section>
+
       <footer className="landing-footer">
         <div className="landing-footer-content">
           <p className="landing-footer-brand">MESSIAH</p>

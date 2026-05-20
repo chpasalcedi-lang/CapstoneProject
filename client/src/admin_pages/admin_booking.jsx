@@ -2,8 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Swal from 'sweetalert2';
+import emailjs from "@emailjs/browser";
 import "../admincss/admin_boking.css";
 import ViewBookingModal from "../Modals/view_booking_modal.jsx";
+
+// Initialize EmailJS
+emailjs.init("-Vq78NrvG691mgYQ3");
 
 function AdminBooking() {
     const [bookings, setBookings] = useState([]);
@@ -43,7 +47,40 @@ function AdminBooking() {
 
     const handleConfirm = async (id) => {
         try {
+            // Find the booking details
+            const booking = bookings.find((b) => b.id === id);
+            if (!booking) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Booking not found' });
+                return;
+            }
+
+            // Update reservation status
             await axios.post(`http://localhost:3001/update_reservation/${id}`, { status: 'confirmed' });
+
+            // Prepare email data
+            const templateParams = {
+                email: booking.email,
+                guest_name: `${booking.first_name} ${booking.last_name}`,
+                room_number: booking.room_number,
+                check_in_date: new Date(booking.check_in_date).toLocaleDateString(),
+                check_out_date: new Date(booking.check_out_date).toLocaleDateString(),
+                room_price: `₱${Number(booking.room_price || 0).toLocaleString()}`,
+                num_guests: booking.num_guests,
+            };
+
+            // Send confirmation email
+            try {
+                await emailjs.send(
+                    "service_9fw39gp",
+                    "template_wba3f1m",
+                    templateParams
+                );
+                Swal.fire({ icon: 'success', title: 'Confirmed', text: 'Reservation confirmed and email sent to guest.' });
+            } catch (emailErr) {
+                console.error("Email send error:", emailErr);
+                Swal.fire({ icon: 'warning', title: 'Confirmed', text: 'Reservation confirmed but email failed to send.' });
+            }
+
             // Refetch bookings
             const res = await axios.get('http://localhost:3001/get_reservations');
             setBookings(res.data);

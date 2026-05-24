@@ -232,46 +232,19 @@ function LandingPage() {
           </p>
           <form onSubmit={handleFeedbackSubmit}>
             <label>Name</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Your Name"
-              value={feedback.name}
-              onChange={handleFeedbackChange}
-              required
-            />
+            <input type="text" name="name" placeholder="Your Name" value={feedback.name} onChange={handleFeedbackChange} required/>
 
             <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Your Email"
-              value={feedback.email}
-              onChange={handleFeedbackChange}
-              required
-            />
+            <input type="email" name="email" placeholder="Your Email" value={feedback.email} onChange={handleFeedbackChange} required/>
 
             <label>Message</label>
-            <textarea
-              className="message-box"
-              name="message"
-              placeholder="Your Message"
-              value={feedback.message}
-              onChange={handleFeedbackChange}
-              required
-            />
+            <textarea className="message-box" name="message" placeholder="Your Message" value={feedback.message} onChange={handleFeedbackChange} required/>
 
-            <button
-              type="submit"
-              className="landing-btn-feedback"
-              disabled={submitting}
-            >
-             Submit
+            <button type="submit" className="landing-btn-feedback" disabled={submitting}>
+              Submit
             </button>
           </form>
-
         </div>
-
       </section>
 
       <footer className="landing-footer">

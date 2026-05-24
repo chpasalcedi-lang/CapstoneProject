@@ -139,26 +139,18 @@ function ResBook() {
             <div className="booking-search-bar">
               <div className="booking-field">
                 <label className="booking-field-label">Check-In</label>
-                <input
-                  type="date"
-                  className="booking-input"
-                  value={checkIn}
-                  min={new Date().toISOString().slice(0,10)}
-                  onChange={handleCheckInChange}
-                  placeholder="Select check-in date"
-                />
+                <input type="date" className="booking-input" value={checkIn} 
+                min={new Date().toISOString().slice(0,10)} 
+                onChange={handleCheckInChange} 
+                placeholder="Select check-in date"/>
               </div>
 
               <div className="booking-field">
                 <label className="booking-field-label">Check-Out</label>
-                <input
-                  type="date"
-                  className="booking-input"
-                  value={checkOut}
+                <input type="date" className="booking-input" value={checkOut} 
                   min={checkIn ? (() => { const d = new Date(checkIn); d.setDate(d.getDate() + 1); return d.toISOString().slice(0,10); })() : new Date().toISOString().slice(0,10)}
                   onChange={handleCheckOutChange}
-                  placeholder="Select check-out date"
-                />
+                  placeholder="Select check-out date"/>
               </div>
 
               <div className="booking-field">

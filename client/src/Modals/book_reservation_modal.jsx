@@ -7,6 +7,14 @@ import "../Modalscss/book_reservation_modal.css";
 function BookReservationModal({ showModal, setShowModal, refreshData, roomId, roomPrice }) {
     const userEmail = localStorage.getItem('userEmail') || "";
 
+  const getTodayISO = () => {
+    const t = new Date();
+    const year = t.getFullYear();
+    const month = String(t.getMonth() + 1).padStart(2, '0');
+    const day = String(t.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
     const [values, setValues] = useState({
         last_name: "",
         first_name: "",
@@ -34,8 +42,45 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         setShowModal(false);
     };
 
+    const handleCheckInDateChange = (e) => {
+        const val = e.target.value;
+        if (val && val < getTodayISO()) {
+            Swal.fire({ icon: 'error', title: 'Invalid check-in', text: 'Check-in cannot be in the past.' });
+            return;
+        }
+        setValues({ ...values, check_in_date: val });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
+      const form = document.getElementById('bookReservationForm');
+      if (form && !form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const checkIn = values.check_in_date;
+      const checkOut = values.check_out_date;
+      if (checkIn) {
+        const checkInDate = new Date(checkIn);
+        const todayDate = new Date(getTodayISO());
+        if (checkInDate < todayDate) {
+          Swal.fire({ icon: 'error', title: 'Invalid check-in', text: 'Check-in cannot be in the past.' });
+          return;
+        }
+      }
+      if (checkIn && checkOut) {
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        if (checkOutDate <= checkInDate) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid dates',
+            text: 'Check-out must be later than check-in. Please choose valid dates.'
+          });
+          return;
+        }
+      }
 
         const normalizedPrice = roomPrice ? parseFloat(String(roomPrice).replace(/,/g, '')) : null;
 
@@ -76,7 +121,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                     <p className="book-reservation-modal-eyebrow">New Record</p>
                     <h2 className="book-reservation-modal-title">Book Reservation</h2>
                   </div>
-                  <button className="book-reservation-modal-close" onClick={closeModal}>X</button>
+                  <button className="book-reservation-modal-close" onClick={closeModal}><i className="fa-solid fa-xmark"></i></button>
                 </div>
                 <form id="bookReservationForm" className="book-reservation-modal-body" onSubmit={handleSubmit}>
                   <div className="book-reservation-form-row">
@@ -114,11 +159,26 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                   <div className="book-reservation-form-row">
                     <div className="book-reservation-form-group">
                        <label>Check-in Date</label>
-                      <input type="date" name="check_in_date" required onChange={(e)=> setValues({...values, check_in_date: e.target.value})} className="book-input" />
+                      <input
+                        type="date"
+                        name="check_in_date"
+                        required
+                        value={values.check_in_date}
+                        min={getTodayISO()}
+                        onChange={handleCheckInDateChange}
+                        className="book-input"
+                      />
                     </div>
                     <div className="book-reservation-form-group">
                         <label>Check-out Date</label>
-                        <input type="date" name="check_out_date" required onChange={(e)=> setValues({...values, check_out_date: e.target.value})} className="book-input" />
+                        <input type="date" 
+                          name="check_out_date" 
+                          required 
+                          min={values.check_in_date || ""} 
+                          value={values.check_out_date} 
+                          onChange={(e)=> setValues({...values, check_out_date: e.target.value})} 
+                          className="book-input"
+                        />
                       </div>
                   </div>
                   <div className="book-reservation-form-row">

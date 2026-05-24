@@ -46,21 +46,24 @@
 }
 
 .no-rooms-modal-close {
-  background: none;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
   border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #999;
-  display: flex;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  transition: color 0.2s;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease, color 0.12s ease;
 }
 
 .no-rooms-modal-close:hover {
-  color: #333;
+  background: #e5e7eb;
+  color: #111827;
+  transform: scale(1.03);
 }
 
 .no-rooms-modal-body {

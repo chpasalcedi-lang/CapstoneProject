@@ -3,7 +3,7 @@ import "../Modalscss/update_userAcc_modal.css";
 
 
 function UpdateAccountModal({ show, onClose, onSave, initialData }) {
-    const [formData, setFormData] = React.useState({ name: '', email: '', password: '', confirmPassword: '', role: 'staff' });
+    const [formData, setFormData] = React.useState({ name: '', email: '', password: '', confirmPassword: '', role: '' });
 
     React.useEffect(() => {
         if (show && initialData) {
@@ -12,7 +12,7 @@ function UpdateAccountModal({ show, onClose, onSave, initialData }) {
                 email: initialData.email || '',
                 password: '',
                 confirmPassword: '',
-                role: initialData.role || 'staff'
+                role: initialData.role || ''
             });
         }
     }, [show, initialData]);
@@ -44,7 +44,7 @@ function UpdateAccountModal({ show, onClose, onSave, initialData }) {
                 <div className="update-acc-form-card">
                     <div className="update-acc-modal-header">
                         <h2 className="update-acc-modal-title">Update Account</h2>
-                        <button className="update-acc-modal-close" type="button" onClick={onClose}>×</button>
+                        <button className="update-acc-modal-close" type="button" onClick={onClose}><i className="fa-solid fa-xmark"></i></button>
                     </div>
                     <div className="update-acc-modal-body">
                         <form onSubmit={handleSubmit}>

@@ -16,6 +16,17 @@ function AdminBooking() {
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
+    const [adminData] = useState(() => {
+        const storedUser = localStorage.getItem('adminUser');
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          return {
+            name: parsed.name,
+            role: parsed.role,
+          };
+        }
+        return { name: "?", role: "?" };
+      });
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -176,9 +187,9 @@ function AdminBooking() {
                                       <Link to="/Profile">
                                           <div className="dasboard-admin-status-content">
                                               <h1>System admin</h1>
-                                              <p className="admin-status ">admin</p>
+                                              <p className="admin-status ">{adminData.role}</p>
                                           </div>
-                                          <div className="dasboard-admin-profile"> Ap </div>
+                                          <div className="dasboard-admin-profile"> {adminData.name.charAt(0).toUpperCase()} </div>
                                       </Link>
                                   </div>
                             </ul>

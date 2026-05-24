@@ -13,9 +13,6 @@ body {
   display: flex;
 }
 
-/* 
-   SIDEBAR
- */
 .guests-navbar {
   width: 220px;
   min-height: 100vh;
@@ -91,9 +88,7 @@ body {
   padding-left: 14px;
 }
 
-/* 
-   MAIN AREA
- */
+
 .guests-main {
   width: calc(100vw - 220px);
   margin-left: 220px;
@@ -110,9 +105,7 @@ body {
   margin: 0 auto;
 }
 
-/* 
-   TOPBAR
- */
+
 .guests-topbar {
   display: flex;
   align-items: center;
@@ -132,9 +125,7 @@ body {
   line-height: 1;
 }
 
-/* 
-   BOOKING HEADER 
- */
+
 .guests-booking-headers {
   margin: 16px 0 12px;
   display: flex;
@@ -191,9 +182,6 @@ body {
   box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.06);
 }
 
-/* 
-   BOOKING CONTAINER
-*/
 .guests-booking-container {
   padding: 0;
   margin-bottom: 28px;
@@ -378,6 +366,10 @@ body {
   flex-wrap: nowrap;
 }
 
+.feedback-tables .actions-cell .btn.guest {
+  min-width: 56px;
+  text-align: center;
+}
 
 .btn.guest {
   display: inline-block;
@@ -392,6 +384,33 @@ body {
   transition: opacity 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.btn-primary1.guest {
+  background: rgba(200, 169, 110, 0.12);
+  color: #c8a96e;
+}
+
+.btn-primary1.guest:active,
+.btn-primary1.guest:focus {
+  transform: translateY(1px);
+  outline: none;
+}
+
+.actions-cell {
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .feedback-tables .actions-cell,
+  .booking-table .actions-cell,
+  .guests-tables .actions-cell {
+    gap: 8px;
+  }
+  .btn.guest {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
 }
 
 .btn.guest:hover {

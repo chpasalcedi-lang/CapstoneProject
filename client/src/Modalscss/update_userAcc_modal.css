@@ -62,7 +62,6 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  flex: 0 0 auto;
 }
 
 .update-acc-modal-title {
@@ -72,21 +71,25 @@
 }
 
 .update-acc-modal-close {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  color: #ccc;
-  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f3ee;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background 0.18s ease, transform 0.12s ease;
+  font-size: 1rem;
 }
 
 .update-acc-modal-close:hover {
-  background: rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.16);
+  transform: scale(1.03);
   color: #fff;
 }
 
@@ -131,7 +134,10 @@
   transition: 0.15s;
 }
 
-
+.update-acc-form-group select option {
+    color:  #0c0c0c;
+    background: #ffffff;
+}
 
 .update-acc-modal-footer {
   height: 70px;
@@ -184,7 +190,6 @@
   border-radius: 4px;
 }
 
-/* RESPONSIVE */
 @media (max-width: 600px) {
   .update-acc-form-card {
     width: 100%;

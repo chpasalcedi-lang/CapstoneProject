@@ -1,133 +1,280 @@
-.edit-booking-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+.edit-booking-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(-12px);
+  transition: transform 0.22s ease, opacity 0.22s ease, visibility 0.22s ease;
+  opacity: 0;
+  visibility: hidden;
 }
 
-.edit-booking-modal-content {
-    background: #111111;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+.edit-booking-modal.-hidden {
+  display: none ;
+}
+
+.edit-booking-modal.modal-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.edit-booking-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.edit-booking-form-card {
+  background: #111111;
+  width: 520px;
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 10px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+}
+
+.edit-booking-form-card h2 {
+  color: #f5f3ee;
+  margin-bottom: 8px;
+  font-size: 26px;
 }
 
 .edit-booking-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    flex: 0 0 auto;
+  height: 80px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(249, 248, 248, 0.08);
+}
+.edit-booking-modal-eyebrow {
+  margin: 0 0 3px 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.edit-booking-modal-header h2 {
-    margin: 0;
-    color: #f5f3ee;
-    font-size: 1.5rem;
+.edit-booking-modal-close {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f3ee;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.12s ease, color 0.12s ease;
+  font-size: 1rem;
 }
 
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    color: #f5f3ee;
-    cursor: pointer;
-    padding: 0;
+.edit-booking-modal-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: scale(1.03);
+  color: #ffffff;
+}
+
+.edit-booking-form-card p {
+  color: #b8b8b8;
+  margin-bottom: 24px;
+  line-height: 1.7;
 }
 
 .edit-booking-modal-body {
-    padding: 20px;
-    overflow-y: auto;
-    flex: 1 1 auto;
-    min-height: 0;
+  overflow-y: auto;
+  flex: 1;
+  padding: 20px 30px 20px; 
+  
 }
 
-.edit-form-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    margin-bottom: 16px;
+.edit-booking-form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
-.edit-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.edit-booking-form-row .edit-booking-form-group {
+  flex: 1;
+  margin-bottom: 0;
 }
 
-.edit-form-group label {
-    color: #d3d3d3;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+.edit-booking-form-group {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
 }
 
-.edit-form-group input,
-.edit-form-group textarea,
-.edit-form-group select {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    background: #111111;
-    color: #f5f3ee;
-    padding: 12px;
-    font-size: 14px;
+.edit-booking-form-group:last-child {
+  margin-bottom: 4px;
 }
 
-.edit-form-group input:focus,
-.edit-form-group textarea:focus,
-.edit-form-group select:focus {
-    border-color: #c8a96e;
-    outline: none;
+.edit-booking-form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #d3d3d3;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.edit-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 0;
-    padding: 16px 20px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: #111111;
-    flex: 0 0 auto;
+.edit-booking-form-group label .optional {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 0.74rem;
 }
 
-.edit-btn-cancel,
-.edit-btn-save {
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
+.edit-booking-form-group input,
+.edit-booking-form-group select,
+.edit-booking-form-group textarea {
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #111111;
+  color: #f5f3ee;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.edit-btn-cancel {
-    background: rgba(255, 255, 255, 0.1);
-    color: #d3d3d3;
+.edit-booking-form-group input::placeholder,
+.edit-booking-form-group textarea::placeholder {
+  color: #c4c9d4;
 }
 
-.edit-btn-save {
-    background: #c8a96e;
-    color: #111111;
+.edit-booking-form-group input:hover,
+.edit-booking-form-group select:hover,
+.edit-booking-form-group textarea:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: #1a1a1a;
+}
+.edit-booking-form-group select option {
+  color: #0c0c0c;
+  background: #ffffff;
 }
 
-.edit-status-message {
-    margin-top: 16px;
-    color: #c8a96e;
-    font-size: 14px;
-    background: rgba(200, 169, 110, 0.1);
-    border: 1px solid rgba(200, 169, 110, 0.2);
-    border-radius: 8px;
+.edit-booking-form-group textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.edit-booking-modal-footer {
+  height: 80px; 
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.edit-booking-btn-cancel,
+.edit-booking-btn-save {
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.12s ease;
+}
+
+.edit-booking-btn-cancel {
+  background: rgba(255, 255, 255, 0.06);
+  color: #d3d3d3;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.edit-booking-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.edit-booking-btn-save {
+  background: #c8a96e;
+  color: #111111;
+  border: none;
+}
+
+.edit-booking-btn-save:hover {
+  background: #b8995f;
+  box-shadow: 0 4px 14px rgba(200, 169, 110, 0.3);
+}
+
+.edit-booking-status-message {
+  margin-top: 18px;
+  color: #c8a96e;
+  font-size: 14px;
+  background: rgba(200, 169, 110, 0.1);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+
+@media (max-width: 600px) {
+  .edit-booking-form-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 10px;
+  }
+
+  .edit-booking-modal-header {
+    padding: 14px 16px;
+  }
+
+  .edit-booking-modal-title {
+    font-size: 1.1rem;
+  }
+
+  .edit-booking-modal-body {
+    padding: 16px 16px 10px;
+  }
+
+  .edit-booking-form-row {
+    gap: 10px;
+  }
+
+  .edit-booking-modal-footer {
+    padding: 12px 16px;
+  }
+
+  .edit-booking-btn-cancel,
+  .edit-booking-btn-save {
+    flex: 1;
+    text-align: center;
     padding: 10px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .edit-booking-form-row {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .edit-booking-form-row .edit-booking-form-group {
+    margin-bottom: 14px;
+  }
 }

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2";
+import bcrypt from 'bcryptjs';
 
 const app = express();
 
@@ -21,56 +22,7 @@ db.connect((err) => {
         process.exit(1);
     }
     console.log('Connected to database');
-
-    db.query(`CREATE TABLE IF NOT EXISTS guest (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        number_of_guests INT NOT NULL,
-        food_service VARCHAR(10) NOT NULL,
-        total_price DECIMAL(10,2) NOT NULL,
-        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`, (tableErr) => {
-        if (tableErr) {
-            console.error('Error ensuring guest table exists:', tableErr);
-            process.exit(1);
-        }
-    });
-    db.query(`CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        password VARCHAR(255) NOT NULL,
-        role ENUM('admin','staff') NOT NULL DEFAULT 'staff',
-        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`, (userTableErr) => {
-        if (userTableErr) {
-            console.error('Error ensuring users table exists:', userTableErr);
-            process.exit(1);
-        }
-
-        db.query("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'", (countErr, rows) => {
-            if (!countErr && rows && rows[0] && rows[0].count === 0) {
-                db.query(
-                    'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-                    ['System Administrator', 'admin@example.com', 'admin123', 'admin'],
-                    (insertErr) => {
-                        if (insertErr) {
-                            console.error('Error inserting default admin user:', insertErr);
-                        } else {
-                            console.log('Created default admin user: admin@example.com / admin123');
-                        }
-                    }
-                );
-            }
-        });
-    });
-    // Add room_price column to reservations table if it doesn't exist
-    db.query(`ALTER TABLE reservations ADD COLUMN room_price DECIMAL(10,2) AFTER room_id`, (alterErr) => {
-        // Ignore error if column already exists
-        if (alterErr && alterErr.code !== 'ER_DUP_FIELDNAME') {
-            console.log('Note: room_price column may already exist or other schema update');
-        }
-    });
-}); 
+});
 
 
 app.post('/add_rooms', (req, res) => {
@@ -186,10 +138,12 @@ app.get('/get_admin_users', (req, res) => {
 
 app.post('/add_user_account', (req, res) => {
     const sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
+    const plain = req.body.password || '';
+    const hashed = bcrypt.hashSync(plain, 10);
     const values = [
         req.body.name || '',
         req.body.email || '',
-        req.body.password || '',
+        hashed,
         req.body.role || 'staff'
     ];
     db.query(sql, values, (err, data) => {
@@ -219,8 +173,9 @@ app.post('/update_user_account/:id', (req, res) => {
         values.push(req.body.role);
     }
     if (req.body.password) {
+        const hashed = bcrypt.hashSync(req.body.password, 10);
         fields.push('password = ?');
-        values.push(req.body.password);
+        values.push(hashed);
     }
 
     if (fields.length === 0) {
@@ -262,46 +217,52 @@ app.post('/login', (req, res) => {
         return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const sql = 'SELECT id, name, email, role FROM users WHERE email = ? AND password = ?';
-    db.query(sql, [email, password], (err, results) => {
+    const sql = 'SELECT id, name, email, role, password FROM users WHERE email = ?';
+    db.query(sql, [email], (err, results) => {
         if (err) {
             console.error('Error during login:', err);
             return res.status(500).json({ error: 'Database query error', details: err.message });
         }
-
         if (!results.length) {
-            db.query("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'", (countErr, countRows) => {
-                if (!countErr && countRows && countRows[0] && countRows[0].count === 0) {
-                    if (email === 'admin@example.com' && password === 'admin123') {
-                        const defaultEmail = 'admin@example.com';
-                        const defaultPassword = 'admin123';
-                        db.query(
-                            'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-                            ['System Administrator', defaultEmail, defaultPassword, 'admin'],
-                            (insertErr, insertResult) => {
-                                if (insertErr) {
-                                    console.error('Error creating default admin during login:', insertErr);
-                                    return res.status(500).json({ error: 'Database query error', details: insertErr.message });
-                                }
-                                return res.status(200).json({ message: 'Login successful', user: { id: insertResult.insertId, name: 'System Administrator', email: defaultEmail, role: 'admin' } });
-                            }
-                        );
-                    } else {
-                        return res.status(401).json({ error: 'No admin account found.' });
-                    }
-                } else {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const user = results[0];
+        const hash = user.password || '';
+        const isBcrypt = hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$');
+
+        const finishLogin = () => {
+            delete user.password;
+            console.log('Login successful for:', user.email, 'role:', user.role);
+            return res.status(200).json({ message: 'Login successful', user });
+        };
+
+        if (isBcrypt) {
+            bcrypt.compare(password, hash, (bcryptErr, same) => {
+                if (bcryptErr) {
+                    console.error('Bcrypt compare error:', bcryptErr);
+                    return res.status(500).json({ error: 'Server error' });
+                }
+                if (!same) {
                     return res.status(401).json({ error: 'Invalid email or password' });
                 }
+                finishLogin();
             });
             return;
         }
 
-        const user = results[0];
-        if (user.role !== 'admin') {
-            return res.status(403).json({ error: 'Only admin users may access the dashboard' });
+        if (password === hash) {
+            const newHash = bcrypt.hashSync(password, 10);
+            db.query('UPDATE users SET password = ? WHERE email = ?', [newHash, email], (updateErr) => {
+                if (updateErr) {
+                    console.error('Error migrating plaintext password:', updateErr);
+                }
+                finishLogin();
+            });
+            return;
         }
 
-        return res.status(200).json({ message: 'Login successful', user });
+        return res.status(401).json({ error: 'Invalid email or password' });
     });
 });
 
@@ -414,6 +375,35 @@ app.post('/add_reservation', (req, res) => {
             return res.status(200).json({ message: "Reservation saved successfully!" });
         });
     }
+});
+
+app.post('/add_feedback', (req, res) => {
+    const sql = "INSERT INTO feedback (name, email, message, created_at) VALUES (?, ?, ?, ?)";
+    const values = [
+        req.body.name || '',
+        req.body.email || '',
+        req.body.message || '',
+        new Date()
+    ];
+
+    db.query(sql, values, (err, data) => {
+        if (err) {
+            console.error("Error inserting feedback:", err);
+            return res.status(500).json({ error: "Database query error!", details: err.message });
+        }
+        return res.status(200).json({ message: "Feedback submitted successfully!", feedbackId: data.insertId });
+    });
+});
+
+app.get('/get_feedback', (req, res) => {
+    const sql = "SELECT id, name, email, message, created_at FROM feedback ORDER BY created_at DESC";
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error("Error fetching feedback:", err);
+            return res.status(500).json({ error: "Database query error!", details: err.message });
+        }
+        return res.status(200).json(data);
+    });
 });
 
 app.get('/get_reservations', (req, res) => {

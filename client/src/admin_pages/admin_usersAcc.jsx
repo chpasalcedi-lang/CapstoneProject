@@ -16,6 +16,19 @@ function AdminUsersAcc() {
   const [sortBy, setSortBy] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(false);
+  const [adminData] = useState(() => {
+      const storedUser = localStorage.getItem('adminUser');
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        return {
+          name: parsed.name,
+          role: parsed.role,
+        };
+      }
+      return { name: "?", role: "?" };
+    });
+
+  const isAdmin = adminData.role?.toString().toLowerCase() === 'admin';
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -66,9 +79,6 @@ function AdminUsersAcc() {
       .filter((user) => {
         if (filterRole !== "all") {
           const roleValue = user.role?.toString().toLowerCase() || '';
-          if (filterRole === 'pending') {
-            return !roleValue || roleValue === 'pending';
-          }
           return roleValue === filterRole;
         }
         return true;
@@ -82,16 +92,37 @@ function AdminUsersAcc() {
   );
 
   const formatRoleLabel = (role) => {
-    if (!role || role.toLowerCase() === 'pending') return "Pending";
+    if (!role) return "Pending";
+    if (role.toLowerCase() === 'pending') return "Pending";
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
-  const openEditUser = (user) => {
+  const openEditUser = async (user) => {
+    if (!isAdmin) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Access denied',
+        text: 'Only admin can access this action.',
+      });
+      return;
+    }
+
     setSelectedUser(user);
     setShowUpdateAccModal(true);
   };
 
+  const hasAdminAccount = () => users.some((user) => user.role?.toLowerCase() === 'admin');
+
   const handleCreateUser = async (userData) => {
+    if (userData.role?.toLowerCase() === 'admin' && hasAdminAccount()) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Admin exists',
+        text: 'Only one admin account is allowed.',
+      });
+      return;
+    }
+
     try {
       await axios.post("http://localhost:3001/add_user_account", userData);
       await fetchUsers();
@@ -105,6 +136,19 @@ function AdminUsersAcc() {
 
   const handleUpdateUser = async (updatedData) => {
     if (!selectedUser) return;
+
+    const adminExistsElsewhere = users.some(
+      (user) => user.role?.toLowerCase() === 'admin' && user.id !== selectedUser.id
+    );
+    if (updatedData.role?.toLowerCase() === 'admin' && adminExistsElsewhere) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Admin exists',
+        text: 'Only one admin account is allowed.',
+      });
+      return;
+    }
+
     const payload = {
       name: updatedData.name,
       email: updatedData.email,
@@ -126,20 +170,17 @@ function AdminUsersAcc() {
     }
   };
 
-  const isPendingUser = (user) => !user.role || user.role.toLowerCase() === 'pending';
-
-  const handleAcceptUser = async (id) => {
-    try {
-      await axios.post(`http://localhost:3001/update_user_account/${id}`, { role: 'staff' });
-      await fetchUsers();
-      Swal.fire({ icon: 'success', title: 'Accepted', text: 'User has been approved as staff.' });
-    } catch (err) {
-      console.error("Error accepting staff user:", err);
-      Swal.fire({ icon: 'error', title: 'Accept failed', text: err?.response?.data?.error || 'Unable to accept staff user.' });
-    }
-  };
 
   const handleDeleteUser = async (id) => {
+    if (!isAdmin) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Access denied',
+        text: 'Only admin can access this action.',
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: 'Delete user?',
       text: 'This action cannot be undone.',
@@ -186,9 +227,9 @@ function AdminUsersAcc() {
               <Link to="/Profile">
                 <div className="dasboard-admin-status-content">
                   <h1>System admin</h1>
-                  <p className="admin-status ">admin</p>
+                  <p className="admin-status ">{adminData.role}</p>
                 </div>
-                <div className="dasboard-admin-profile"> Ap </div>
+                <div className="dasboard-admin-profile"> {adminData.name.charAt(0).toUpperCase()} </div>
               </Link>
             </div>
           </ul>
@@ -215,11 +256,10 @@ function AdminUsersAcc() {
                   onChange={handleSearchChange}
                   placeholder="Search users..."
                 />
-                <div className="admin-users-filter-btns">
+                  <div className="admin-users-filter-btns">
                   <button className={filterRole === 'all' ? 'active' : ''} type="button" onClick={() => handleFilterRole('all')}>all</button>
                   <button className={filterRole === 'admin' ? 'active' : ''} type="button" onClick={() => handleFilterRole('admin')}>Admin</button>
                   <button className={filterRole === 'staff' ? 'active' : ''} type="button" onClick={() => handleFilterRole('staff')}>Staff</button>
-                  <button className={filterRole === 'pending' ? 'active' : ''} type="button" onClick={() => handleFilterRole('pending')}>Pending</button>
                 </div>
               </div>
             </div>
@@ -255,16 +295,13 @@ function AdminUsersAcc() {
                       <tr key={user.id}>
                         <td>
                           <div className="user-name-cell">
-                            <div className="avatar">{user.name?.charAt(0) || 'U'}</div>
+                            <div className="avatar">{user.name?.charAt(0)?.toUpperCase()}</div>
                             <span>{user.name}</span>
                           </div>
                         </td>
                         <td>{user.email}</td>
                         <td>{formatRoleLabel(user.role)}</td>
                         <td className="action">
-                          {isPendingUser(user) && (
-                            <button className="admin-users-action-btn accept" type="button" onClick={() => handleAcceptUser(user.id)}>Accept</button>
-                          )}
                           <button className="admin-users-action-btn edit" type="button" onClick={() => openEditUser(user)}>Edit</button>
                           <button className="admin-users-action-btn delete" type="button" onClick={() => handleDeleteUser(user.id)}>Delete</button>
                         </td>

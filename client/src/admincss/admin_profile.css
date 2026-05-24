@@ -350,6 +350,9 @@
   overflow: hidden;
 }
 
+.admin-profile-card.admin-profile-card--editing {
+  justify-content: center;
+}
 
 .admin-profile-card-left {
   display: flex;
@@ -416,6 +419,62 @@
   color: #f0ede8;
   margin-left: 8px;
 }
+
+.admin-profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: min(100%, 540px);
+  padding: 28px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(200, 169, 110, 0.18);
+  margin: 0 auto;
+}
+.admin-profile-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #d8d1c4;
+  font-size: 13px;
+}
+
+.admin-profile-edit-form input {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 15, 15, 0.95);
+  color: #f0ede8;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-profile-edit-form input::placeholder {
+  color: #8f8a7e;
+}
+
+.admin-profile-edit-form input:focus {
+  outline: none;
+  border-color: #c8a96e;
+  box-shadow: 0 0 0 4px rgba(200, 169, 110, 0.14);
+}
+
+.admin-profile-edit-form button {
+  width: fit-content;
+  padding: 12px 30px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #c8a96e);
+  color: #080808;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
 .admin-profile-stats {
   display: flex;
   gap: 18px;

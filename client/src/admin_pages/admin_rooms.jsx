@@ -11,6 +11,19 @@ function AdminRooms() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [data, setData] = useState([]);
+    const [adminData] = useState(() => {
+        const storedUser = localStorage.getItem('adminUser');
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          return {
+            name: parsed.name,
+            role: parsed.role,
+          };
+        }
+        return { name: "?", role: "?" };
+      });
+
+    const isAdmin = adminData.role?.toString().toLowerCase() === 'admin';
 
     const fetchData = () => {
         axios.get("http://localhost:3001/get_rooms")
@@ -28,6 +41,14 @@ function AdminRooms() {
     };
 
     const handleDelete = (roomId) => {
+        if (!isAdmin) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Access denied',
+                text: 'Only admin can access this action.',
+            });
+            return;
+        }
         Swal.fire({
             icon: 'warning',
             title: 'Confirm delete',
@@ -71,9 +92,9 @@ function AdminRooms() {
                                       <Link to="/Profile">
                                           <div className="dasboard-admin-status-content">
                                               <h1>System admin</h1>
-                                              <p className="admin-status ">admin</p>
+                                              <p className="admin-status ">{adminData.role}</p>
                                           </div>
-                                          <div className="dasboard-admin-profile"> Ap </div>
+                                          <div className="dasboard-admin-profile"> {adminData.name.charAt(0).toUpperCase()} </div>
                                       </Link>
                                   </div>
                             </ul>
@@ -98,7 +119,9 @@ function AdminRooms() {
                                 <div className="rooms-room-card-img">
                                     <img src={room.room_image} alt={room.room_name} />
                                     <span className="rooms-room-badge">{room.room_type}</span>
-                                    <span className="rooms-room-rating">Room : {room.room_number}</span>
+                                    {room.room_type?.toLowerCase() !== 'event' && (
+                                        <span className="rooms-room-rating">Room : {room.room_number}</span>
+                                    )}
                                 </div>
                                 <div className="rooms-room-card-body">
                                     <div className="rooms-room-price">

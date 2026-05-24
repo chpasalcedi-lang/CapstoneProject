@@ -17,6 +17,17 @@ function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
+  const [adminData] = useState(() => {
+      const storedUser = localStorage.getItem('adminUser');
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        return {
+          name: parsed.name,
+          role: parsed.role,
+        };
+      }
+      return { name: "?", role: "?" };
+    });
 
 
   useEffect(() => {
@@ -76,9 +87,9 @@ function AdminDashboard() {
                           <Link to="/Profile">
                               <div className="dasboard-admin-status-content">
                                   <h1>System admin</h1>
-                                  <p className="admin-status ">admin</p>
+                                  <p className="admin-status ">{adminData.role}</p>
                               </div>
-                              <div className="dasboard-admin-profile"> Ap </div>
+                              <div className="dasboard-admin-profile"> {adminData.name.charAt(0).toUpperCase()} </div>
                           </Link>
                       </div>
                 </ul>

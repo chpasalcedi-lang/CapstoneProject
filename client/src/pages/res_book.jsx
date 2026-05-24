@@ -55,6 +55,37 @@ function ResBook() {
         setFilteredData(filtered);
     };
 
+    const handleCheckInChange = (e) => {
+      const val = e.target.value;
+      const today = new Date().toISOString().slice(0,10);
+      if (val && val < today) {
+        Swal.fire({ icon: 'error', title: 'Invalid date', text: 'Check-in cannot be in the past.' });
+        return;
+      }
+      setCheckIn(val);
+      if (val && checkOut && checkOut <= val) {
+        setCheckOut('');
+        Swal.fire({ icon: 'info', title: 'Check-out reset', text: 'Please choose a check-out date after the new check-in.' });
+      }
+    };
+
+    const handleCheckOutChange = (e) => {
+      const val = e.target.value;
+      if (checkIn) {
+        if (val <= checkIn) {
+          Swal.fire({ icon: 'error', title: 'Invalid date', text: 'Check-out must be after check-in.' });
+          return;
+        }
+      } else {
+        const today = new Date().toISOString().slice(0,10);
+        if (val < today) {
+          Swal.fire({ icon: 'error', title: 'Invalid date', text: 'Check-out cannot be in the past.' });
+          return;
+        }
+      }
+      setCheckOut(val);
+    };
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -95,12 +126,26 @@ function ResBook() {
             <div className="booking-search-bar">
               <div className="booking-field">
                 <label className="booking-field-label">Check-In</label>
-                <input type="date" className="booking-input" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} placeholder="Select check-in date"/>
+                <input
+                  type="date"
+                  className="booking-input"
+                  value={checkIn}
+                  min={new Date().toISOString().slice(0,10)}
+                  onChange={handleCheckInChange}
+                  placeholder="Select check-in date"
+                />
               </div>
 
               <div className="booking-field">
                 <label className="booking-field-label">Check-Out</label>
-                <input type="date" className="booking-input" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} placeholder="Select check-out date"/>
+                <input
+                  type="date"
+                  className="booking-input"
+                  value={checkOut}
+                  min={checkIn ? (() => { const d = new Date(checkIn); d.setDate(d.getDate() + 1); return d.toISOString().slice(0,10); })() : new Date().toISOString().slice(0,10)}
+                  onChange={handleCheckOutChange}
+                  placeholder="Select check-out date"
+                />
               </div>
 
               <div className="booking-field">
@@ -139,7 +184,9 @@ function ResBook() {
                       <div className="booking-room-card-img">
                         <img src={room.room_image} alt={room.room_name} />
                         <span className="booking-room-badge">{room.room_status}</span>
-                        <span className="booking-room-rating">Room : {room.room_number}</span>
+                        {room.room_type?.toLowerCase() !== 'event' && (
+                            <span className="rooms-room-rating">Room : {room.room_number}</span>
+                        )}
                       </div>
                       <div className="booking-room-card-body">
                         <h3>{room.room_name}</h3>
@@ -149,7 +196,7 @@ function ResBook() {
                             <span className="booking-room-price-amount">₱{room.room_price}</span>
                             <span className="booking-room-price-night">per night</span>
                           </div>
-                          <button className="booking-room-book-btn" onClick={() => handleBookClick(room)}>{userEmail ? "Book Now" : "Login to Book"}</button>
+                          <button className="booking-room-book-btn" onClick={() => handleBookClick(room)}>Book now</button>
                         </div>
                       </div>
                     </div>

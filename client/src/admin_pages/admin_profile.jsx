@@ -1,14 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../admincss/admin_profile.css";
 
 function AdminProfile() {
     const navigate = useNavigate();
+    const [adminData, setAdminData] = useState(() => {
+        const storedUser = localStorage.getItem('adminUser');
+        if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            return {
+                name: parsed.name || parsed.username || parsed.email,
+                email: parsed.email,
+                role: parsed.role,
+            };
+        }
+        return { name: "?", email: "?", role: "?" };
+    });
+    const [editMode, setEditMode] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem('adminUser');
         navigate('/AdminLogin');
     };
+
+    const handleToggleEdit = () => {
+        setEditMode((prev) => !prev);
+    };
+
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+        setAdminData((prevData) => ({ ...prevData, [name]: value }));
+    };
+
+    const handleSaveProfile = () => {
+        const storedUser = localStorage.getItem('adminUser');
+        if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            const updatedUser = { ...parsed, name: adminData.name, email: adminData.email };
+            localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+        }
+        setEditMode(false);
+    };
+
     return (
         <div>
             <nav className="dashboard-navbar">
@@ -29,9 +62,9 @@ function AdminProfile() {
                                 <Link to="/Profile">
                                     <div className="dasboard-admin-status-content">
                                         <h1>System admin</h1>
-                                        <p className="admin-status ">admin</p>
+                                        <p className="admin-status ">{adminData.role}</p>
                                     </div>
-                                    <div className="dasboard-admin-profile"> Ap </div>
+                                    <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
                                 </Link>
                             </div>
                       </ul>
@@ -44,23 +77,55 @@ function AdminProfile() {
                     <div className="admin-profile-topbar">
                         <h1>Profile</h1>
                         <div>
+                            <button className="dashboard-topbar-btn1" onClick={handleToggleEdit}>
+                                {editMode ? "Cancel" : "Edit Profile"}
+                            </button>
                             <button className="dashboard-topbar-btn1" onClick={handleLogout}>Logout</button>
                         </div>
                     </div>
 
                     <div className="admin-profile-content">
-                        <div className="admin-profile-card">
-                            <div className="admin-profile-card-img">
-                                <div className="admin-profile-avatar"> Ap </div>
-                            </div>
-                            <div className="admin-profile-card-body">
-                                <h2>Admin User</h2>
-                                <p>Email:
-                                    <span>
-                                        admin@example.com
-                                    </span>
-                                </p>
-                            </div>
+                        <div className={`admin-profile-card ${editMode ? 'admin-profile-card--editing' : ''}`}>
+                            {editMode ? (
+                                <div className="admin-profile-edit-form">
+                                    <label>
+                                        Name
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={adminData.name}
+                                            onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Email
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={adminData.email}
+                                            onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <button className="dashboard-topbar-btn12" type="button" onClick={handleSaveProfile}>
+                                        Save Profile
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="admin-profile-card-img">
+                                        <div className="admin-profile-avatar">
+                                            {adminData.name.charAt(0).toUpperCase()}
+                                        </div>
+                                    </div>
+                                    <div className="admin-profile-card-body">
+                                        <h2>{adminData.name}</h2>
+                                        <p className="admin-profile-role">{adminData.role}</p>
+                                        <p>Email:
+                                            <span>{adminData.email}</span>
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 

@@ -11,11 +11,10 @@ const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "-Vq78NrvG
 
 emailjs.init(EMAILJS_PUBLIC_KEY);
 
-function AdminLogin() {
+function UserLogin() {
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
     const [otpSent, setOtpSent] = useState(false);
-    const [sentOtp, setSentOtp] = useState("");
     const [waiting, setWaiting] = useState(false);
     const [loggedInEmail, setLoggedInEmail] = useState(null);
     const navigate = useNavigate();
@@ -25,16 +24,30 @@ function AdminLogin() {
         if (storedEmail) {
             setLoggedInEmail(storedEmail);
         }
+
+        const pendingEmail = localStorage.getItem("pendingOtpEmail");
+        const pendingExpires = Number(localStorage.getItem("pendingOtpExpires"));
+
+        if (pendingEmail && pendingExpires && Date.now() < pendingExpires) {
+            setOtpSent(true);
+            setEmail(pendingEmail);
+        } else {
+            localStorage.removeItem("pendingOtp");
+            localStorage.removeItem("pendingOtpEmail");
+            localStorage.removeItem("pendingOtpExpires");
+        }
     }, []);
 
     const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
     const handleSendCode = async () => {
-        if (!email) {
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!normalizedEmail) {
             Swal.fire({ icon: "warning", title: "Enter email", text: "Please type your email address first." });
             return;
         }
 
+        setEmail(normalizedEmail);
         const otp = generateOtp();
         setWaiting(true);
 
@@ -43,20 +56,19 @@ function AdminLogin() {
                 EMAILJS_SERVICE_ID,
                 EMAILJS_TEMPLATE_ID,
                 {
-                    email: email,
+                    email: normalizedEmail,
                     otp: otp,
                     time: "15 minutes",
-                    reply_to: email,
+                    reply_to: normalizedEmail,
                 },
                 EMAILJS_PUBLIC_KEY
             );
 
-            setSentOtp(otp);
             setOtpSent(true);
             localStorage.setItem("pendingOtp", otp);
-            localStorage.setItem("pendingOtpEmail", email);
+            localStorage.setItem("pendingOtpEmail", normalizedEmail);
             localStorage.setItem("pendingOtpExpires", String(Date.now() + 15 * 60 * 1000));
-            Swal.fire({ icon: "success", title: "Code sent", text: `A verification code was sent to ${email}. It will expire in 15 minutes.` });
+            Swal.fire({ icon: "success", title: "Code sent", text: `A verification code was sent to ${normalizedEmail}. It will expire in 15 minutes.` });
         } catch (err) {
             console.error("EmailJS send error:", err);
             Swal.fire({ icon: "error", title: "Email failed", text: "Could not send the verification code. Please try again." });
@@ -71,6 +83,7 @@ function AdminLogin() {
         const storedOtp = localStorage.getItem("pendingOtp");
         const storedEmail = localStorage.getItem("pendingOtpEmail");
         const expires = Number(localStorage.getItem("pendingOtpExpires"));
+        const normalizedEmail = email.trim().toLowerCase();
 
         if (!storedOtp || !storedEmail || !expires) {
             Swal.fire({ icon: "error", title: "No code sent", text: "Please request a verification code first." });
@@ -80,24 +93,28 @@ function AdminLogin() {
         if (Date.now() > expires) {
             Swal.fire({ icon: "warning", title: "Code expired", text: "The verification code expired. Please request a new one." });
             setOtpSent(false);
+            localStorage.removeItem("pendingOtp");
+            localStorage.removeItem("pendingOtpEmail");
+            localStorage.removeItem("pendingOtpExpires");
             return;
         }
 
-        if (email !== storedEmail) {
+        if (normalizedEmail !== storedEmail.toLowerCase()) {
             Swal.fire({ icon: "error", title: "Email mismatch", text: "Please use the same email address that received the code." });
             return;
         }
 
-        if (code !== storedOtp) {
+        if (code.trim() !== storedOtp) {
             Swal.fire({ icon: "error", title: "Invalid code", text: "The verification code is incorrect." });
             return;
         }
 
-        localStorage.setItem("userEmail", email);
+        localStorage.setItem("userEmail", normalizedEmail);
         localStorage.removeItem("pendingOtp");
         localStorage.removeItem("pendingOtpEmail");
         localStorage.removeItem("pendingOtpExpires");
-        setLoggedInEmail(email);
+        setLoggedInEmail(normalizedEmail);
+        setCode("");
         Swal.fire({ icon: "success", title: "Logged in", text: "You are now verified and can book a room." });
         navigate("/Reservation");
     };
@@ -108,9 +125,14 @@ function AdminLogin() {
         Swal.fire({ icon: "success", title: "Logged out", text: "You have been logged out." });
     };
 
+    const handleBackToLanding = () => {
+        navigate("/");
+    };
+
     return (
         <div className="user-login-page">
             <div className="user-login-card">
+                <button className="user-login-close-btn" type="button" onClick={handleBackToLanding}><i className="fa-solid fa-xmark"></i></button>
                 <img src="https://image2url.com/r2/default/images/1772332199936-491a3025-c124-4928-a38c-faad063cc82a.jpg" alt="Login Background" className="admin-login-bg" />
                 <div className="user-login-content">
                     <div className="user-login-header">
@@ -165,4 +187,4 @@ function AdminLogin() {
     );
 }
 
-export default AdminLogin;
+export default UserLogin;

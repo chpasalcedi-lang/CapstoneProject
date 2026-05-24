@@ -413,6 +413,10 @@
 .admin-users-table td:first-child {
   color: #f0ede8;
   font-weight: 500;
+  width: 400px;
+}
+.admin-users-table td:nth-child(2) {
+  width: 300px;
 }
 
 .admin-users-table td.action {

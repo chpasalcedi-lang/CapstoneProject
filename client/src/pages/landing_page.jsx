@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
+import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import "../pagescss/landing_page.css";
@@ -7,6 +9,41 @@ import "../pagescss/landing_page.css";
 
 function LandingPage() {
   const location = useLocation();
+  const [feedback, setFeedback] = useState({ name: '', email: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleFeedbackChange = (e) => {
+    const { name, value } = e.target;
+    setFeedback((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (!feedback.name || !feedback.email || !feedback.message) {
+      alert('Please fill out all fields before submitting your feedback.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await axios.post('http://localhost:3001/add_feedback', feedback);
+      Swal.fire({
+        icon: 'success',
+        title: 'Thank you!',
+        text: 'Your feedback has been submitted successfully.',
+      });
+      setFeedback({ name: '', email: '', message: '' });
+    } catch (error) {
+      console.error('Feedback submission error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Submission failed',
+        text: error.response?.data?.message || 'Unable to submit feedback. Please try again later.',
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (location.hash === "#about-pool") {
@@ -172,19 +209,46 @@ function LandingPage() {
             Your feedback helps us improve and provide the best
             experience possible.
           </p>
+          <form onSubmit={handleFeedbackSubmit}>
+            <label>Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Name"
+              value={feedback.name}
+              onChange={handleFeedbackChange}
+              required
+            />
 
-          <label>Name</label>
-          <input type="text" placeholder="Your Name" />
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Your Email"
+              value={feedback.email}
+              onChange={handleFeedbackChange}
+              required
+            />
 
-          <label>Email</label>
-          <input type="email" placeholder="Your Email" />
+            <label>Message</label>
+            <textarea
+              className="message-box"
+              name="message"
+              placeholder="Your Message"
+              value={feedback.message}
+              onChange={handleFeedbackChange}
+              required
+            />
 
-          <label>Message</label>
-          <textarea className="message-box" placeholder="Your Message"></textarea>
+            <button
+              type="submit"
+              className="landing-btn-feedback"
+              disabled={submitting}
+            >
+             Submit
+            </button>
+          </form>
 
-          <button className="landing-btn-feedback">
-            Submit Feedback
-          </button>
         </div>
 
       </section>

@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import "../admincss/admin_guest.css";
 import EditBookingModal from '../Modals/Edit_booking_modal';
 import ViewBookingModal from '../Modals/view_booking_modal';
+import FeedbackModal from '../Modals/feedback._modal';
 
 
 function AdminGuest() {
@@ -15,11 +16,29 @@ function AdminGuest() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
     const [selectedMonthGuest, setSelectedMonthGuest] = useState("");
+    const [selectedMonthFeedback, setSelectedMonthFeedback] = useState("");
+    const [feedbackList, setFeedbackList] = useState([]);
     const [viewModal, setViewModal] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [editModal, setEditModal] = useState(false);
     const [selectedEditBooking, setSelectedEditBooking] = useState(null);
+    const [feedbackModal, setFeedbackModal] = useState(false);
+    const [selectedFeedback, setSelectedFeedback] = useState(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
+
+    const [adminData] = useState(() => {
+        const storedUser = localStorage.getItem('adminUser');
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          return {
+            name: parsed.name,
+            role: parsed.role,
+          };
+        }
+        return { name: "?", role: "?" };
+      });
+
+    const isAdmin = adminData.role?.toString().toLowerCase() === 'admin';
 
 
     const handleView = (booking) => {
@@ -32,8 +51,14 @@ function AdminGuest() {
         setEditModal(true);
     };
 
+    const handleViewFeedback = (feedback) => {
+        setSelectedFeedback(feedback);
+        setFeedbackModal(true);
+    };
+
     const formatBookingDate = (dateString) => {
         if (!dateString) return '';
+
     const date = new Date(dateString);
         if (Number.isNaN(date.getTime())) return '';
 
@@ -86,11 +111,24 @@ function AdminGuest() {
             }
         };
 
+        const fetchFeedback = async () => {
+            try {
+                const res = await axios.get("http://localhost:3001/get_feedback");
+                setFeedbackList(res.data);
+            } catch (err) {
+                console.error("Error fetching feedback:", err);
+            }
+        };
+
         fetchBookings();
         fetchGuestArrivals();
+        fetchFeedback();
     }, []);
 
     const filteredBookings = bookings.filter((booking) => {
+        const isConfirmed = booking.res_status?.toLowerCase() === 'confirmed';
+        if (!isConfirmed) return false;
+
         const query = searchTerm.toLowerCase();
         const searchMatch = (
             booking.first_name?.toLowerCase().includes(query) ||
@@ -115,7 +153,24 @@ function AdminGuest() {
         return guestMonth === parseInt(selectedMonthGuest);
     });
 
+    const filteredFeedback = feedbackList.filter((feedback) => {
+        if (!selectedMonthFeedback) return true;
+
+        const feedbackDate = new Date(feedback.created_at);
+        const feedbackMonth = feedbackDate.getMonth() + 1;
+        return feedbackMonth === parseInt(selectedMonthFeedback);
+    });
+
     const handleDeleteBooking = async (id) => {
+        if (!isAdmin) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Access denied',
+                text: 'Only admin can access this action.',
+            });
+            return;
+        }
+
         const result = await Swal.fire({
             icon: 'warning',
             title: 'Delete booking',
@@ -139,6 +194,15 @@ function AdminGuest() {
     };
 
     const handleDeleteGuest = async (id) => {
+        if (!isAdmin) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Access denied',
+                text: 'Only admin can access this action.',
+            });
+            return;
+        }
+
         const result = await Swal.fire({
             icon: 'warning',
             title: 'Delete guest record',
@@ -160,6 +224,38 @@ function AdminGuest() {
             Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to delete guest arrival record.' });
         }
     };
+
+    const handleDeleteFeedback = async (id) => {
+        if (!isAdmin) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Access denied',
+                text: 'Only admin can access this action.',
+            });
+            return;
+        }
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Delete feedback',
+            text: 'This will permanently remove the feedback. Continue?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it',
+            cancelButtonText: 'Keep feedback'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await axios.delete(`http://localhost:3001/delete_feedback/${id}`);
+            const res = await axios.get('http://localhost:3001/get_feedback');
+            setFeedbackList(res.data);
+            Swal.fire({ icon: 'success', title: 'Deleted', text: 'Feedback deleted successfully.' });
+        } catch (err) {
+            console.error("Error deleting feedback:", err);
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to delete feedback.' });
+        }
+    };
+
 
     useEffect(() => {
     const handleScroll = () => {
@@ -197,9 +293,9 @@ function AdminGuest() {
                                 <Link to="/Profile">
                                     <div className="dasboard-admin-status-content">
                                         <h1>System admin</h1>
-                                        <p className="admin-status ">admin</p>
+                                        <p className="admin-status ">{adminData.role}</p>
                                     </div>
-                                    <div className="dasboard-admin-profile"> Ap </div>
+                                    <div className="dasboard-admin-profile"> {adminData.name.charAt(0).toUpperCase()} </div>
                                 </Link>
                             </div>
                         </ul>
@@ -278,10 +374,10 @@ function AdminGuest() {
                                     ) : (
                                         filteredBookings.map((booking) => (
                                             <tr key={booking.id}>
-                                                <td>{booking.room_number || 'N/A'}</td>
+                                                <td>{booking.room_number}</td>
                                                 <td>{booking.first_name} {booking.last_name}</td>
-                                                <td>{booking.phone_number || 'N/A'}</td>
-                                                <td>{booking.email || 'N/A'}</td>
+                                                <td>{booking.phone_number}</td>
+                                                <td>{booking.email}</td>
                                                 <td>{formatBookingDate(booking.check_in_date)}</td>
                                                 <td>{formatBookingDate(booking.check_out_date)}</td>
                                                 <td className="actions-cell">
@@ -366,7 +462,7 @@ function AdminGuest() {
                         
                         <p className="Guest-section-label" id="feedback-list"> Feedback list </p>
                         <div className="feedback-booking-headers">
-                            <select className="search-options" >
+                            <select className="search-options" value={selectedMonthFeedback} onChange={(e) => setSelectedMonthFeedback(e.target.value)}>
                                 <option value="">All Months</option>
                                 <option value="1">January</option>
                                 <option value="2">February</option>
@@ -394,15 +490,25 @@ function AdminGuest() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>charls</td>
-                                            <td>Email@domain.com</td>
-                                            <td>ano ni man ahahaha asssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</td>
-                                            <td className="actions-cell">
-                                                <button className="btn guest btn-primary">View</button>
-                                                <button className="btn guest btn-danger">Delete</button>
-                                            </td>
-                                        </tr>
+                                        {filteredFeedback.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                                                    No feedback found.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredFeedback.map((feedback) => (
+                                                <tr key={feedback.id}>
+                                                    <td>{feedback.name}</td>
+                                                    <td>{feedback.email}</td>
+                                                    <td>{feedback.message}</td>
+                                                    <td className="actions-cell">
+                                                        <button className="btn guest btn-primary1" onClick={() => handleViewFeedback(feedback)}>View</button>
+                                                        <button className="btn guest btn-danger" onClick={() => handleDeleteFeedback(feedback.id)}>Delete</button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -415,7 +521,9 @@ function AdminGuest() {
                     // Refetch bookings after update
                     axios.get("http://localhost:3001/get_reservations").then(res => setBookings(res.data));
                 }}/>
-            <ViewBookingModal show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking}/>
+            <ViewBookingModal 
+                show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking} onEdit={handleEdit}/>
+            <FeedbackModal show={feedbackModal} onClose={() => setFeedbackModal(false)} feedback={selectedFeedback} />
         </div>
     );
 }

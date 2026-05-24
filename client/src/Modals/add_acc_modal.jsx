@@ -1,8 +1,13 @@
 import React from "react";
+import Swal from "sweetalert2";
 import "../Modalscss/add_acc_modal.css";
 
 
 function AddAccountModal({ show, onClose, onSave }) {
+    const storedUser = localStorage.getItem('adminUser');
+    const adminData = storedUser ? JSON.parse(storedUser) : { name: '?', role: '?' };
+    const isAdmin = adminData.role?.toString().toLowerCase() === 'admin';
+
     const [formData, setFormData] = React.useState({ name: '', email: '', password: '', role: '' });
 
     React.useEffect(() => {
@@ -18,6 +23,14 @@ function AddAccountModal({ show, onClose, onSave }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!isAdmin) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Access denied',
+                text: 'Only admin can access this action.',
+            });
+            return;
+        }
         if (!formData.name || !formData.email || !formData.password || !formData.role) {
             return;
         }
@@ -30,7 +43,7 @@ function AddAccountModal({ show, onClose, onSave }) {
                 <div className="add-acc-form-card">
                     <div className="add-acc-modal-header">
                         <h2 className="add-acc-modal-title">Add Account</h2>
-                        <button className="add-acc-modal-close" type="button" onClick={onClose}>×</button>
+                        <button className="add-acc-modal-close" type="button" onClick={onClose}><i className="fa-solid fa-xmark"></i></button>
                     </div>
                     <div className="add-acc-modal-body">
                         <form onSubmit={handleSubmit}>
@@ -54,11 +67,11 @@ function AddAccountModal({ show, onClose, onSave }) {
                                     <option value="staff">Staff</option>
                                 </select>
                             </div>
-                            <div className="add-acc-modal-footer">
-                                <button type="button" className="add-acc-btn-cancel" onClick={onClose}>Cancel</button>
-                                <button type="submit" className="add-acc-btn-save">Save Account</button>
-                            </div>
                         </form>
+                    </div>
+                    <div className="add-acc-modal-footer">
+                        <button type="button" className="add-acc-btn-cancel" onClick={onClose}>Cancel</button>
+                        <button type="submit" className="add-acc-btn-save">Save Account</button>
                     </div>
                 </div>
             </div>

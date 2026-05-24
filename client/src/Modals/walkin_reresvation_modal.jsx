@@ -86,35 +86,35 @@ function AdminWalkinModal( { show, onClose }) {
                 <div className="walkin-form-card">
                     <div className="walkin-reservation-modal-header">
                         <h2 className="walkin-reservation-modal-title">Walk-in Reservation</h2>
-                        <button className="walkin-reservation-modal-close" onClick={onClose}>×</button>
+                        <button className="walkin-reservation-modal-close" onClick={onClose}><i className="fa-solid fa-xmark"></i></button>
                     </div>
                     <div className="walkin-reservation-modal-body">
                     <form onSubmit={handleSubmit}>
                         <div className="walkin-reservation-form-row">
                             <div className="walkin-reservation-form-group">
-                            <label>Last Name</label>
-                            <input type="text" name="last_name" required value={values.last_name} onChange={handleChange} placeholder="e.g. Family Name" />
+                                <label>Last Name</label>
+                                <input type="text" name="last_name" required value={values.last_name} onChange={handleChange} placeholder="e.g. Family Name" />
                             </div>
                             <div className="walkin-reservation-form-group">
-                            <label>First Name</label>
-                            <input type="text" name="first_name" required value={values.first_name} onChange={handleChange} placeholder="e.g. First Name" />
+                                <label>First Name</label>
+                                <input type="text" name="first_name" required value={values.first_name} onChange={handleChange} placeholder="e.g. First Name" />
                             </div>
                         </div>
                         <div className="walkin-reservation-form-row">
                             <div className="walkin-reservation-form-group">
-                            <label>No. of Guests</label>
-                            <input type="number" name="num_guests" required value={values.num_guests} onChange={handleChange} placeholder="e.g. 2" />
+                                <label>No. of Guests</label>
+                                <input type="number" name="num_guests" required value={values.num_guests} onChange={handleChange} placeholder="e.g. 2" />
                             </div>
                             <div className="walkin-reservation-form-group">
-                            <label>Room Number</label>
-                            <select name="room_number" required value={values.room_number} onChange={handleChange}>
-                              <option value="">Select Room</option>
-                              {rooms.map(room => (
-                                <option key={room.id} value={String(room.room_number)}>
-                                  {room.room_number} - {room.room_name} ({room.room_type})
-                                </option>
-                              ))}
-                            </select>
+                                <label>Room Number</label>
+                                <select name="room_number" required value={values.room_number} onChange={handleChange}>
+                                <option value="">Select Room</option>
+                                {rooms.map(room => (
+                                    <option key={room.id} value={String(room.room_number)}>
+                                    {room.room_number} - {room.room_name} ({room.room_type})
+                                    </option>
+                                ))}
+                                </select>
                             </div>
                         </div>
                         <div className="walkin-reservation-form-group">
@@ -135,9 +135,6 @@ function AdminWalkinModal( { show, onClose }) {
                                 <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} className="walkin-input" />
                             </div>
                         </div>
-                        
-                        
-
                         <div className="walkin-reservation-form-group">
                             <label>Notes <span className="optional">Optional</span></label>
                             <textarea name="notes" rows="3" value={values.notes} onChange={handleChange} placeholder="..."></textarea>

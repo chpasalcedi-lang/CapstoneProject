@@ -18,6 +18,7 @@ function ResBook() {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [roomType, setRoomType] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleBookClick = (room) => {
     if (!userEmail) {
@@ -35,6 +36,9 @@ function ResBook() {
     setSelectedRoomPrice(room.room_price);
     setBookShowModal(true);
   };
+
+  const toggleMenu = () => setMenuOpen((p) => !p);
+  const closeMenu = () => setMenuOpen(false);
 
     const fetchData = () => {
         axios.get('http://localhost:3001/get_rooms')
@@ -96,20 +100,31 @@ function ResBook() {
       <nav className="landing-navbar">
         <div className="landing-nav-content">
             <div className="logo">
-            <h1>MESSIAH</h1>
+              <h1>MESSIAH</h1>
             </div>
+
             <ul className="landing-nav-links">
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/Reservation">Room</Link></li>
-            <li><Link to="/Home#about-pool">About</Link></li>
-            <li>
-                <Link to="/Login">
-                    <button className="landing-btn">
-                        sign in
-                    </button>
-                </Link>
-            </li>
+              <li><Link to="/Home">Home</Link></li>
+              <li><Link to="/Reservation">Room</Link></li>
+              <li><Link to="/Home#about-pool">About</Link></li>
             </ul>
+
+            <div className="nav-actions">
+              <Link to="/Login">
+                <button className="landing-btn">
+                  sign in
+                </button>
+              </Link>
+              <button className="hamburger-btn" onClick={toggleMenu} aria-label="Toggle menu" aria-expanded={menuOpen}>
+                <i className={`fa-solid ${menuOpen ? "fa-x" : "fa-bars"}`}></i>
+              </button>
+            </div>
+        </div>
+
+        <div className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen}>
+          <Link to="/" onClick={closeMenu}>Home</Link>
+          <Link to="/Reservation" onClick={closeMenu}>Room</Link>
+          <a href="#about-pool" onClick={closeMenu}>About</a>
         </div>
       </nav>
 
@@ -118,8 +133,6 @@ function ResBook() {
           <div className="booking-text">
             <span className="booking-eyebrow">Find Your Perfect Room</span>
             <h1>Room <strong>Availability</strong></h1>
-          
-            
           </div>
        
           <div className="booking-search-wrap">

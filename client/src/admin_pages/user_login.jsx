@@ -126,7 +126,7 @@ function UserLogin() {
     };
 
     const handleBackToLanding = () => {
-        navigate("/");
+        navigate("/Home");
     };
 
     return (

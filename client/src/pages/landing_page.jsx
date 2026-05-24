@@ -11,6 +11,15 @@ function LandingPage() {
   const location = useLocation();
   const [feedback, setFeedback] = useState({ name: '', email: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
 
   const handleFeedbackChange = (e) => {
     const { name, value } = e.target;
@@ -59,22 +68,34 @@ function LandingPage() {
       <nav className="landing-navbar">
         <div className="landing-nav-content">
             <div className="logo">
-            <h1>MESSIAH</h1>
+              <h1>MESSIAH</h1>
             </div>
+
             <ul className="landing-nav-links">
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/Reservation">Room</Link></li>
-            <li><a href="#about-pool">About</a></li>
-            <li>
-                <Link to="/Login">
-                    <button className="landing-btn">
-                        sign in
-                    </button>
-                </Link>
-            </li>
+              <li><Link to="/Home">Home</Link></li>
+              <li><Link to="/Reservation">Room</Link></li>
+              <li><a href="#about-pool">About</a></li>
             </ul>
+
+            <div className="nav-actions">
+              <Link to="/Login">
+                <button className="landing-btn">
+                  sign in
+                </button>
+              </Link>
+              <button className="hamburger-btn" onClick={toggleMenu} aria-label="Toggle menu" aria-expanded={menuOpen}>
+                <i className={`fa-solid ${menuOpen ? "fa-x" : "fa-bars"}`}></i>
+              </button>
+            </div>
         </div>
-    </nav>
+ 
+        <div className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen}>
+          <Link to="/Home" onClick={closeMenu}>Home</Link>
+          <Link to="/Reservation" onClick={closeMenu}>Room</Link>
+          <a href="#about-pool" onClick={closeMenu}>About</a>
+        </div>
+      </nav>
+      
 
       <section className="landing-main">
         <div className="landing-main-content">

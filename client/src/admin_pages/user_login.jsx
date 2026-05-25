@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import emailjs from "@emailjs/browser";
@@ -16,15 +15,9 @@ function UserLogin() {
     const [code, setCode] = useState("");
     const [otpSent, setOtpSent] = useState(false);
     const [waiting, setWaiting] = useState(false);
-    const [loggedInEmail, setLoggedInEmail] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedEmail = localStorage.getItem("userEmail");
-        if (storedEmail) {
-            setLoggedInEmail(storedEmail);
-        }
-
         const pendingEmail = localStorage.getItem("pendingOtpEmail");
         const pendingExpires = Number(localStorage.getItem("pendingOtpExpires"));
 
@@ -113,16 +106,9 @@ function UserLogin() {
         localStorage.removeItem("pendingOtp");
         localStorage.removeItem("pendingOtpEmail");
         localStorage.removeItem("pendingOtpExpires");
-        setLoggedInEmail(normalizedEmail);
         setCode("");
         Swal.fire({ icon: "success", title: "Logged in", text: "You are now verified and can book a room." });
         navigate("/Reservation");
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem("userEmail");
-        setLoggedInEmail(null);
-        Swal.fire({ icon: "success", title: "Logged out", text: "You have been logged out." });
     };
 
     const handleBackToLanding = () => {
@@ -140,47 +126,22 @@ function UserLogin() {
                         <p>Verify with your email before booking a room.</p>
                     </div>
 
-                    {loggedInEmail ? (
-                        <div className="user-login-status">
-                            <p>You are logged in as <strong>{loggedInEmail}</strong>.</p>
-                            <button className="user-login-btn" type="button" onClick={() => navigate('/Reservation')}>Continue to Reservation</button>
-                            <button className="user-login-btn user-logout-btn" type="button" onClick={handleLogout}>Logout</button>
+                    <form className="user-login-form" onSubmit={handleVerify}>
+                        <div className="user-login-field">
+                            <label>Email</label>
+                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required/>
                         </div>
-                    ) : (
-                        <form className="user-login-form" onSubmit={handleVerify}>
-                            <div className="user-login-field">
-                                <label>Email</label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email"
-                                    required
-                                />
-                            </div>
-                            <div className="user-login-buttons">
-                                <button
-                                    type="button"
-                                    className="user-login-btn"
-                                    onClick={handleSendCode}
-                                    disabled={waiting}
-                                >
-                                    {otpSent ? "Resend Code" : "Send Verification Code"}
-                                </button>
-                            </div>
-                            <div className="user-login-field">
-                                <label>Verification Code</label>
-                                <input
-                                    type="text"
-                                    value={code}
-                                    onChange={(e) => setCode(e.target.value)}
-                                    placeholder="Enter verification code"
-                                    required
-                                />
-                            </div>
-                            <button className="user-login-btn" type="submit">Verify and Login</button>
-                        </form>
-                    )}
+                        <div className="user-login-buttons">
+                            <button type="button" className="user-login-btn" onClick={handleSendCode} disabled={waiting}>
+                                {otpSent ? "Resend Code" : "Send Verification Code"}
+                            </button>
+                        </div>
+                        <div className="user-login-field">
+                            <label>Verification Code</label>
+                            <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Enter verification code" required/>
+                        </div>
+                        <button className="user-login-btn" type="submit">Verify and Login</button>
+                    </form>
                 </div>
             </div>
         </div>

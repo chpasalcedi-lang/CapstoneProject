@@ -12,13 +12,23 @@ function LandingPage() {
   const [feedback, setFeedback] = useState({ name: '', email: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState(null);
 
-  const toggleMenu = () => {
-    setMenuOpen((prev) => !prev);
-  };
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("userEmail");
+    if (storedEmail) setUserEmail(storedEmail);
+  }, []);
 
-  const closeMenu = () => {
-    setMenuOpen(false);
+  const toggleMenu = () => setMenuOpen((prev) => !prev);
+  const closeMenu = () => setMenuOpen(false);
+  const toggleProfile = () => setProfileOpen((prev) => !prev);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userEmail");
+    setUserEmail(null);
+    setProfileOpen(false);
+    Swal.fire({ icon: "success", title: "Logged out", text: "You have been logged out." });
   };
 
   const handleFeedbackChange = (e) => {
@@ -63,6 +73,17 @@ function LandingPage() {
     }
   }, [location]);
 
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".profile-dropdown-wrapper")) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div>
       <nav className="landing-navbar">
@@ -78,11 +99,35 @@ function LandingPage() {
             </ul>
 
             <div className="nav-actions">
-              <Link to="/Login">
-                <button className="landing-btn">
-                  sign in
-                </button>
-              </Link>
+              {userEmail ? (
+                <div className="profile-dropdown-wrapper">
+                  <button className="landing-btn" onClick={toggleProfile}>
+                    <i class="fa-solid fa-user"></i>
+                    Profile
+                  </button>
+                  {profileOpen && (
+                    <div className="profile-dropdown">
+                      <div className="profile-dropdown-info">
+                        <div className="profile-dropdown-avatar">
+                          <i className="fa-solid fa-circle-user"></i>
+                        </div>
+                        <div className="profile-dropdown-email">{userEmail}</div>
+                      </div>
+                      <div className="profile-dropdown-divider"/>
+
+                      <button className="profile-dropdown-item profile-dropdown-logout" onClick={handleLogout}>
+                        <i className="fa-solid fa-right-from-bracket"></i> Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/Login">
+                  <button className="landing-btn">
+                    sign in
+                  </button>
+                </Link>
+              )}
               <button className="hamburger-btn" onClick={toggleMenu} aria-label="Toggle menu" aria-expanded={menuOpen}>
                 <i className={`fa-solid ${menuOpen ? "fa-x" : "fa-bars"}`}></i>
               </button>

@@ -19,6 +19,15 @@ function ResBook() {
   const [checkOut, setCheckOut] = useState('');
   const [roomType, setRoomType] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const toggleProfile = () => setProfileOpen((prev) => !prev);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userEmail');
+    setProfileOpen(false);
+    navigate('/Login');
+  };
 
   const handleBookClick = (room) => {
     if (!userEmail) {
@@ -110,11 +119,35 @@ function ResBook() {
             </ul>
 
             <div className="nav-actions">
-              <Link to="/Login">
-                <button className="landing-btn">
-                  sign in
-                </button>
-              </Link>
+              {userEmail ? (
+                <div className="profile-dropdown-wrapper">
+                  <button className="landing-btn" onClick={toggleProfile}>
+                    <i className="fa-solid fa-user"></i>
+                    Profile
+                  </button>
+                  {profileOpen && (
+                    <div className="profile-dropdown">
+                      <div className="profile-dropdown-info">
+                        <div className="profile-dropdown-avatar">
+                          <i className="fa-solid fa-circle-user"></i>
+                        </div>
+                        <div className="profile-dropdown-email">{userEmail}</div>
+                      </div>
+                      <div className="profile-dropdown-divider"/>
+
+                      <button className="profile-dropdown-item profile-dropdown-logout" onClick={handleLogout}>
+                        <i className="fa-solid fa-right-from-bracket"></i> Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/Login">
+                  <button className="landing-btn">
+                    sign in
+                  </button>
+                </Link>
+              )}
               <button className="hamburger-btn" onClick={toggleMenu} aria-label="Toggle menu" aria-expanded={menuOpen}>
                 <i className={`fa-solid ${menuOpen ? "fa-x" : "fa-bars"}`}></i>
               </button>
@@ -155,11 +188,7 @@ function ResBook() {
 
               <div className="booking-field">
                 <label className="booking-field-label">Room Type</label>
-                <select 
-                  className="booking-input booking-select"
-                  value={roomType}
-                  onChange={(e) => setRoomType(e.target.value)}
-                >
+                <select className="booking-input booking-select" value={roomType} onChange={(e) => setRoomType(e.target.value)}>
                   <option value="">All Types</option>
                   <option value="family">Family Room</option>
                   <option value="double">Double Room</option>

@@ -509,94 +509,141 @@
   letter-spacing: 0.12em;
   color: #666;
 }
+/* =========================================================
+   SALES METRICS & OVERVIEW
+========================================================= */
+
 .admin-profile-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-}
-
-
-.admin-profile-activity,
-.admin-profile-logs,
-.admin-profile-settings {
-  background: #0f0f0f;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 18px;
-  padding: 28px;
-  transition: all 0.25s ease;
-}
-
-.admin-profile-activity:hover,
-.admin-profile-logs:hover,
-.admin-profile-settings:hover {
-  border-color: rgba(200,169,110,0.15);
-  transform: translateY(-2px);
-}
-
-.admin-profile-activity h2,
-.admin-profile-logs h2,
-.admin-profile-settings h2 {
-  font-size: 18px;
-  color: #f0ede8;
-  margin-bottom: 22px;
-  position: relative;
-  padding-bottom: 12px;
-  border-bottom: 2px solid rgba(255,255,255,0.06);
-}
-
-
-.admin-profile-activity ul,
-.admin-profile-logs ul,
-.admin-profile-settings ul {
-  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
-.admin-profile-activity li,
-.admin-profile-logs li,
-.admin-profile-settings li {
+/* Top metric cards */
+.admin-sales-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.sales-metric-card {
   background: #111111;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
-  padding: 14px 16px;
-  color: #8b8b8b;
-  font-size: 13px;
-  line-height: 1.5;
-  transition: all 0.2s ease;
+  padding: 1rem;
 }
 
-.admin-profile-activity li:hover,
-.admin-profile-logs li:hover,
-.admin-profile-settings li:hover {
-  background: #151515;
-  border-color: rgba(200,169,110,0.12);
+.sales-metric-card span {
+  font-size: 12px;
+  color: #777;
+  display: block;
+  margin-bottom: 6px;
 }
 
-.admin-profile-settings li a {
-  color: #c8a96e;
-  text-decoration: none;
-}
-
-.admin-profile-settings li a:hover {
+.sales-metric-card h3 {
+  font-size: 26px;
+  font-weight: 600;
   color: #f0ede8;
+  margin: 0;
+}
+
+/* Sales overview card */
+.admin-profile-settings {
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.admin-sales-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.admin-sales-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #777;
+  font-size: 16px;
+}
+
+.admin-sales-title h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f0ede8;
+  margin: 0;
+}
+
+.admin-sales-badge {
+  font-size: 12px;
+  color: #777;
+  background: #1a1a1a;
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+/* Row of 3 cards */
+.sales-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.sales-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  background: #111111;
+}
+
+.sales-card p {
+  font-size: 12px;
+  color: #777;
+  margin: 0 0 4px;
+}
+
+.sales-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #f0ede8;
+  margin: 0;
+}
+
+.sales-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.sales-icon--green {
+  background: rgba(56, 161, 105, 0.15);
+  color: #48bb78;
+}
+
+.sales-icon--blue {
+  background: rgba(66, 153, 225, 0.15);
+  color: #63b3ed;
+}
+
+.sales-icon--amber {
+  background: rgba(237, 137, 54, 0.15);
+  color: #f6ad55;
 }
 
 /* =========================================================
    RESPONSIVE
 ========================================================= */
-
-@media (max-width: 1200px) {
-
-  .admin-profile-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .admin-profile-settings {
-    grid-column: span 2;
-  }
-}
 
 @media (max-width: 980px) {
 
@@ -633,12 +680,9 @@
     gap: 18px;
   }
 
-  .admin-profile-grid {
+  .admin-sales-metrics,
+  .sales-cards-row {
     grid-template-columns: 1fr;
-  }
-
-  .admin-profile-settings {
-    grid-column: span 1;
   }
 
   .admin-profile-card-left {

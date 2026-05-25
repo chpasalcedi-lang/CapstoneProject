@@ -154,8 +154,6 @@ function AdminDashboard() {
 
           </div>
 
-
-          {/* Property Overview */}
           <p className="section-label">Property overview</p>
           <div className="dashboard-stats-grid-4">
 

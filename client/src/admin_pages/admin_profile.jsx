@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../admincss/admin_profile.css";
 
 function AdminProfile() {
@@ -17,6 +18,77 @@ function AdminProfile() {
         return { name: "?", email: "?", role: "?" };
     });
     const [editMode, setEditMode] = useState(false);
+    // live sales totals
+    const [guestSales, setGuestSales] = useState(0);
+    const [bookingConfirmedSales, setBookingConfirmedSales] = useState(0);
+    const [salesLoading, setSalesLoading] = useState(true);
+    // monthly (this month) sales totals
+    const [monthlyGuestSales, setMonthlyGuestSales] = useState(0);
+    const [monthlyBookingConfirmedSales, setMonthlyBookingConfirmedSales] = useState(0);
+
+    useEffect(() => {
+        const parseDateValue = (value) => {
+            if (!value) return null;
+            const normalized = typeof value === 'string' ? value.replace(' ', 'T') : value;
+            const date = new Date(normalized);
+            return Number.isNaN(date.getTime()) ? null : date;
+        };
+
+        const fetchSales = async () => {
+            try {
+                const [guestRes, bookingRes] = await Promise.all([
+                    axios.get("http://localhost:3001/get_guest_arrivals"),
+                    axios.get("http://localhost:3001/get_reservations")
+                ]);
+
+                const guests = guestRes.data || [];
+                const bookings = bookingRes.data || [];
+
+                const guestTotal = guests.reduce((sum, g) => sum + (Number(g.total_price) || 0), 0);
+
+                const confirmedTotal = bookings.reduce((sum, b) => {
+                    const status = (b.res_status || "").toLowerCase();
+                    const val = Number(b.total_price || b.room_price || 0);
+                    return status === "confirmed" ? sum + (Number.isNaN(val) ? 0 : val) : sum;
+                }, 0);
+
+                setGuestSales(guestTotal);
+                setBookingConfirmedSales(confirmedTotal);
+
+                // compute monthly totals (this month)
+                const now = new Date();
+                const month = now.getMonth();
+                const year = now.getFullYear();
+
+                const monthlyGuestTotal = (guests || []).reduce((sum, g) => {
+                    const d = parseDateValue(g.created_at);
+                    if (d && d.getFullYear() === year && d.getMonth() === month) {
+                        return sum + (Number(g.total_price) || 0);
+                    }
+                    return sum;
+                }, 0);
+
+                const monthlyConfirmedTotal = (bookings || []).reduce((sum, b) => {
+                    const status = (b.res_status || "").toLowerCase();
+                    const d = parseDateValue(b.check_in_date);
+                    if (status === 'confirmed' && d && d.getFullYear() === year && d.getMonth() === month) {
+                        const val = Number(b.total_price || b.room_price || 0);
+                        return sum + (Number.isNaN(val) ? 0 : val);
+                    }
+                    return sum;
+                }, 0);
+
+                setMonthlyGuestSales(monthlyGuestTotal);
+                setMonthlyBookingConfirmedSales(monthlyConfirmedTotal);
+            } catch (err) {
+                console.error("Error fetching sales for profile:", err);
+            } finally {
+                setSalesLoading(false);
+            }
+        };
+
+        fetchSales();
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('adminUser');
@@ -130,31 +202,57 @@ function AdminProfile() {
                     </div>
 
                     <div className="admin-profile-grid">
-                        <div className="admin-profile-activity">
-                            <h2>Recent Activity</h2>
-                            <ul>
-                                <li>Updated room details for Room 101</li>
-                                <li>Confirmed booking for Jane Smith</li>
-                                <li>Added new user account for staff member</li>
-                                <li>Generated sales report for last month</li>
-                            </ul>
-                        </div>
-
-                        <div className="admin-profile-logs">
-                            <h2>Activity Logs</h2>
-                            <ul>
-                                <li>Logged in at 09:00 AM</li>
-                                <li>Logged out at 05:00 PM</li>
-                                <li>Updated profile information</li>
-                            </ul>
+                        <div className="admin-sales-metrics">
+                            <div className="sales-metric-card">
+                                <span>Booking sales</span>
+                                <h3>{salesLoading ? '...' : ('₱' + bookingConfirmedSales.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</h3>
+                            </div>
+                            <div className="sales-metric-card">
+                                <span>Guest revenue</span>
+                                <h3>{salesLoading ? '...' : ('₱' + guestSales.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</h3>
+                            </div>
+                            <div className="sales-metric-card">
+                                <span>Total</span>
+                                <h3>{salesLoading ? '...' : ('₱' + (bookingConfirmedSales + guestSales).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</h3>
+                            </div>
                         </div>
                         <div className="admin-profile-settings">
-                            <h2>Sales</h2>
-                            <ul>
-                                <li>Booking Sales + $1,200</li>
-                                <li>Guest Revenue + $2,500</li>
-                                <li>Monthly Sales + $3,700</li>
-                            </ul>
+                            <div className="admin-sales-header">
+                                <div className="admin-sales-title">
+                                    <i className="fa-solid fa-coins"></i>
+                                    <h2>Sales overview</h2>
+                                </div>
+                                    <span className="admin-sales-badge">This month</span>
+                                </div>
+                            <div className="sales-cards-row">
+                                <div className="sales-card">
+                                    <div className="sales-icon-box sales-icon--green">
+                                        <i className="fa-solid fa-bed"></i>
+                                    </div>
+                                    <div>
+                                        <p>Booking sales (this month)</p>
+                                        <h3>{salesLoading ? '...' : ('₱' + monthlyBookingConfirmedSales.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</h3>
+                                    </div>
+                                </div>
+                            <div className="sales-card">
+                                <div className="sales-icon-box sales-icon--blue">
+                                    <i className="fa-solid fa-users"></i>
+                                </div>
+                                <div>
+                                    <p>Guest revenue (this month)</p>
+                                    <h3>{salesLoading ? '...' : ('₱' + monthlyGuestSales.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</h3>
+                                </div>
+                            </div>
+                            <div className="sales-card">
+                                <div className="sales-icon-box sales-icon--amber">
+                                    <i className="fa-solid fa-chart-bar"></i>
+                                </div>
+                                <div>
+                                    <p>Total (this month)</p>
+                                    <h3>{salesLoading ? '...' : ('₱' + (monthlyBookingConfirmedSales + monthlyGuestSales).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</h3>
+                                </div>
+                            </div>
+                            </div>
                         </div>
                     </div>
                 </div>

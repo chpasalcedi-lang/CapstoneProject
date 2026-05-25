@@ -406,6 +406,25 @@ app.get('/get_feedback', (req, res) => {
     });
 });
 
+app.delete('/delete_feedback/:id', (req, res) => {
+    const feedbackId = parseInt(req.params.id, 10);
+    if (Number.isNaN(feedbackId)) {
+        return res.status(400).json({ error: 'Invalid feedback ID.' });
+    }
+
+    const sql = 'DELETE FROM feedback WHERE id = ?';
+    db.query(sql, [feedbackId], (err, result) => {
+        if (err) {
+            console.error('Error deleting feedback:', err);
+            return res.status(500).json({ error: 'Database error.' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Feedback not found.' });
+        }
+        return res.status(200).json({ message: 'Feedback deleted successfully.' });
+    });
+});
+
 app.get('/get_reservations', (req, res) => {
     const sql = `
         SELECT

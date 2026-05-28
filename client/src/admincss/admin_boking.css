@@ -396,7 +396,8 @@ body {
   }
   .guests-main { 
     width: 100%; 
-    margin-left: 0; 
+    margin-left: 0;
+    padding-top: 65px;
   }
   .guests-main-content { 
     padding: 26px 16px 48px; 

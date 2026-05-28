@@ -1,4 +1,3 @@
-/* SIDEBAR */
 .dashboard-navbar {
   width: 220px;
   min-height: 100vh;
@@ -111,7 +110,6 @@
   margin: 0;
 }
 
-
 .dasboard-admin-profile {
   width: 36px;
   height: 36px;
@@ -143,7 +141,6 @@
   margin-top: 0;
 }
 
-
 .dashboard-main1 {
   width: calc(100vw - 220px);
   margin-left: 220px;
@@ -159,7 +156,6 @@
   padding: 56px 48px 96px;
   margin: 0 auto;
 }
-
 
 .dashboard-topbar1 {
   display: flex;
@@ -208,10 +204,6 @@
     align-items: center;
 }
 
-
-/* main content */
-
-
 .admin-profile-main {
   width: calc(100vw - 220px);
   margin-left: 220px;
@@ -228,9 +220,6 @@
   margin: 0 auto;
 }
 
-/* 
-   TOPBAR
- */
 .admin-profile-topbar {
   display: flex;
   align-items: center;
@@ -384,7 +373,6 @@
   transition: 0.3s ease;
 }
 
-
 .admin-profile-card-body {
   display: flex;
   flex-direction: column;
@@ -509,9 +497,6 @@
   letter-spacing: 0.12em;
   color: #666;
 }
-/* =========================================================
-   SALES METRICS & OVERVIEW
-========================================================= */
 
 .admin-profile-grid {
   display: flex;
@@ -519,7 +504,6 @@
   gap: 12px;
 }
 
-/* Top metric cards */
 .admin-sales-metrics {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -547,7 +531,6 @@
   margin: 0;
 }
 
-/* Sales overview card */
 .admin-profile-settings {
   background: #0f0f0f;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -585,7 +568,6 @@
   border-radius: 8px;
 }
 
-/* Row of 3 cards */
 .sales-cards-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -641,9 +623,6 @@
   color: #f6ad55;
 }
 
-/* =========================================================
-   RESPONSIVE
-========================================================= */
 
 @media (max-width: 980px) {
 
@@ -668,6 +647,7 @@
   .admin-profile-main {
     width: 100%;
     margin-left: 0;
+    padding-top: 65px;
   }
 
   .admin-profile-main-content {

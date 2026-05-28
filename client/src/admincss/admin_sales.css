@@ -373,11 +373,12 @@
   }
   
   .admin-sales-main { 
-	width:100%; 
-	margin-left:0;
+	width: 100%; 
+	margin-left: 0;
+	padding-top: 65px;
   }
   .admin-sales-main-content { 
-	padding:26px 16px 48px; 
+	padding: 26px 16px 48px; 
   }
   .sales-stats-grid { 
 	grid-template-columns: 1fr; 

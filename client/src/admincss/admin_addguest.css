@@ -265,6 +265,7 @@
   .dashboard-main1 {
     width: 100%;
     margin-left: 0;
+    padding-top: 65px;
   }
   .add-guest-main-content,
   .dashboard-main-content1 {

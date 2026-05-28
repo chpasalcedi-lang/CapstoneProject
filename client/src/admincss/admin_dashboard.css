@@ -13,7 +13,6 @@ body {
   display: flex;
 }
 
-/* ─── DESKTOP SIDEBAR ───────────────────────────── */
 .dashboard-navbar {
   width: 220px;
   min-height: 100vh;
@@ -108,7 +107,6 @@ body {
   margin-top: 0;
 }
 
-/* Admin status at bottom of sidebar */
 .dasboard-admin-status {
   position: absolute;
   bottom: 0;
@@ -168,7 +166,6 @@ body {
   transition: all 0.25s ease;
 }
 
-/* ─── MAIN CONTENT ──────────────────────────────── */
 .dashboard-main-section {
   width: calc(100vw - 220px);
   margin-left: 220px;
@@ -234,7 +231,6 @@ body {
   box-shadow: 0 0 18px rgba(200, 169, 110, 0.12);
 }
 
-/* ─── SECTION LABEL ─────────────────────────────── */
 .section-label {
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -244,7 +240,6 @@ body {
   font-weight: 500;
 }
 
-/* ─── STAT GRIDS ────────────────────────────────── */
 .dashboard-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -512,7 +507,7 @@ body {
   .dashboard-main-section {
       width: 100% !important;
       margin-left: 0 !important;
-      padding-top: 64px;
+      padding-top: 65px;
   }
 
   .mobile-topbar {

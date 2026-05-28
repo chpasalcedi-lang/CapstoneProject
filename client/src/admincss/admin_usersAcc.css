@@ -385,6 +385,7 @@
   .admin-users-main {
     width: 100%;
     margin-left: 0;
+    padding-top: 65px;
   }
 
   .admin-users-main-content {
@@ -421,15 +422,6 @@
   overflow-x: auto;
 }
 
-.admin-users-table-wrapper::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.admin-users-table-wrapper::-webkit-scrollbar-thumb {
-  background: rgba(200, 169, 110, 0.35);
-  border-radius: 10px;
-}
 
 .admin-users-table {
   width: 100%;

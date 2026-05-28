@@ -336,21 +336,31 @@ body {
 }
 
 @media (max-width: 1400px) {
-  .rooms-main-content { padding: 48px 40px 80px; }
+  .rooms-main-content { 
+    padding: 48px 40px 80px; 
+  }
 }
 
 @media (max-width: 1100px) {
-  .rooms-main-content { padding: 44px 32px 72px; }
-  .rooms-stats-grid { gap: 16px; }
+  .rooms-main-content { 
+    padding: 44px 32px 72px; 
+  }
+  .rooms-stats-grid { 
+    gap: 16px; 
+  }
 }
 
 @media (max-width: 900px) {
-  .rooms-main-content { padding: 36px 24px 56px; }
+  .rooms-main-content { 
+    padding: 36px 24px 56px; 
+  }
   .rooms-stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
-  .rooms-room-card-img { height: 130px; }
+  .rooms-room-card-img { 
+    height: 130px; 
+  }
 }
 
 @media (max-width: 768px) {
@@ -384,9 +394,12 @@ body {
   .rooms-main {
     width: 100%;
     margin-left: 0;
+    padding-top: 65px;
   }
 
-  .rooms-main-content { padding: 26px 20px 48px; }
+  .rooms-main-content { 
+    padding: 26px 20px 48px; 
+  }
 
   .rooms-topbar {
     flex-direction: column;
@@ -402,8 +415,12 @@ body {
 }
 
 @media (max-width: 540px) {
-  .rooms-main-content { padding: 20px 14px 40px; }
-  .rooms-topbar h1 { font-size: 32px; }
+  .rooms-main-content { 
+    padding: 20px 14px 40px; 
+  }
+  .rooms-topbar h1 { 
+    font-size: 32px; 
+  }
   .rooms-stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
@@ -416,6 +433,10 @@ body {
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  .rooms-room-card-img { height: 160px; }
-  .rooms-topbar h1 { font-size: 28px; }
+  .rooms-room-card-img { 
+    height: 160px; 
+  }
+  .rooms-topbar h1 { 
+    font-size: 28px; 
+  }
 }

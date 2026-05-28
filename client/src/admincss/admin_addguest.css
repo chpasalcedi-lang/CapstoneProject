@@ -1,4 +1,4 @@
-.dashboard-main1 {
+.add-guest-main {
   width: calc(100vw - 220px);
   margin-left: 220px;
   min-height: 100vh;
@@ -7,17 +7,14 @@
   overflow-x: hidden;
 }
 
-.dashboard-main-content1 {
+.add-guest-main-content {
   width: 100%;
   max-width: 1280px;
   padding: 56px 48px 96px;
   margin: 0 auto;
 }
 
-/* 
-   TOPBAR
- */
-.dashboard-topbar1 {
+.add-guest-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -26,7 +23,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.dashboard-topbar1 h1 {
+.add-guest-topbar h1 {
   font-family: 'Cormorant Garamond', serif;
   font-size: 40px;
   font-weight: 700;
@@ -35,7 +32,7 @@
   line-height: 1;
 }
 
-.dashboard-topbar-btn1 {
+.add-guest-topbar-btn1{
   background: transparent;
   color: #c8a96e;
   border: 1px solid rgba(200, 169, 110, 0.2);
@@ -49,19 +46,20 @@
   transition: all 0.2s ease;
   text-transform: uppercase;
   white-space: nowrap;
+  text-decoration: none;
 }
 
-.dashboard-topbar-btn1:hover {
+.add-guest-topbar-btn1:hover {
   background: rgba(200, 169, 110, 0.1);
   border-color: #c8a96e;
   color: #bbad90;
   box-shadow: 0 0 18px rgba(200, 169, 110, 0.12);
 }
 
-.dashboard-topbar-btns {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
+.add-guest-topbar-btns {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .add-guest-container {
@@ -253,5 +251,48 @@
 .add-guest-form button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .add-guest-main-content,
+  .dashboard-main-content1 {
+    padding: 36px 24px 56px;
+  }
+}
+
+@media (max-width: 768px) {
+  .add-guest-main,
+  .dashboard-main1 {
+    width: 100%;
+    margin-left: 0;
+  }
+  .add-guest-main-content,
+  .dashboard-main-content1 {
+    padding: 26px 16px 48px;
+  }
+  .add-guest-topbar,
+  .dashboard-topbar1 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .add-guest-topbar h1,
+  .dashboard-topbar1 h1 {
+    font-size: 30px;
+  }
+  .add-guest-form {
+    padding: 24px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .add-guest-form {
+    padding: 20px;
+  }
+  .add-form-summary {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 

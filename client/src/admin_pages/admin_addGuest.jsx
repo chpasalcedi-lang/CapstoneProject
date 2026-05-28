@@ -14,6 +14,7 @@ function AdminAddGuest() {
     foods: "No",
   });
   const [statusMessage, setStatusMessage] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
   const [adminData] = useState(() => {
     const storedUser = localStorage.getItem('adminUser');
@@ -80,41 +81,77 @@ function AdminAddGuest() {
 
   return (
     <div className="wrap">
+      <div className="mobile-topbar">
+        <Link to="/Dashboard">
+          <h1 className="mobile-logo">
+            Messiah
+          </h1>
+        </Link>
+        <button className="mobile-hamburger" onClick={() => setDrawerOpen(prev => !prev)} aria-label={drawerOpen ? "Close menu" : "Open menu"}>
+          <i className={drawerOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
+        </button>
+      </div>
+
+      <div className={`drawer-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
       <nav className="dashboard-navbar">
-                <div className="dashboard-nav-content">
-                    <div className="dashboard-logo">
-                        <Link to="/Dashboard"><h1>Messiah</h1></Link>
-                    </div>
-                        <ul className="dashboard-nav-links">
-                            <p>dashboard</p>
-                            <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
-                            <li><Link to="/Users">User</Link></li>
-                            <li><Link to="/Sales">Sales</Link></li>
-                            <p>management</p>
-                            <li><Link to="/Rooms">Rooms</Link></li>
-                            <li><Link to="/Booking">Booking</Link></li>
-                            <li><Link to="/Guest">Guest / Feedback</Link></li>
-                            <div className="dasboard-admin-status">
-                                <Link to="/Profile">
-                                    <div className="dasboard-admin-status-content">
-                                        <h1>System admin</h1>
-                                        <p className="admin-status ">{adminData.role}</p>
-                                    </div>
-                                    <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
-                                </Link>
-                            </div>
-                      </ul>
+        <div className="dashboard-nav-content">
+          <div className="dashboard-logo">
+            <Link to="/Dashboard"><h1>Messiah</h1></Link>
+          </div>
+          <ul className="dashboard-nav-links">
+            <p>dashboard</p>
+            <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+            <li><Link to="/Users">User</Link></li>
+            <li><Link to="/Sales">Sales</Link></li>
+            <p>management</p>
+            <li><Link to="/Rooms">Rooms</Link></li>
+            <li><Link to="/Booking">Booking</Link></li>
+            <li><Link to="/Guest">Guest / Feedback</Link></li>
+            <div className="dasboard-admin-status">
+              <Link to="/Profile">
+                <div className="dasboard-admin-status-content">
+                  <h1>System admin</h1>
+                  <p className="admin-status">{adminData.role}</p>
                 </div>
-            </nav>
+                <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
+              </Link>
+            </div>
+          </ul>
+        </div>
+      </nav>
 
-      <section className="dashboard-main1">
-        <div className="dashboard-main-content1">
+        <nav className={`drawer-panel ${drawerOpen ? 'open' : ''}`}>
+          <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingRight: 20 }}>
+            <Link to="/Dashboard"><h1>Messiah</h1></Link>
+          </div>
+          <ul className="dashboard-nav-links" onClick={() => setDrawerOpen(false)}>
+            <p>dashboard</p>
+            <li className="active"><Link to="/Dashboard">Dashboard</Link></li>
+            <li><Link to="/Users">User</Link></li>
+            <li><Link to="/Sales">Sales</Link></li>
+            <p>management</p>
+            <li><Link to="/Rooms">Rooms</Link></li>
+            <li><Link to="/Booking">Booking</Link></li>
+            <li><Link to="/Guest">Guest / Feedback</Link></li>
+            <div className="dasboard-admin-status">
+              <Link to="/Profile">
+                <div className="dasboard-admin-status-content">
+                  <h1>System admin</h1>
+                  <p className="admin-status">{adminData.role}</p>
+                </div>
+                <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
+              </Link>
+            </div>
+          </ul>
+        </nav>
 
-          <div className="dashboard-topbar1">
+      <section className="add-guest-main">
+        <div className="add-guest-main-content">
+          <div className="add-guest-topbar">
             <h1>Dashboard</h1>
-            <div className="dashboard-topbar-btns">
-                <button className="dashboard-topbar-btn1" onClick={() => setShowWalkinModal(true)}>Walk in</button>
-                <Link className="dashboard-topbar-btn1" to="/AddGuest">Add Guest</Link>
+            <div className="add-guest-topbar-btns">
+                <button className="add-guest-topbar-btn1" onClick={() => setShowWalkinModal(true)}>Walk in</button>
+                <Link className="add-guest-topbar-btn1" to="/AddGuest">Add Guest</Link>
             </div>
           </div>
             <div className="add-guest-container">
@@ -124,24 +161,11 @@ function AdminAddGuest() {
                       <p className="price-display">Guest Rate: ₱{PRICE_PER_GUEST} | Food Service: ₱{FOOD_CHARGE}</p>
                       <div className="add-form-group">
                         <label>Number of Guests:</label>
-                        <input 
-                          type="number" 
-                          name="number_of_guests" 
-                          required
-                          value={values.number_of_guests}
-                          onChange={handleChange}
-                          placeholder="e.g. 2"
-                          min="1"
-                        />
+                        <input type="number" name="number_of_guests" required value={values.number_of_guests} onChange={handleChange} placeholder="e.g. 2" min="1"/>
                       </div>
                       <div className="add-form-group add-form-checkbox">
                         <label>Include Food Service (₱{FOOD_CHARGE})</label>
-                        <input 
-                          type="checkbox"
-                          name="foods"
-                          checked={values.foods === "Yes"}
-                          onChange={handleFoodsToggle}
-                        />
+                        <input type="checkbox" name="foods" checked={values.foods === "Yes"} onChange={handleFoodsToggle}/>
                       </div>
 
                       <div className="add-form-summary">
@@ -163,7 +187,7 @@ function AdminAddGuest() {
                       <button type="submit"> Confirm </button>
                     </form>
                     {statusMessage && (
-                      <p className={`add-status-message ${statusMessage.includes('✓') ? 'success' : 'error'}`}>
+                      <p className={`add-status-message ${statusMessage.includes('<i class="fa-solid fa-check"></i>') ? 'success' : 'error'}`}>
                         {statusMessage}
                       </p>
                     )}

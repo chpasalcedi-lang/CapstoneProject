@@ -700,3 +700,52 @@
     font-size: 28px;
   }
 }
+
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+
+  .dashboard-navbar {
+    width: 100%;
+    min-height: unset;
+    position: relative;
+    flex-direction: row;
+    padding: 14px 16px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .dashboard-nav-content {
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    height: auto;
+  }
+
+  .dashboard-nav-links {
+    flex-direction: row;
+    padding: 0;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .admin-profile-main {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .admin-profile-main-content {
+    padding: 26px 16px 48px;
+  }
+
+  .admin-profile-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .admin-profile-topbar h1 {
+    font-size: 30px;
+  }
+}

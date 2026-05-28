@@ -12,6 +12,7 @@ const MONTH_LABELS = ['January','February','March','April','May','June','July','
 
 function AdminSales() {
     const [guestSales, setGuestSales] = useState(0);
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const [bookingConfirmedSales, setBookingConfirmedSales] = useState(0);
     const [bookingCanceledLoss, setBookingCanceledLoss] = useState(0);
     const [guestArrivals, setGuestArrivals] = useState([]);
@@ -267,14 +268,11 @@ function AdminSales() {
         return `₱${value.toLocaleString()}`;
     };
 
-    // helpers for nav
-
     const handlePrev = () => {
         if (chartMode === 'year' || chartMode === 'month') {
             setSelectedYear((prev) => prev - 1);
             return;
         }
-
         if (chartMode === 'day') {
             if (selectedMonthIndex === 0) {
                 setSelectedMonthIndex(11);
@@ -290,7 +288,6 @@ function AdminSales() {
             setSelectedYear((prev) => prev + 1);
             return;
         }
-
         if (chartMode === 'day') {
             if (selectedMonthIndex === 11) {
                 setSelectedMonthIndex(0);
@@ -315,32 +312,67 @@ function AdminSales() {
 
     return (
         <div>
+            <div className="mobile-topbar">
+                <Link to="/Dashboard">
+                <h1 className="mobile-logo">Messiah</h1>
+                </Link>
+                <button className="mobile-hamburger" onClick={() => setDrawerOpen(prev => !prev)} aria-label={drawerOpen ? "Close menu" : "Open menu"}>
+                    <i className={drawerOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
+                </button>
+            </div>
+
+            <div className={`drawer-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)}/>
             <nav className="dashboard-navbar">
                 <div className="dashboard-nav-content">
                     <div className="dashboard-logo">
                         <Link to="/Dashboard"><h1>Messiah</h1></Link>
                     </div>
-                        <ul className="dashboard-nav-links">
-                            <p>dashboard</p>
-                            <li><Link to="/Dashboard">Dashboard</Link></li>
-                            <li><Link to="/Users">User</Link></li>
-                            <li className="active"><Link to="/Sales">Sales</Link></li>
-                            <p>management</p>
-                            <li><Link to="/Rooms">Rooms</Link></li>
-                            <li><Link to="/Booking">Booking</Link></li>
-                            <li><Link to="/Guest">Guest / Feedback</Link></li>
-                            <div className="dasboard-admin-status">
-                                <Link to="/Profile">
-                                    <div className="dasboard-admin-status-content">
-                                        <h1>System admin</h1>
-                                        <p className="admin-status ">{adminData.role}</p>
-                                    </div>
-                                    <div className="dasboard-admin-profile"> {adminData.name.charAt(0).toUpperCase()} </div>
-                                </Link>
-                            </div>
-                      </ul>
+                    <ul className="dashboard-nav-links">
+                        <p>dashboard</p>
+                        <li><Link to="/Dashboard">Dashboard</Link></li>
+                        <li><Link to="/Users">User</Link></li>
+                        <li className="active"><Link to="/Sales">Sales</Link></li>
+                        <p>management</p>
+                        <li><Link to="/Rooms">Rooms</Link></li>
+                        <li><Link to="/Booking">Booking</Link></li>
+                        <li><Link to="/Guest">Guest / Feedback</Link></li>
+                        <div className="dasboard-admin-status">
+                            <Link to="/Profile">
+                                <div className="dasboard-admin-status-content">
+                                    <h1>System admin</h1>
+                                    <p className="admin-status">{adminData.role}</p>
+                                </div>
+                                <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
+                            </Link>
+                        </div>
+                    </ul>
                 </div>
             </nav>
+            <nav className={`drawer-panel ${drawerOpen ? 'open' : ''}`}>
+                <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingRight: 20 }}>
+                    <Link to="/Dashboard"><h1>Messiah</h1></Link>
+                </div>
+                <ul className="dashboard-nav-links" onClick={() => setDrawerOpen(false)}>
+                    <p>dashboard</p>
+                    <li><Link to="/Dashboard">Dashboard</Link></li>
+                    <li><Link to="/Users">User</Link></li>
+                    <li className="active"><Link to="/Sales">Sales</Link></li>
+                    <p>management</p>
+                    <li><Link to="/Rooms">Rooms</Link></li>
+                    <li><Link to="/Booking">Booking</Link></li>
+                    <li><Link to="/Guest">Guest / Feedback</Link></li>
+                    <div className="dasboard-admin-status">
+                        <Link to="/Profile">
+                            <div className="dasboard-admin-status-content">
+                            <h1>System admin</h1>
+                            <p className="admin-status">{adminData.role}</p>
+                            </div>
+                            <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
+                        </Link>
+                    </div>
+                </ul>
+            </nav>
+
 
             <section className="admin-sales-main">
                 <div className="admin-sales-main-content">

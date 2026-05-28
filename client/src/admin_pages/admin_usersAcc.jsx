@@ -8,6 +8,7 @@ import UpdateAccountModal from '../Modals/update_userAcc.modal';
 
 function AdminUsersAcc() {
   const [users, setUsers] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [showAddAccModal, setShowAddAccModal] = useState(false);
   const [showUpdateAccModal, setShowUpdateAccModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -106,7 +107,6 @@ function AdminUsersAcc() {
       });
       return;
     }
-
     setSelectedUser(user);
     setShowUpdateAccModal(true);
   };
@@ -136,7 +136,6 @@ function AdminUsersAcc() {
 
   const handleUpdateUser = async (updatedData) => {
     if (!selectedUser) return;
-
     const adminExistsElsewhere = users.some(
       (user) => user.role?.toLowerCase() === 'admin' && user.id !== selectedUser.id
     );
@@ -209,31 +208,65 @@ function AdminUsersAcc() {
 
   return (
     <div>
+      <div className="mobile-topbar">
+          <Link to="/Dashboard">
+          <h1 className="mobile-logo">Messiah</h1>
+          </Link>
+          <button className="mobile-hamburger" onClick={() => setDrawerOpen(prev => !prev)} aria-label={drawerOpen ? "Close menu" : "Open menu"}>
+              <i className={drawerOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
+          </button>
+      </div>
+
+      <div className={`drawer-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)}/>
       <nav className="dashboard-navbar">
-        <div className="dashboard-nav-content">
-          <div className="dashboard-logo">
-            <Link to="/Dashboard"><h1>Messiah</h1></Link>
+          <div className="dashboard-nav-content">
+              <div className="dashboard-logo">
+                  <Link to="/Dashboard"><h1>Messiah</h1></Link>
+              </div>
+              <ul className="dashboard-nav-links">
+                  <p>dashboard</p>
+                  <li><Link to="/Dashboard">Dashboard</Link></li>
+                  <li className="active"><Link to="/Users">User</Link></li>
+                  <li><Link to="/Sales">Sales</Link></li>
+                  <p>management</p>
+                  <li><Link to="/Rooms">Rooms</Link></li>
+                  <li><Link to="/Booking">Booking</Link></li>
+                  <li><Link to="/Guest">Guest / Feedback</Link></li>
+                  <div className="dasboard-admin-status">
+                    <Link to="/Profile">
+                        <div className="dasboard-admin-status-content">
+                            <h1>System admin</h1>
+                            <p className="admin-status">{adminData.role}</p>
+                        </div>
+                        <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
+                    </Link>
+                  </div>
+              </ul>
           </div>
-          <ul className="dashboard-nav-links">
-            <p>dashboard</p>
-            <li><Link to="/Dashboard">Dashboard</Link></li>
-            <li className="active"><Link to="/Users">User</Link></li>
-            <li><Link to="/Sales">Sales</Link></li>
-            <p>management</p>
-            <li><Link to="/Rooms">Rooms</Link></li>
-            <li><Link to="/Booking">Booking</Link></li>
-            <li><Link to="/Guest">Guest / Feedback</Link></li>
-            <div className="dasboard-admin-status">
-              <Link to="/Profile">
-                <div className="dasboard-admin-status-content">
-                  <h1>System admin</h1>
-                  <p className="admin-status ">{adminData.role}</p>
-                </div>
-                <div className="dasboard-admin-profile"> {adminData.name.charAt(0).toUpperCase()} </div>
-              </Link>
-            </div>
-          </ul>
+      </nav>
+      <nav className={`drawer-panel ${drawerOpen ? 'open' : ''}`}>
+        <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingRight: 20 }}>
+          <Link to="/Dashboard"><h1>Messiah</h1></Link>
         </div>
+        <ul className="dashboard-nav-links" onClick={() => setDrawerOpen(false)}>
+          <p>dashboard</p>
+          <li><Link to="/Dashboard">Dashboard</Link></li>
+          <li className="active"><Link to="/Users">User</Link></li>
+          <li><Link to="/Sales">Sales</Link></li>
+          <p>management</p>
+          <li><Link to="/Rooms">Rooms</Link></li>
+          <li><Link to="/Booking">Booking</Link></li>
+          <li><Link to="/Guest">Guest / Feedback</Link></li>
+          <div className="dasboard-admin-status">
+            <Link to="/Profile">
+              <div className="dasboard-admin-status-content">
+                <h1>System admin</h1>
+                <p className="admin-status">{adminData.role}</p>
+              </div>
+              <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
+            </Link>
+          </div>
+        </ul>
       </nav>
 
       <section className="admin-users-main">
@@ -250,12 +283,7 @@ function AdminUsersAcc() {
           <div className="admin-users-stats-bar">
             <div className="admin-users-stats-bar-content">
               <div className="admin-users-stats-card">
-                <input
-                  type="search"
-                  value={searchText}
-                  onChange={handleSearchChange}
-                  placeholder="Search users..."
-                />
+                <input type="search" value={searchText} onChange={handleSearchChange} placeholder="Search users..."/>
                   <div className="admin-users-filter-btns">
                   <button className={filterRole === 'all' ? 'active' : ''} type="button" onClick={() => handleFilterRole('all')}>all</button>
                   <button className={filterRole === 'admin' ? 'active' : ''} type="button" onClick={() => handleFilterRole('admin')}>Admin</button>
@@ -266,7 +294,7 @@ function AdminUsersAcc() {
           </div>
 
           <div className="admin-users-table-container">
-            <h1>User Accounts</h1>
+            <h1 className="admin-users-table-title">User Accounts</h1>
             <div className="admin-users-table-wrapper">
               <table className="admin-users-table">
                 <thead>

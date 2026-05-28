@@ -8,6 +8,7 @@ import "../admincss/admin_rooms.css";
 
 function AdminRooms() {
     const [showAddModal, setShowAddModal] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [data, setData] = useState([]);
@@ -74,7 +75,17 @@ function AdminRooms() {
 
     return (
         <div>
-            <nav className="dashboard-navbar">
+            <div className="mobile-topbar">
+                <Link to="/Dashboard">
+                <h1 className="mobile-logo">Messiah</h1>
+                </Link>
+                <button className="mobile-hamburger" onClick={() => setDrawerOpen(prev => !prev)} aria-label={drawerOpen ? "Close menu" : "Open menu"}>
+                    <i className={drawerOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
+                </button>
+            </div>
+
+            <div className={`drawer-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)}/>
+                <nav className="dashboard-navbar">
                       <div className="dashboard-nav-content">
                           <div className="dashboard-logo">
                               <Link to="/Dashboard"><h1>Messiah</h1></Link>
@@ -99,7 +110,32 @@ function AdminRooms() {
                                   </div>
                             </ul>
                       </div>
-                  </nav>
+                </nav>
+
+                <nav className={`drawer-panel ${drawerOpen ? 'open' : ''}`}>
+                    <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingRight: 20 }}>
+                        <Link to="/Dashboard"><h1>Messiah</h1></Link>
+                    </div>
+                    <ul className="dashboard-nav-links" onClick={() => setDrawerOpen(false)}>
+                        <p>dashboard</p>
+                        <li><Link to="/Dashboard">Dashboard</Link></li>
+                        <li><Link to="/Users">User</Link></li>
+                        <li><Link to="/Sales">Sales</Link></li>
+                        <p>management</p>
+                        <li className="active"><Link to="/Rooms">Rooms</Link></li>
+                        <li><Link to="/Booking">Booking</Link></li>
+                        <li><Link to="/Guest">Guest / Feedback</Link></li>
+                        <div className="dasboard-admin-status">
+                            <Link to="/Profile">
+                                <div className="dasboard-admin-status-content">
+                                <h1>System admin</h1>
+                                <p className="admin-status">{adminData.role}</p>
+                                </div>
+                                <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
+                            </Link>
+                        </div>
+                    </ul>
+                </nav>
 
             <section className="rooms-main">
                 <div className="rooms-main-content">

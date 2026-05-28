@@ -65,25 +65,13 @@ function AdminLoginForm() {
                 <form onSubmit={handleSubmit}>
                     <div className="admin-form-group">
                         <label>Email</label>
-                        <input
-                            type="email"
-                            placeholder="Enter your credentials email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
+                        <input type="email" placeholder="Enter your credentials email" required value={email} onChange={(e) => setEmail(e.target.value)}/>
                     </div>
                     
 
                     <div className="admin-form-group">
                         <label>Password</label>
-                        <input
-                            type="password"
-                            placeholder="Enter your password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                        <input type="password" placeholder="Enter your password" required value={password} onChange={(e) => setPassword(e.target.value)}/>
                     </div>
 
                     <button type="submit" className="login-btn" disabled={loading}>

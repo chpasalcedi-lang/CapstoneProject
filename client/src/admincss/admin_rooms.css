@@ -13,9 +13,6 @@ body {
   display: flex;
 }
 
-/* 
-   SIDEBAR
- */
 .rooms-navbar {
   width: 220px;
   min-height: 100vh;
@@ -91,9 +88,6 @@ body {
   padding-left: 14px;
 }
 
-/* 
-   MAIN AREA
- */
 .rooms-main {
   width: calc(100vw - 220px);
   margin-left: 220px;
@@ -110,9 +104,6 @@ body {
   margin: 0 auto;
 }
 
-/* 
-   TOPBAR
- */
 .rooms-topbar {
   display: flex;
   align-items: center;
@@ -154,9 +145,6 @@ body {
   box-shadow: 0 0 18px rgba(200,169,110,0.12);
 }
 
-/* 
-   GRID
- */
 .rooms-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -164,9 +152,6 @@ body {
   width: 100%;
 }
 
-/* 
-   CARD
- */
 .rooms-stat-card {
   background: #111111;
   border: 1px solid rgba(255,255,255,0.06);
@@ -198,9 +183,7 @@ body {
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
 }
 
-/* 
-   CARD IMAGE
- */
+
 .rooms-room-card-img {
   position: relative;
   height: 160px;             
@@ -251,9 +234,6 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* 
-   CARD BODY
- */
 .rooms-room-card-body {
   padding: 16px 16px 14px;
   display: flex;
@@ -355,22 +335,15 @@ body {
   box-shadow: 0 4px 12px rgba(224,85,85,0.12);
 }
 
-/* 
-   RESPONSIVE
- */
-
-/* Large desktops — still 3 cols but breathing room */
 @media (max-width: 1400px) {
   .rooms-main-content { padding: 48px 40px 80px; }
 }
 
-/* Medium desktops */
 @media (max-width: 1100px) {
   .rooms-main-content { padding: 44px 32px 72px; }
   .rooms-stats-grid { gap: 16px; }
 }
 
-/* Small desktops / large tablets — drop to 2 cols */
 @media (max-width: 900px) {
   .rooms-main-content { padding: 36px 24px 56px; }
   .rooms-stats-grid {
@@ -380,7 +353,6 @@ body {
   .rooms-room-card-img { height: 130px; }
 }
 
-/* Tablets — navbar goes horizontal */
 @media (max-width: 768px) {
   body { flex-direction: column; }
 
@@ -429,7 +401,6 @@ body {
   }
 }
 
-/* Large phones */
 @media (max-width: 540px) {
   .rooms-main-content { padding: 20px 14px 40px; }
   .rooms-topbar h1 { font-size: 32px; }
@@ -440,7 +411,6 @@ body {
   .rooms-room-card-img { height: 110px; }
 }
 
-/* Small phones — single column */
 @media (max-width: 400px) {
   .rooms-stats-grid {
     grid-template-columns: 1fr;

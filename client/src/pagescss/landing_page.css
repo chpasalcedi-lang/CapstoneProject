@@ -368,8 +368,6 @@ body {
   margin: 0 auto;
 }
 
-
-
 .landing-info-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -866,7 +864,6 @@ body {
 .message-box::placeholder {
   color: rgba(255,255,255,0.35);
 }
-/* ── Profile Dropdown ───────────────────────────── */
 
 .nav-actions .landing-btn {
   margin-left: 0;

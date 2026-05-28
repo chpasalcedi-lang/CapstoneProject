@@ -10,6 +10,7 @@ import FeedbackModal from '../Modals/feedback._modal';
 
 function AdminGuest() {
     const [bookings, setBookings] = useState([]);
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const [guestArrivals, setGuestArrivals] = useState([]);
     const [loadingBookings, setLoadingBookings] = useState(true);
     const [loadingGuests, setLoadingGuests] = useState(true);
@@ -275,6 +276,16 @@ function AdminGuest() {
 
     return (
         <div>
+            <div className="mobile-topbar">
+                <Link to="/Dashboard">
+                <h1 className="mobile-logo">Messiah</h1>
+                </Link>
+                <button className="mobile-hamburger" onClick={() => setDrawerOpen(prev => !prev)} aria-label={drawerOpen ? "Close menu" : "Open menu"}>
+                    <i className={drawerOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
+                </button>
+            </div>
+
+            <div className={`drawer-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
             <nav className="dashboard-navbar">
                 <div className="dashboard-nav-content">
                     <div className="dashboard-logo">
@@ -301,6 +312,30 @@ function AdminGuest() {
                         </ul>
                 </div>
             </nav>
+            <nav className={`drawer-panel ${drawerOpen ? 'open' : ''}`}>
+                <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingRight: 20 }}>
+                    <Link to="/Dashboard"><h1>Messiah</h1></Link>
+                </div>
+                <ul className="dashboard-nav-links" onClick={() => setDrawerOpen(false)}>
+                    <p>dashboard</p>
+                    <li><Link to="/Dashboard">Dashboard</Link></li>
+                    <li><Link to="/Users">User</Link></li>
+                    <li><Link to="/Sales">Sales</Link></li>
+                    <p>management</p>
+                    <li><Link to="/Rooms">Rooms</Link></li>
+                    <li><Link to="/Booking">Booking</Link></li>
+                    <li className="active"><Link to="/Guest">Guest / Feedback</Link></li>
+                    <div className="dasboard-admin-status">
+                    <Link to="/Profile">
+                        <div className="dasboard-admin-status-content">
+                        <h1>System admin</h1>
+                        <p className="admin-status">{adminData.role}</p>
+                        </div>
+                        <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
+                    </Link>
+                    </div>
+                </ul>
+            </nav>
 
             <div className={`guests-up-btn ${showScrollTop ? "show" : ""}`} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
                 <i className="fa-solid fa-angles-up"></i>
@@ -311,19 +346,21 @@ function AdminGuest() {
                     <div className="guests-topbar">
                         <h1>Guest Management</h1>
                     </div>
-                    <div className="guests-headers">
-                        <div className="guests-headers-content">
-                            <p className="guests-section-label">Manage guest records and bookings</p>
-                            <div className="guests-headers-links">
-                                <a href="#booking-list"> booking </a>
-                                <a href="#guest-list"> guest </a>
-                                <a href="#feedback-list"> feedback </a>
+
+                    <div className="admin-guest-stats-bar">
+                        <div className="admin-guest-stats-bar-content">
+                            <div className="admin-guest-stats-card">
+                                <p className="guests-section-label">Manage guest records and bookings</p>
+                                <div className="admin-guest-filter-btns">
+                                    <a href="#booking-list"> booking </a>
+                                    <a href="#guest-list"> guest </a>
+                                    <a href="#feedback-list"> feedback </a>
+                                </div>
                             </div>
                         </div>
+                    </div>
                     
-
-
-
+                    
                         <p className="Guest-section-label" id="booking-list">Booking list</p>
                         <div className="guests-booking-headers">
                             <input type="text" className="search-input" placeholder="Search by guest, room, phone, or email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
@@ -513,7 +550,6 @@ function AdminGuest() {
                                 </table>
                             </div>
                         </div>
-                    </div>
                 </div>
             </section>
             <EditBookingModal 

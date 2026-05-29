@@ -359,7 +359,7 @@ body {
 }
 
 .landing-info {
-  background: #0f1e2e;
+  background: #f5f4f0;
   padding: 96px 56px;
   text-align: center;
   position: relative;
@@ -384,7 +384,7 @@ body {
   font-family: 'Playfair Display', serif;
   font-size: clamp(1.9rem, 3.5vw, 2.9rem);
   font-weight: 700;
-  color: #ffffff;
+  color: #0f1e2e;
   margin-bottom: 56px;
 }
 
@@ -400,9 +400,9 @@ body {
 }
 
 .landing-info-content {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #e8e6e0;
+  border-radius: 24px;
   padding: 48px 36px 40px;
   text-align: center;
   position: relative;
@@ -416,11 +416,11 @@ body {
 
 .landing-info-content:hover {
   transform: translateY(-8px);
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(200, 154, 42, 0.25);
+  background: #faf9f6;
+  border-color: rgba(200, 154, 42, 0.3);
   box-shadow:
-    0 24px 56px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(200, 154, 42, 0.1);
+    0 24px 56px rgba(15, 30, 46, 0.12),
+    0 0 0 1px rgba(200, 154, 42, 0.08);
 }
 
 .landing-info-content:hover::before {
@@ -428,28 +428,41 @@ body {
 }
 
 .landing-info-icon {
-  width: 68px;
-  height: 68px;
-  background: rgba(200, 154, 42, 0.15);
-  border: 1px solid rgba(200, 154, 42, 0.3);
-  border-radius: 50%;
-  display: flex;
+  width: 82px;
+  height: 82px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 30, 46, 0.12);
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 28px;
+  font-size: 1.6rem;
+  color: #0f1e2e;
+  box-shadow: 0 12px 24px rgba(15, 30, 46, 0.08);
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.landing-info-icon::before {
+  display: none;
+}
+
+.landing-info-icon span {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 28px;
-  font-size: 1.5rem;
-  transition: background 0.3s, transform 0.3s;
 }
 
 .landing-info-content:hover .landing-info-icon {
-  background: rgba(200, 154, 42, 0.25);
-  transform: scale(1.08);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px rgba(15, 30, 46, 0.12);
+  border-color: rgba(15, 30, 46, 0.18);
 }
 
 .landing-info-content h3 {
   font-family: 'Playfair Display', serif;
   font-size: 1.1rem;
-  color: #ffffff;
+  color: #0f1e2e;
   margin-bottom: 14px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -457,7 +470,7 @@ body {
 
 .landing-info-content p {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: #666;
   line-height: 1.8;
   letter-spacing: 0.02em;
 }

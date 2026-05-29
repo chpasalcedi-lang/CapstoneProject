@@ -6,7 +6,7 @@ import emailjs from "@emailjs/browser";
 import "../admincss/admin_boking.css";
 import ViewBookingModal from "../Modals/view_booking_modal.jsx";
 
-// Initialize EmailJS
+//emailjs API key
 emailjs.init("-Vq78NrvG691mgYQ3");
 
 function AdminBooking() {
@@ -59,7 +59,7 @@ function AdminBooking() {
 
     const handleConfirm = async (id) => {
         try {
-            // Find the booking details
+            //GEt booking details
             const booking = bookings.find((b) => b.id === id);
             if (!booking) {
                 Swal.fire({ icon: 'error', title: 'Error', text: 'Booking not found' });
@@ -183,31 +183,31 @@ function AdminBooking() {
 
             <div className={`drawer-overlay ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} />
             <nav className="dashboard-navbar">
-                <div className="dashboard-nav-content">
-                <div className="dashboard-logo">
-                    <Link to="/Dashboard"><h1>Messiah</h1></Link>
-                </div>
-                <ul className="dashboard-nav-links">
-                    <p>dashboard</p>
-                    <li><Link to="/Dashboard">Dashboard</Link></li>
-                    <li><Link to="/Users">User</Link></li>
-                    <li><Link to="/Sales">Sales</Link></li>
-                    <p>management</p>
-                    <li><Link to="/Rooms">Rooms</Link></li>
-                    <li className="active"><Link to="/Booking">Booking</Link></li>
-                    <li><Link to="/Guest">Guest / Feedback</Link></li>
-                    <div className="dasboard-admin-status">
-                    <Link to="/Profile">
-                        <div className="dasboard-admin-status-content">
-                        <h1>System admin</h1>
-                        <p className="admin-status">{adminData.role}</p>
-                        </div>
-                        <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
-                    </Link>
-                    </div>
-                </ul>
-                </div>
-            </nav>
+                      <div className="dashboard-nav-content">
+                          <div className="dashboard-logo">
+                              <Link to="/Dashboard"><h1>Messiah</h1></Link>
+                          </div>
+                              <ul className="dashboard-nav-links">
+                                  <p>dashboard</p>
+                                  <li><Link to="/Dashboard">Dashboard</Link></li>
+                                  <li><Link to="/Users">User</Link></li>
+                                  <li><Link to="/Sales">Sales</Link></li>
+                                  <p>management</p>
+                                  <li><Link to="/Rooms">Rooms</Link></li>
+                                  <li  className="active"><Link to="/Booking">Booking</Link></li>
+                                  <li><Link to="/Guest">Guest / Feedback</Link></li>
+                                  <div className="dasboard-admin-status">
+                                      <Link to="/Profile">
+                                          <div className="dasboard-admin-status-content">
+                                              <h1>System admin</h1>
+                                              <p className="admin-status ">admin</p>
+                                          </div>
+                                          <div className="dasboard-admin-profile"> Ap </div>
+                                      </Link>
+                                  </div>
+                            </ul>
+                      </div>
+                  </nav>
 
             <nav className={`drawer-panel ${drawerOpen ? 'open' : ''}`}>
                 <div className="dashboard-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingRight: 20 }}>

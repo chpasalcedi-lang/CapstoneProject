@@ -1,29 +1,237 @@
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2";
-import bcrypt from 'bcryptjs';
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 const app = express();
+
+console.log('SERVER STARTED:', { cwd: process.cwd(), scriptFile: import.meta.url });
+
+console.log('PROCESS CWD:', process.cwd());
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+const CREDENTIAL_SECRET = process.env.USER_CREDENTIALS_SECRET || 'ChangeThisSecretInProduction123!';
 
-const db = mysql.createConnection({
-    host:   'localhost',
-    user:   'root',
+function getCredentialKey() {
+  return crypto.createHash('sha256').update(CREDENTIAL_SECRET).digest();
+}
+
+function encryptCredentials(value) {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-cbc', getCredentialKey(), iv);
+  let encrypted = cipher.update(String(value), 'utf8', 'base64');
+  encrypted += cipher.final('base64');
+  return `${iv.toString('base64')}:${encrypted}`;
+}
+
+function decryptCredentials(value) {
+  if (!value) return '';
+  const stringValue = String(value);
+  const parts = stringValue.split(':');
+  if (parts.length !== 2) {
+    return stringValue;
+  }
+
+  try {
+    const [ivString, encryptedData] = parts;
+    const iv = Buffer.from(ivString, 'base64');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', getCredentialKey(), iv);
+    let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (decodeErr) {
+    console.warn('Failed to decrypt credentials, returning raw value:', decodeErr.message);
+    return stringValue;
+  }
+}
+
+function isEncryptedValue(value) {
+  if (!value) return false;
+  const stringValue = String(value);
+  const parts = stringValue.split(':');
+  if (parts.length !== 2) {
+    return false;
+  }
+
+  try {
+    const [ivString, encryptedData] = parts;
+    const iv = Buffer.from(ivString, 'base64');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', getCredentialKey(), iv);
+    decipher.update(encryptedData, 'base64', 'utf8');
+    decipher.final('utf8');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function migrateExistingSensitiveData() {
+  try {
+    const [users] = await db.promise().query('SELECT id, password FROM users');
+    for (const user of users) {
+      if (user.password && !isEncryptedValue(user.password)) {
+        const encryptedPassword = encryptCredentials(user.password);
+        await db.promise().query('UPDATE users SET password = ? WHERE id = ?', [encryptedPassword, user.id]);
+      }
+    }
+
+    const [reservations] = await db.promise().query('SELECT id, last_name, first_name, phone_number, email, notes FROM reservations');
+    for (const reservation of reservations) {
+      const encryptedValues = {};
+      if (reservation.last_name && !isEncryptedValue(reservation.last_name)) {
+        encryptedValues.last_name = encryptCredentials(reservation.last_name);
+      }
+      if (reservation.first_name && !isEncryptedValue(reservation.first_name)) {
+        encryptedValues.first_name = encryptCredentials(reservation.first_name);
+      }
+      if (reservation.phone_number && !isEncryptedValue(reservation.phone_number)) {
+        encryptedValues.phone_number = encryptCredentials(reservation.phone_number);
+      }
+      if (reservation.email && !isEncryptedValue(reservation.email)) {
+        encryptedValues.email = encryptCredentials(reservation.email);
+      }
+      if (reservation.notes && !isEncryptedValue(reservation.notes)) {
+        encryptedValues.notes = encryptCredentials(reservation.notes);
+      }
+      if (Object.keys(encryptedValues).length > 0) {
+        const setClauses = Object.keys(encryptedValues).map((field) => `${field} = ?`).join(', ');
+        const values = Object.values(encryptedValues);
+        values.push(reservation.id);
+        await db.promise().query(`UPDATE reservations SET ${setClauses} WHERE id = ?`, values);
+      }
+    }
+
+    const [guests] = await db.promise().query('SELECT id, food_service FROM guest');
+    for (const guest of guests) {
+      if (guest.food_service && !isEncryptedValue(guest.food_service)) {
+        const encryptedFoodService = encryptCredentials(guest.food_service);
+        await db.promise().query('UPDATE guest SET food_service = ? WHERE id = ?', [encryptedFoodService, guest.id]);
+      }
+    }
+
+    console.log('Migration completed', { timestamp: new Date().toISOString() });
+    return { migrated: true };
+  } catch (err) {
+    console.error('Error migrating existing sensitive data:', err);
+    console.error('Migration error', { error: err.message });
+    throw err;
+  }
+}
+
+const db = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
     password: '',
-    database: 'resort_managements'
-}); 
+    database: 'resort_managements',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
-db.connect((err) => {
+db.getConnection((err, connection) => {
     if (err) {
         console.error('Database connection failed:', err);
+        console.error('Database connection failed', { error: err.message });
         process.exit(1);
     }
     console.log('Connected to database');
+
+    // release the test connection back to the pool
+    connection.release();
+
+    db.query(`CREATE TABLE IF NOT EXISTS guest (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        number_of_guests INT NOT NULL,
+        food_service VARCHAR(10) NOT NULL,
+        total_price DECIMAL(10,2) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`, (tableErr) => {
+        if (tableErr) {
+            console.error('Error ensuring guest table exists:', tableErr);
+        }
+    });
+
+    db.query(`CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(512) NOT NULL,
+        role ENUM('admin','staff') NOT NULL DEFAULT 'staff',
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`, (userTableErr) => {
+        if (userTableErr) {
+            console.error('Error ensuring users table exists:', userTableErr);
+        }
+
+        db.query("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'", (countErr, rows) => {
+            if (!countErr && rows && rows[0] && rows[0].count === 0) {
+                db.query(
+                    'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+                    ['System Administrator', 'admin@example.com', encryptCredentials('admin123'), 'admin'],
+                    (insertErr) => {
+                        if (insertErr) {
+                            console.error('Error inserting default admin user:', insertErr);
+                        } else {
+                            console.log('Created default admin user: admin@example.com / admin123');
+                        }
+                    }
+                );
+            }
+        });
+    });
+
+    db.query(`ALTER TABLE reservations 
+        MODIFY COLUMN last_name VARCHAR(512),
+        MODIFY COLUMN first_name VARCHAR(512),
+        MODIFY COLUMN phone_number VARCHAR(512),
+        MODIFY COLUMN email VARCHAR(512),
+        MODIFY COLUMN notes TEXT`, (alterErr) => {
+        if (alterErr) {
+            console.log('Note: reservation column type migration may already be applied or failed:', alterErr.message);
+        }
+    });
+
+    db.query(`ALTER TABLE guest MODIFY COLUMN food_service VARCHAR(512)`, (alterErr) => {
+        if (alterErr) {
+            console.log('Note: guest column type migration may already be applied or failed:', alterErr.message);
+        }
+    });
+
+    migrateExistingSensitiveData().catch((err) => {
+        console.error('Initial migration failure:', err);
+    });
+
+    // Add room_price column to reservations table if it doesn't exist
+    db.query(`ALTER TABLE reservations ADD COLUMN room_price DECIMAL(10,2) AFTER room_id`, (alterErr) => {
+        // Ignore error if column already exists
+        if (alterErr && alterErr.code !== 'ER_DUP_FIELDNAME') {
+            console.log('Note: room_price column may already exist or other schema update');
+            console.error('Room price alter note', { message: alterErr.message });
+        }
+    });
 });
 
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Rejection:', reason);
+});
+
+
+app.post('/migrate_sensitive_data', async (req, res) => {
+    try {
+        await migrateExistingSensitiveData();
+        return res.status(200).json({ message: 'Sensitive rows migrated successfully.' });
+    } catch (err) {
+        return res.status(500).json({ error: 'Migration failed.', details: err.message });
+    }
+});
 
 app.post('/add_rooms', (req, res) => {
     const sql = "INSERT INTO rooms (room_name, room_number, room_price, room_image, room_type, room_status, room_label) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -115,13 +323,21 @@ app.delete('/delete_guest_arrival/:id', (req, res) => {
 
 
 app.get('/get_user_accounts', (req, res) => {
-    const sql = "SELECT id, name, email, role, created_at FROM users ORDER BY name ASC";
+    const sql = "SELECT id, name, email, role, created_at, password FROM users ORDER BY name ASC";
     db.query(sql, (err, data) => {
         if (err) {
             console.error("Error fetching users:", err);
             return res.status(500).json({ error: "Database query error!" });
         }
-        return res.status(200).json(data);
+        const decryptedUsers = (data || []).map((user) => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            created_at: user.created_at,
+            password: decryptCredentials(user.password)
+        }));
+        return res.status(200).json(decryptedUsers);
     });
 });
 
@@ -143,7 +359,7 @@ app.post('/add_user_account', (req, res) => {
     const values = [
         req.body.name || '',
         req.body.email || '',
-        hashed,
+        encryptCredentials(req.body.password || ''),
         req.body.role || 'staff'
     ];
     db.query(sql, values, (err, data) => {
@@ -175,7 +391,7 @@ app.post('/update_user_account/:id', (req, res) => {
     if (req.body.password) {
         const hashed = bcrypt.hashSync(req.body.password, 10);
         fields.push('password = ?');
-        values.push(hashed);
+        values.push(encryptCredentials(req.body.password));
     }
 
     if (fields.length === 0) {
@@ -193,6 +409,59 @@ app.post('/update_user_account/:id', (req, res) => {
             return res.status(404).json({ error: "User account not found" });
         }
         return res.status(200).json({ message: "User account updated successfully" });
+    });
+});
+
+app.post('/login', (req, res) => {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const sql = 'SELECT id, name, email, role, password FROM users WHERE email = ?';
+    db.query(sql, [email], (err, results) => {
+        if (err) {
+            console.error('Error during login:', err);
+            return res.status(500).json({ error: 'Database query error', details: err.message });
+        }
+
+        if (!results.length) {
+            db.query("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'", (countErr, countRows) => {
+                if (!countErr && countRows && countRows[0] && countRows[0].count === 0) {
+                    if (email === 'admin@example.com' && password === 'admin123') {
+                        const defaultEmail = 'admin@example.com';
+                        const defaultPassword = 'admin123';
+                        db.query(
+                            'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+                            ['System Administrator', defaultEmail, encryptCredentials(defaultPassword), 'admin'],
+                            (insertErr, insertResult) => {
+                                if (insertErr) {
+                                    console.error('Error creating default admin during login:', insertErr);
+                                    return res.status(500).json({ error: 'Database query error', details: insertErr.message });
+                                }
+                                return res.status(200).json({ message: 'Login successful', user: { id: insertResult.insertId, name: 'System Administrator', email: defaultEmail, role: 'admin' } });
+                            }
+                        );
+                    } else {
+                        return res.status(401).json({ error: 'No admin account found. Use admin@example.com / admin123 to initialize admin access.' });
+                    }
+                } else {
+                    return res.status(401).json({ error: 'Invalid email or password' });
+                }
+            });
+            return;
+        }
+
+        const user = results[0];
+        const storedPassword = decryptCredentials(user.password);
+        if (storedPassword !== password) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        if (user.role !== 'admin') {
+            return res.status(403).json({ error: 'Only admin users may access the dashboard' });
+        }
+
+        return res.status(200).json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, role: user.role } });
     });
 });
 
@@ -267,6 +536,7 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/add_reservation', (req, res) => {
+    console.log('Incoming /add_reservation payload:', req.body);
     const rawRoomPrice = req.body.room_price;
     const normalizedRoomPrice = rawRoomPrice != null ? parseFloat(String(rawRoomPrice).replace(/,/g, '')) : null;
     const numGuests = parseInt(req.body.num_guests, 10) || 0;
@@ -277,25 +547,28 @@ app.post('/add_reservation', (req, res) => {
         // Room price is provided, insert directly
         const sql = "INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         const values = [
-            req.body.last_name || '',
-            req.body.first_name || '',
+            encryptCredentials(req.body.last_name || ''),
+            encryptCredentials(req.body.first_name || ''),
             numGuests,
-            req.body.phone_number || '',
-            req.body.email || '',
+            encryptCredentials(req.body.phone_number || ''),
+            encryptCredentials(req.body.email || ''),
             req.body.check_in_date,
             req.body.check_out_date,
-            req.body.notes || '',
+            encryptCredentials(req.body.notes || ''),
             req.body.status || 'pending',
             roomId,
             normalizedRoomPrice
         ];
+        console.log('DEBUG add_reservation values:', values);
         db.query(sql, values, (err, data) => {
             if (err) {
                 console.error("Error inserting reservation:", err);
                 return res.status(500).json({ error: "Database query error!", details: err.message });
             }
             console.log(`Reservation created with room_price=${normalizedRoomPrice}`);
-            return res.status(200).json({ message: "Reservation saved successfully!" });
+            const resp = { message: "Reservation saved successfully!" };
+            if (process.env.DEBUG_RESERVATION === '1') resp.debug_values = values;
+            return res.status(200).json(resp);
         });
     } else if (roomId) {
         // Get room_price from rooms table
@@ -306,14 +579,14 @@ app.post('/add_reservation', (req, res) => {
                 // Still insert even if room price fetch fails
                 const sql = "INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 const values = [
-                    req.body.last_name || '',
-                    req.body.first_name || '',
+                    encryptCredentials(req.body.last_name || ''),
+                    encryptCredentials(req.body.first_name || ''),
                     numGuests,
-                    req.body.phone_number || '',
-                    req.body.email || '',
+                    encryptCredentials(req.body.phone_number || ''),
+                    encryptCredentials(req.body.email || ''),
                     req.body.check_in_date,
                     req.body.check_out_date,
-                    req.body.notes || '',
+                    encryptCredentials(req.body.notes || ''),
                     req.body.status || 'pending',
                     roomId,
                     null
@@ -323,20 +596,22 @@ app.post('/add_reservation', (req, res) => {
                         console.error("Error inserting reservation:", err);
                         return res.status(500).json({ error: "Database query error!", details: err.message });
                     }
-                    return res.status(200).json({ message: "Reservation saved successfully!" });
+                    const resp = { message: "Reservation saved successfully!" };
+                    if (process.env.DEBUG_RESERVATION === '1') resp.debug_values = values;
+                    return res.status(200).json(resp);
                 });
             } else {
                 const roomPrice = parseFloat(String(results[0].room_price).replace(/,/g, '')) || null;
                 const sql = "INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 const values = [
-                    req.body.last_name || '',
-                    req.body.first_name || '',
+                    encryptCredentials(req.body.last_name || ''),
+                    encryptCredentials(req.body.first_name || ''),
                     numGuests,
-                    req.body.phone_number || '',
-                    req.body.email || '',
+                    encryptCredentials(req.body.phone_number || ''),
+                    encryptCredentials(req.body.email || ''),
                     req.body.check_in_date,
                     req.body.check_out_date,
-                    req.body.notes || '',
+                    encryptCredentials(req.body.notes || ''),
                     req.body.status || 'pending',
                     roomId,
                     roomPrice
@@ -347,7 +622,9 @@ app.post('/add_reservation', (req, res) => {
                         return res.status(500).json({ error: "Database query error!", details: err.message });
                     }
                     console.log(`Reservation created with room_price=${roomPrice}`);
-                    return res.status(200).json({ message: "Reservation saved successfully!" });
+                    const resp = { message: "Reservation saved successfully!" };
+                    if (process.env.DEBUG_RESERVATION === '1') resp.debug_values = values;
+                    return res.status(200).json(resp);
                 });
             }
         });
@@ -355,14 +632,14 @@ app.post('/add_reservation', (req, res) => {
         // No room_price and no room_id
         const sql = "INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         const values = [
-            req.body.last_name || '',
-            req.body.first_name || '',
+            encryptCredentials(req.body.last_name || ''),
+            encryptCredentials(req.body.first_name || ''),
             numGuests,
-            req.body.phone_number || '',
-            req.body.email || '',
+            encryptCredentials(req.body.phone_number || ''),
+            encryptCredentials(req.body.email || ''),
             req.body.check_in_date,
             req.body.check_out_date,
-            req.body.notes || '',
+            encryptCredentials(req.body.notes || ''),
             req.body.status || 'pending',
             null,
             null
@@ -372,7 +649,9 @@ app.post('/add_reservation', (req, res) => {
                 console.error("Error inserting reservation:", err);
                 return res.status(500).json({ error: "Database query error!", details: err.message });
             }
-            return res.status(200).json({ message: "Reservation saved successfully!" });
+            const resp = { message: "Reservation saved successfully!" };
+            if (process.env.DEBUG_RESERVATION === '1') resp.debug_values = values;
+            return res.status(200).json(resp);
         });
     }
 });
@@ -444,7 +723,15 @@ app.get('/get_reservations', (req, res) => {
             console.error("Error fetching reservations:", err);
             return res.status(500).json({ error: "Database query error!" });
         }
-        return res.status(200).json(data);
+        const decrypted = (data || []).map((row) => ({
+            ...row,
+            last_name: decryptCredentials(row.last_name),
+            first_name: decryptCredentials(row.first_name),
+            phone_number: decryptCredentials(row.phone_number),
+            email: decryptCredentials(row.email),
+            notes: decryptCredentials(row.notes)
+        }));
+        return res.status(200).json(decrypted);
     });
 });
 
@@ -453,7 +740,7 @@ app.post('/add_guest_arrival', (req, res) => {
     const sql = "INSERT INTO guest (number_of_guests, food_service, total_price, created_at) VALUES (?, ?, ?, ?)";
     const values = [
         req.body.number_of_guests,
-        req.body.food_service,
+        encryptCredentials(req.body.food_service || ''),
         req.body.total_price,
         req.body.created_at || new Date()
     ];
@@ -474,7 +761,11 @@ app.get('/get_guest_arrivals', (req, res) => {
             console.error("Error fetching guest arrivals:", err);
             return res.status(500).json({ error: "Database query error!" });
         }
-        return res.status(200).json(data);
+        const decrypted = (data || []).map((row) => ({
+            ...row,
+            food_service: decryptCredentials(row.food_service)
+        }));
+        return res.status(200).json(decrypted);
     });
 });
 
@@ -482,14 +773,32 @@ app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Guest arrival backend is running' });
 });
 
+app.get('/routes', (req, res) => {
+    const routes = app._router.stack
+        .filter((layer) => layer.route)
+        .map((layer) => ({ path: layer.route.path, methods: Object.keys(layer.route.methods) }));
+    res.json({ routes });
+});
+
 app.post('/update_reservation/:id', (req, res) => {
     const reservationId = parseInt(req.params.id);
-    const { status } = req.body;
-    if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+    const {
+        status,
+        last_name,
+        first_name,
+        num_guests,
+        phone_number,
+        email,
+        check_in_date,
+        check_out_date,
+        notes,
+        room_id,
+    } = req.body;
+
+    if (status && !['pending', 'confirmed', 'cancelled'].includes(status)) {
         return res.status(400).json({ error: 'Invalid status.' });
     }
 
-    // Get the reservation details
     const getReservationSql = `SELECT room_id, room_price FROM reservations WHERE id = ?`;
     db.query(getReservationSql, [reservationId], (err, results) => {
         if (err || results.length === 0) {
@@ -498,41 +807,65 @@ app.post('/update_reservation/:id', (req, res) => {
         }
 
         const reservation = results[0];
-        
-        // When confirming, ALWAYS fetch room_price from rooms table if room_id exists
-        if (status === 'confirmed' && reservation.room_id) {
-            const getRoomPriceSql = `SELECT room_price FROM rooms WHERE id = ?`;
-            db.query(getRoomPriceSql, [reservation.room_id], (err, roomResults) => {
-                let finalRoomPrice = reservation.room_price;
-                
-                if (!err && roomResults.length > 0) {
-                    const fetchedPrice = parseFloat(String(roomResults[0].room_price).replace(/,/g, ''));
-                    if (!isNaN(fetchedPrice) && fetchedPrice > 0) {
-                        finalRoomPrice = fetchedPrice;
-                    }
-                }
-                
-                console.log(`Updating reservation ${reservationId}: status=${status}, room_price=${finalRoomPrice}`);
-                
-                // Update both status and room_price
-                const updateSql = `UPDATE reservations SET res_status = ?, room_price = ? WHERE id = ?`;
-                db.query(updateSql, [status, finalRoomPrice, reservationId], (updateErr, result) => {
-                    if (updateErr) {
-                        console.error('Error updating reservation:', updateErr);
-                        return res.status(500).json({ error: 'Database error.' });
-                    }
-                    if (result.affectedRows === 0) {
-                        return res.status(404).json({ error: 'Reservation not found.' });
-                    }
-                    console.log(`Reservation ${reservationId} confirmed with room_price=${finalRoomPrice}`);
-                    return res.status(200).json({ message: 'Reservation updated successfully.' });
-                });
-            });
-        } else {
-            // For pending or cancelled, just update the status
-            console.log(`Updating reservation ${reservationId}: status=${status}`);
-            const updateSql = `UPDATE reservations SET res_status = ? WHERE id = ?`;
-            db.query(updateSql, [status, reservationId], (updateErr, result) => {
+        const finalRoomId = room_id != null ? room_id : reservation.room_id;
+        const updateFields = [];
+        const updateValues = [];
+
+        if (status) {
+            updateFields.push('res_status = ?');
+            updateValues.push(status);
+        }
+        if (last_name !== undefined) {
+            updateFields.push('last_name = ?');
+            updateValues.push(encryptCredentials(last_name || ''));
+        }
+        if (first_name !== undefined) {
+            updateFields.push('first_name = ?');
+            updateValues.push(encryptCredentials(first_name || ''));
+        }
+        if (phone_number !== undefined) {
+            updateFields.push('phone_number = ?');
+            updateValues.push(encryptCredentials(phone_number || ''));
+        }
+        if (email !== undefined) {
+            updateFields.push('email = ?');
+            updateValues.push(encryptCredentials(email || ''));
+        }
+        if (notes !== undefined) {
+            updateFields.push('notes = ?');
+            updateValues.push(encryptCredentials(notes || ''));
+        }
+        if (num_guests !== undefined) {
+            updateFields.push('num_guests = ?');
+            updateValues.push(parseInt(num_guests, 10) || 0);
+        }
+        if (check_in_date !== undefined) {
+            updateFields.push('check_in_date = ?');
+            updateValues.push(check_in_date);
+        }
+        if (check_out_date !== undefined) {
+            updateFields.push('check_out_date = ?');
+            updateValues.push(check_out_date);
+        }
+        if (room_id !== undefined) {
+            updateFields.push('room_id = ?');
+            updateValues.push(room_id);
+        }
+
+        const updateReservation = (roomPriceUpdate) => {
+            if (roomPriceUpdate !== null) {
+                updateFields.push('room_price = ?');
+                updateValues.push(roomPriceUpdate);
+            }
+
+            if (updateFields.length === 0) {
+                return res.status(400).json({ error: 'No fields to update.' });
+            }
+
+            const updateSql = `UPDATE reservations SET ${updateFields.join(', ')} WHERE id = ?`;
+            updateValues.push(reservationId);
+
+            db.query(updateSql, updateValues, (updateErr, result) => {
                 if (updateErr) {
                     console.error('Error updating reservation:', updateErr);
                     return res.status(500).json({ error: 'Database error.' });
@@ -540,9 +873,25 @@ app.post('/update_reservation/:id', (req, res) => {
                 if (result.affectedRows === 0) {
                     return res.status(404).json({ error: 'Reservation not found.' });
                 }
-                console.log(`Reservation ${reservationId} status changed to ${status}`);
+                console.log(`Reservation ${reservationId} updated`, { status, room_id: finalRoomId, room_price: roomPriceUpdate });
                 return res.status(200).json({ message: 'Reservation updated successfully.' });
             });
+        };
+
+        if (status === 'confirmed' && finalRoomId) {
+            const getRoomPriceSql = `SELECT room_price FROM rooms WHERE id = ?`;
+            db.query(getRoomPriceSql, [finalRoomId], (err, roomResults) => {
+                let finalRoomPrice = reservation.room_price;
+                if (!err && roomResults.length > 0) {
+                    const fetchedPrice = parseFloat(String(roomResults[0].room_price).replace(/,/g, ''));
+                    if (!isNaN(fetchedPrice) && fetchedPrice > 0) {
+                        finalRoomPrice = fetchedPrice;
+                    }
+                }
+                updateReservation(finalRoomPrice);
+            });
+        } else {
+            updateReservation(null);
         }
     });
 });
@@ -589,6 +938,31 @@ app.get('/get_dashboard_stats', (req, res) => {
         return res.status(200).json(data[0]); 
     });
 });
+
+
+app.post('/migrate_sensitive_data', async (req, res) => {
+    try {
+        await migrateExistingSensitiveData();
+        return res.status(200).json({ message: 'Sensitive rows migrated successfully.' });
+    } catch (err) {
+        console.error('migrate_sensitive_data error', err);
+        return res.status(500).json({ error: 'Migration failed.', details: err.message });
+    }
+});
+
+app.get('/debug_info', (req, res) => {
+    try {
+        return res.status(200).json({
+            pid: process.pid,
+            cwd: process.cwd(),
+            scriptFile: import.meta.url,
+            env_DEBUG_RESERVATION: process.env.DEBUG_RESERVATION || null
+        });
+    } catch (e) {
+        return res.status(500).json({ error: String(e) });
+    }
+});
+
 
 
 const PORT = process.env.PORT || 3001;

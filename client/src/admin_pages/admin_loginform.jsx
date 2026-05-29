@@ -19,18 +19,17 @@ function AdminLoginForm() {
             return;
         }
 
-        const fetchUsers = async () => {
+        const fetchAdminUsers = async () => {
             try {
-                // fetch all users so we can inform if any accounts exist (admin or staff)
-                const response = await axios.get("http://localhost:3001/get_user_accounts");
+                const response = await axios.get("http://localhost:3001/get_admin_users");
                 setAdminUsers(response.data || []);
             } catch (error) {
-                console.error("Failed to fetch users:", error);
+                console.error("Failed to fetch admin users:", error);
             } finally {
                 setAdminLoading(false);
             }
         };
-        fetchUsers();
+        fetchAdminUsers();
     }, [navigate]);
 
     const handleSubmit = async (e) => {
@@ -62,16 +61,37 @@ function AdminLoginForm() {
                     <p>authorized users only</p>
                 </div>
 
+                 <div className="admin-form-group">
+                        <p className="admin-login-note">
+                            {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
+                        </p>
+                    </div>
+
                 <form onSubmit={handleSubmit}>
                     <div className="admin-form-group">
                         <label>Email</label>
-                        <input type="email" placeholder="Enter your credentials email" required value={email} onChange={(e) => setEmail(e.target.value)}/>
+                        <input
+                            type="email"
+                            placeholder="Enter your credentials email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
                     </div>
-                    
-
+                    <div className="admin-form-group">
+                        <p className="admin-login-note">
+                            {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
+                        </p>
+                    </div>
                     <div className="admin-form-group">
                         <label>Password</label>
-                        <input type="password" placeholder="Enter your password" required value={password} onChange={(e) => setPassword(e.target.value)}/>
+                        <input
+                            type="password"
+                            placeholder="Enter your password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                     </div>
 
                     <button type="submit" className="login-btn" disabled={loading}>
@@ -79,7 +99,7 @@ function AdminLoginForm() {
                     </button>
                     <div className="admin-form-group">
                         <p className="admin-login-note">
-                            {adminLoading ? "Loading accounts..." : adminUsers.length > 0 ? "Use your admin or staff credentials to access the dashboard." : "No accounts found. Please contact support."}
+                            {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
                         </p>
                     </div>
                 </form>

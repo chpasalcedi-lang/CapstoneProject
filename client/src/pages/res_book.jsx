@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -15,6 +15,8 @@ function ResBook() {
   const [selectedRoomPrice, setSelectedRoomPrice] = useState(null);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const loadingTimer = useRef(null);
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [roomType, setRoomType] = useState('');
@@ -49,14 +51,43 @@ function ResBook() {
   const toggleMenu = () => setMenuOpen((p) => !p);
   const closeMenu = () => setMenuOpen(false);
 
-    const fetchData = () => {
-        axios.get('http://localhost:3001/get_rooms')
-            .then((res) => {
-                setData(res.data);
-                setFilteredData(res.data); 
-            })
-            .catch((err) => console.error("Error sa pagkuha sang data: ", err));
-    };
+    const fetchData = useCallback(() => {
+      setLoading(true);
+      if (loadingTimer.current) {
+        clearTimeout(loadingTimer.current);
+        loadingTimer.current = null;
+      }
+
+      // show cached data first to avoid empty results on refresh
+      const cached = localStorage.getItem('roomsCache');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setData(parsed);
+          // default to showing only available rooms
+          setFilteredData(parsed.filter(r => r.room_status === 'available'));
+        } catch (e) {
+          console.warn('roomsCache parse error', e);
+        }
+      }
+
+      axios.get('http://localhost:3001/get_rooms')
+        .then((res) => {
+          setData(res.data);
+          // default to showing only available rooms
+          setFilteredData(res.data.filter(r => r.room_status === 'available'));
+          try { localStorage.setItem('roomsCache', JSON.stringify(res.data)); } catch (e) { console.warn('roomsCache set error', e); }
+        })
+        .catch((err) => console.error("Error sa pagkuha sang data: ", err))
+        .finally(() => {
+          // keep loading visible for 5 seconds before revealing cards
+          if (loadingTimer.current) clearTimeout(loadingTimer.current);
+          loadingTimer.current = setTimeout(() => {
+            setLoading(false);
+            loadingTimer.current = null;
+          }, 1000);
+        });
+    }, []);
 
     const checkAvailability = () => {
         let filtered = data.filter(room => room.room_status === 'available');
@@ -100,8 +131,15 @@ function ResBook() {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchData();
-    }, []);
+        return () => {
+          if (loadingTimer.current) {
+            clearTimeout(loadingTimer.current);
+            loadingTimer.current = null;
+          }
+        };
+    }, [fetchData]);
 
   
   return (
@@ -155,7 +193,7 @@ function ResBook() {
         </div>
 
         <div className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen}>
-          <Link to="/" onClick={closeMenu}>Home</Link>
+          <Link to="/Home" onClick={closeMenu}>Home</Link>
           <Link to="/Reservation" onClick={closeMenu}>Room</Link>
           <a href="#about-pool" onClick={closeMenu}>About</a>
         </div>
@@ -207,19 +245,21 @@ function ResBook() {
      
       <section className="booking-results-area">
         <div className="booking-results-content">
-          {filteredData.length === 0 ? (
-              <div className="booking-results-grid booking-empty">
-                <p>No rooms available for your selected dates and type.</p>
-              </div>
-            ) : (
-              <div className="booking-results-grid">
-                  {filteredData.map((room) => (
+          {loading ? (
+            <div className="booking-loading">Loading rooms...</div>
+          ) : filteredData.length === 0 ? (
+            <div className="booking-results-grid booking-empty">
+              <p>No rooms available for your selected dates and type.</p>
+            </div>
+          ) : (
+            <div className="booking-results-grid">
+              {filteredData.map((room) => (
                     <div className="booking-room-card" key={room.id}>
                       <div className="booking-room-card-img">
                         <img src={room.room_image} alt={room.room_name} />
                         <span className="booking-room-badge">{room.room_status}</span>
                         {room.room_type?.toLowerCase() !== 'event' && (
-                            <span className="rooms-room-rating">Room : {room.room_number}</span>
+                            <span className="booking-room-rating">Room : {room.room_number}</span>
                         )}
                       </div>
                       <div className="booking-room-card-body">

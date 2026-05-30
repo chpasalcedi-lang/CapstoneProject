@@ -253,6 +253,74 @@
   background: #2d2d2e;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
+.book-reservation-form-price {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--color-background-primary, #fff);
+  border: 0.5px solid #e5e7eb;
+  padding: 12px 14px;
+  width: 100%;
+}
+
+.book-reservation-price-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.book-reservation-price-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 17px;
+  color: #6b7280;
+}
+
+.book-reservation-price-icon.total {
+  background: #eaf3de;
+  color: #3b6d11;
+}
+
+.book-reservation-price-label {
+  margin: 0 0 1px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+}
+
+.book-reservation-price-value {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.book-reservation-price-value.total {
+  color: #3b6d11;
+}
+
+.book-reservation-price-divider {
+  width: 0.5px;
+  height: 34px;
+  background: #e5e7eb;
+  flex-shrink: 0;
+}
+
+.book-reservation-price-hint {
+  margin: 6px 2px 0;
+  font-size: 11px;
+  color: #9ca3af;
+}
 
 @media (max-width: 600px) {
   .book-reservation-modal {

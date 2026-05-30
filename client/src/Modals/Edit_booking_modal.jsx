@@ -53,6 +53,11 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        if (name === 'phone_number') {
+            const digits = value.replace(/\D/g, '');
+            setValues((prev) => ({ ...prev, [name]: digits }));
+            return;
+        }
         setValues((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -124,7 +129,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                             </div>
                             <div className="edit-booking-form-group">
                                 <label>Phone Number</label>
-                                <input type="text" name="phone_number" required value={values.phone_number} onChange={handleChange} placeholder="e.g. 09XX XXX XXXX" />
+                                <input type="text" name="phone_number" inputMode="numeric" pattern="\d*" required value={values.phone_number} onChange={handleChange} placeholder="e.g. 09XXXXXXXXX" />
                             </div>
                             <div className="edit-booking-form-group">
                                 <label>Email</label>

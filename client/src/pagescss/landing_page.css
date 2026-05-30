@@ -101,6 +101,24 @@ body {
 }
 
 
+@media (max-width: 1000px) {
+  .landing-navbar {
+    padding: 0 32px;
+  }
+
+  .landing-nav-links {
+    gap: 28px;
+  }
+
+  .landing-nav-links li a {
+    font-size: 0.74rem;
+  }
+
+  .logo h1 {
+    font-size: 1.45rem;
+  }
+}
+
 @media (max-width: 900px) {
 
   .landing-navbar {
@@ -715,7 +733,6 @@ body {
 .landing-contact-content-main {
   position: relative;
   z-index: 1;
-  transform: translateY(-130px);
 }
 
 .landing-contact {
@@ -724,7 +741,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 80px;
-  align-items: center;
+  align-items: flex-start;
   max-width: 100%;
   position: relative;
 }
@@ -796,7 +813,6 @@ body {
   border: 1px solid rgba(255,255,255,0.08);
   padding: 30px 32px 32px;
   border-radius: 6px;
-  max-height: 580px;
   box-shadow: 0 24px 60px rgba(0,0,0,0.2);
 }
 
@@ -982,16 +998,40 @@ body {
 
 @media (max-width: 600px) {
   .landing-feedback {
-    padding: 30px;
+    padding: 24px;
+    max-height: none;
   }
 
   .landing-contact {
-    padding: 56px 20px;
+    padding: 48px 20px;
+    gap: 32px;
   }
 
   .landing-contact-content h1,
   .landing-feedback h1 {
     font-size: 1.8rem;
+  }
+
+  .landing-contact-content p {
+    font-size: 0.85rem;
+  }
+
+  .landing-feedback p {
+    font-size: 0.8rem;
+  }
+
+  .landing-feedback input,
+  .message-box {
+    padding: 12px;
+    font-size: 0.8rem;
+  }
+
+  .message-box {
+    min-height: 100px;
+  }
+
+  .contact-info p {
+    font-size: 0.85rem;
   }
 }
 

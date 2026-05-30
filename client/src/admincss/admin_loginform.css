@@ -1,4 +1,3 @@
-/* PAGE */
 .admin-login-page {
   position: fixed;
   top: 0;
@@ -102,7 +101,6 @@
   line-height: 1.4;
 }
 
-/* FOOTER */
 .admin-login-footer {
   margin-top: 10px;
   text-align: center;

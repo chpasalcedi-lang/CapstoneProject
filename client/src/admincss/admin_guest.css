@@ -355,9 +355,18 @@ body {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   flex-wrap: nowrap;
   overflow: visible;
+}
+
+.booking-table .actions-cell .btn.guest,
+.guests-tables .actions-cell .btn.guest,
+.feedback-tables .actions-cell .btn.guest {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  text-align: center;
 }
 
 .feedback-booking-headers {

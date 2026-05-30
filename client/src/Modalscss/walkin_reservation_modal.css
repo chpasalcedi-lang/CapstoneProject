@@ -1,35 +1,35 @@
-
 .walkin-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
-  transform: translateY(-12px);
-  transition: transform 0.22s ease, opacity 0.22s ease, visibility 0.22s ease;
   opacity: 0;
   visibility: hidden;
+  transform: translateY(-12px);
+  transition: all 0.25s ease;
 }
 
-.modal-hidden {
-  display: none ;
-}
-
-.modal-visible {
+.walkin-modal.modal-visible {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
 
+.walkin-modal.modal-hidden {
+  display: none;
+}
+
 .walkin-container {
+  width: 100%;
   display: flex;
   justify-content: center;
-  width: 100%;
+  padding: 20px;
 }
 
 .walkin-form-card {
@@ -38,36 +38,26 @@
   max-width: 100%;
   max-height: 80vh;
   border-radius: 10px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-
-}
-
-.walkin-form-card h2 {
-  color: #f5f3ee;
-  margin-bottom: 8px;
-  font-size: 26px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
 .walkin-reservation-modal-header {
   height: 80px;
   padding: 0 20px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   border-bottom: 1px solid rgba(249, 248, 248, 0.08);
+  flex: 0 0 auto;
 }
-.walkin-reservation-modal-eyebrow {
-  margin: 0 0 3px 0;
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+
+.walkin-reservation-modal-title {
+  font-size: 20px;
+  color: #f5f3ee;
+  margin: 0;
 }
 
 .walkin-reservation-modal-close {
@@ -84,7 +74,6 @@
   justify-content: center;
   cursor: pointer;
   transition: background 0.18s ease, transform 0.12s ease, color 0.12s ease;
-  font-size: 1rem;
 }
 
 .walkin-reservation-modal-close:hover {
@@ -93,17 +82,20 @@
   color: #ffffff;
 }
 
-.walkin-form-card p {
-  color: #b8b8b8;
-  margin-bottom: 24px;
-  line-height: 1.7;
+.walkin-reservation-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 30px;
 }
 
-.walkin-reservation-modal-body {
-  overflow-y: auto;
-  flex: 1;
-  padding: 20px 30px 20px; 
-  
+.walkin-reservation-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.walkin-reservation-modal-body::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
 }
 
 .walkin-reservation-form-row {
@@ -118,71 +110,39 @@
 }
 
 .walkin-reservation-form-group {
-  margin-bottom: 14px;
   display: flex;
   flex-direction: column;
-}
-
-.walkin-reservation-form-group:last-child {
-  margin-bottom: 4px;
+  gap: 6px;
+  margin-bottom: 16px;
 }
 
 .walkin-reservation-form-group label {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  margin-bottom: 6px;
   color: #d3d3d3;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.walkin-reservation-form-group label .optional {
-  font-weight: 400;
-  color: #9ca3af;
-  font-size: 0.74rem;
 }
 
 .walkin-reservation-form-group input,
 .walkin-reservation-form-group select,
 .walkin-reservation-form-group textarea {
-  padding: 9px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #111111;
-  color: #f5f3ee;
   width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0c0c0c;
+  color: #f5f3ee;
+  font-size: 0.9rem;
+  transition: 0.15s;
   box-sizing: border-box;
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-  -webkit-appearance: none;
-  appearance: none;
 }
 
-.walkin-reservation-form-group input::placeholder,
-.walkin-reservation-form-group textarea::placeholder {
-  color: #c4c9d4;
-}
-
-.walkin-reservation-form-group input:hover,
-.walkin-reservation-form-group select:hover,
-.walkin-reservation-form-group textarea:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: #1a1a1a;
-}
 .walkin-reservation-form-group select option {
   color: #0c0c0c;
   background: #ffffff;
 }
 
-.walkin-reservation-form-group textarea {
-  resize: vertical;
-  min-height: 72px;
-}
-
 .walkin-reservation-modal-footer {
-  height: 80px; 
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -190,21 +150,21 @@
   padding: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
+
 .walkin-reservation-btn-cancel,
 .walkin-reservation-btn-save {
   padding: 9px 18px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  cursor: pointer;
   border-radius: 6px;
-  transition: all 0.12s ease;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
 .walkin-reservation-btn-cancel {
   background: rgba(255, 255, 255, 0.06);
-  color: #d3d3d3;
   border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ccc;
 }
 
 .walkin-reservation-btn-cancel:hover {
@@ -213,8 +173,8 @@
 
 .walkin-reservation-btn-save {
   background: #c8a96e;
-  color: #111111;
   border: none;
+  color: #111111;
 }
 
 .walkin-reservation-btn-save:hover {
@@ -222,17 +182,87 @@
   box-shadow: 0 4px 14px rgba(200, 169, 110, 0.3);
 }
 
-.walkin-status-message {
+.walkin-reservation-form-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 18px;
   margin-top: 18px;
-  color: #c8a96e;
-  font-size: 14px;
-  background: rgba(200, 169, 110, 0.1);
-  border: 1px solid rgba(200, 169, 110, 0.2);
-  border-radius: 4px;
-  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(17, 17, 17, 0.96);
 }
 
-/* ── Responsive: Tablet / Small ── */
+.sticky-price {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+}
+
+.walkin-reservation-price-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.walkin-reservation-price-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f5f3ee;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.walkin-reservation-price-icon.total {
+  background: rgba(200, 169, 110, 0.18);
+  color: #c8a96e;
+}
+
+.walkin-reservation-price-label {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.walkin-reservation-price-value {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f5f3ee;
+}
+
+.walkin-reservation-price-value.total {
+  color: #c8a96e;
+}
+
+.walkin-reservation-price-divider {
+  width: 1px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.walkin-status-message {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(200, 169, 110, 0.12);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  color: #e5c87f;
+  font-size: 0.95rem;
+}
+
 @media (max-width: 600px) {
   .walkin-form-card {
     width: 100%;
@@ -249,7 +279,7 @@
   }
 
   .walkin-reservation-modal-body {
-    padding: 16px 16px 10px;
+    padding: 16px 16px 12px;
   }
 
   .walkin-reservation-form-row {
@@ -269,7 +299,6 @@
   }
 }
 
-/* ── Responsive: Stack columns on very small screens ── */
 @media (max-width: 400px) {
   .walkin-reservation-form-row {
     flex-direction: column;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import Swal from 'sweetalert2';
@@ -13,23 +13,61 @@ function LandingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [userEmail, setUserEmail] = useState(null);
+  const menuButtonRef = useRef(null);
+  const [userEmail, setUserEmail] = useState(() => {
+    // Read auth info synchronously to avoid a flash of the "sign in" button
+    const stored = localStorage.getItem("userEmail");
+    if (stored) return stored;
+    const adminStr = localStorage.getItem("adminUser");
+    if (adminStr) {
+      try {
+        const parsed = JSON.parse(adminStr);
+        // prefer an email if available, otherwise use name
+        return parsed.email || parsed.name || null;
+      } catch (e) {
+        console.error("Error parsing adminUser from localStorage:", e);
+        return null;
+      }
+    }
+    return null;
+  });
 
-  useEffect(() => {
-    const storedEmail = localStorage.getItem("userEmail");
-    if (storedEmail) setUserEmail(storedEmail);
-  }, []);
-
-  const toggleMenu = () => setMenuOpen((prev) => !prev);
-  const closeMenu = () => setMenuOpen(false);
+  const toggleMenu = () => {
+    setMenuOpen((prev) => {
+      const next = !prev;
+      if (!next && menuButtonRef.current) {
+        menuButtonRef.current.focus();
+      }
+      return next;
+    });
+  };
   const toggleProfile = () => setProfileOpen((prev) => !prev);
 
   const handleLogout = () => {
+    // clear both possible login keys and update UI immediately
     localStorage.removeItem("userEmail");
+    localStorage.removeItem("adminUser");
     setUserEmail(null);
     setProfileOpen(false);
     Swal.fire({ icon: "success", title: "Logged out", text: "You have been logged out." });
   };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+    if (menuButtonRef.current) {
+      menuButtonRef.current.focus();
+    }
+  };
+
+  useEffect(() => {
+    if (!menuOpen && menuButtonRef.current) {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active.closest('.mobile-menu')) {
+        active.blur();
+        menuButtonRef.current.focus();
+      }
+    }
+  }, [menuOpen]);
 
   const handleFeedbackChange = (e) => {
     const { name, value } = e.target;
@@ -102,7 +140,7 @@ function LandingPage() {
               {userEmail ? (
                 <div className="profile-dropdown-wrapper">
                   <button className="landing-btn" onClick={toggleProfile}>
-                    <i class="fa-solid fa-user"></i>
+                    <i className="fa-solid fa-user"></i>
                     Profile
                   </button>
                   {profileOpen && (
@@ -128,16 +166,16 @@ function LandingPage() {
                   </button>
                 </Link>
               )}
-              <button className="hamburger-btn" onClick={toggleMenu} aria-label="Toggle menu" aria-expanded={menuOpen}>
+              <button ref={menuButtonRef} className="hamburger-btn" onClick={toggleMenu} aria-controls="mobile-menu" aria-label="Toggle menu" aria-expanded={menuOpen}>
                 <i className={`fa-solid ${menuOpen ? "fa-x" : "fa-bars"}`}></i>
               </button>
             </div>
         </div>
- 
-        <div className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen}>
-          <Link to="/Home" onClick={closeMenu}>Home</Link>
-          <Link to="/Reservation" onClick={closeMenu}>Room</Link>
-          <a href="#about-pool" onClick={closeMenu}>About</a>
+
+        <div id="mobile-menu" className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen} inert={!menuOpen}>
+          <Link to="/Home" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>Home</Link>
+          <Link to="/Reservation" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>Room</Link>
+          <a href="#about-pool" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>About</a>
         </div>
       </nav>
       

@@ -12,7 +12,12 @@ function AddAccountModal({ show, onClose, onSave }) {
 
     React.useEffect(() => {
         if (show) {
-            setFormData({ name: '', email: '', password: '', role: '' });
+            setFormData({ 
+                name: '', 
+                email: '', 
+                password: '', 
+                role: '' 
+            });
         }
     }, [show]);
 
@@ -71,7 +76,7 @@ function AddAccountModal({ show, onClose, onSave }) {
                     </div>
                     <div className="add-acc-modal-footer">
                         <button type="button" className="add-acc-btn-cancel" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="add-acc-btn-save">Save Account</button>
+                        <button type="button" className="add-acc-btn-save" onClick={handleSubmit}>Save Account</button>
                     </div>
                 </div>
             </div>

@@ -38,7 +38,7 @@ function AdminUsersAcc() {
       setUsers(res.data || []);
     } catch (err) {
       console.error("Error fetching user accounts:", err);
-      Swal.fire({ icon: 'error', title: 'Unable to load users', text: 'Please check your server connection.' });
+      Swal.fire({ icon: 'error', title: 'Unable to load admin accounts', text: 'Please check your server connection.' });
     } finally {
       setLoading(false);
     }
@@ -127,10 +127,10 @@ function AdminUsersAcc() {
       await axios.post("http://localhost:3001/add_user_account", userData);
       await fetchUsers();
       setShowAddAccModal(false);
-      Swal.fire({ icon: 'success', title: 'Created', text: 'User account added successfully.' });
+      Swal.fire({ icon: 'success', title: 'Created', text: 'Admin account added successfully.' });
     } catch (err) {
-      console.error("Error creating user account:", err);
-      Swal.fire({ icon: 'error', title: 'Create failed', text: err?.response?.data?.error || 'Unable to create user.' });
+      console.error("Error creating admin account:", err);
+      Swal.fire({ icon: 'error', title: 'Create failed', text: err?.response?.data?.error || 'Unable to create admin.' });
     }
   };
 
@@ -162,10 +162,10 @@ function AdminUsersAcc() {
       await fetchUsers();
       setSelectedUser(null);
       setShowUpdateAccModal(false);
-      Swal.fire({ icon: 'success', title: 'Saved', text: 'User account updated successfully.' });
+      Swal.fire({ icon: 'success', title: 'Saved', text: 'Admin account updated successfully.' });
     } catch (err) {
-      console.error("Error updating user account:", err);
-      Swal.fire({ icon: 'error', title: 'Update failed', text: err?.response?.data?.error || 'Unable to update user.' });
+      console.error("Error updating admin account:", err);
+      Swal.fire({ icon: 'error', title: 'Update failed', text: err?.response?.data?.error || 'Unable to update admin.' });
     }
   };
 
@@ -194,10 +194,10 @@ function AdminUsersAcc() {
     try {
       await axios.delete(`http://localhost:3001/delete_user_account/${id}`);
       await fetchUsers();
-      Swal.fire({ icon: 'success', title: 'Deleted', text: 'User account was removed.' });
+      Swal.fire({ icon: 'success', title: 'Deleted', text: 'Admin account was removed.' });
     } catch (err) {
-      console.error("Error deleting user account:", err);
-      Swal.fire({ icon: 'error', title: 'Delete failed', text: err?.response?.data?.error || 'Unable to delete user.' });
+      console.error("Error deleting admin account:", err);
+      Swal.fire({ icon: 'error', title: 'Delete failed', text: err?.response?.data?.error || 'Unable to delete admin.' });
     }
   };
 

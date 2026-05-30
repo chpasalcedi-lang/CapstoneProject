@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import "../admincss/admin_addguest.css";
 import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
 
@@ -13,7 +14,6 @@ function AdminAddGuest() {
     number_of_guests: "",
     foods: "No",
   });
-  const [statusMessage, setStatusMessage] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
   const [adminData] = useState(() => {
@@ -45,15 +45,17 @@ function AdminAddGuest() {
     return (guestTotal + foodTotal).toFixed(2);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!values.number_of_guests || values.number_of_guests <= 0) {
-      setStatusMessage("Please enter a valid number of guests.");
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Invalid input',
+        text: 'Please enter a valid number of guests.',
+      });
       return;
     }
-
-    setStatusMessage("Adding guest...");
 
     const totalPrice = calculateTotalPrice();
     const payload = {
@@ -63,20 +65,23 @@ function AdminAddGuest() {
       created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
     };
 
-    console.log('Submitting add guest payload:', payload);
-    axios.post('http://localhost:3001/add_guest_arrival', payload)
-      .then((res) => {
-        console.log("Success: ", res.data);
-        setStatusMessage(`✓ Guest arrival recorded successfully! ID: ${res.data.guestId}`);
-        setValues({ number_of_guests: "", foods: "No" });
-
-        setTimeout(() => setStatusMessage(""), 3000);
-      })
-      .catch((err) => {
-        console.error("Error: ", err);
-        const errorMsg = err.response?.data?.error || err.response?.statusText || "Network error";
-        setStatusMessage(`Error: ${errorMsg}. Make sure server is running on http://localhost:3001/add_guest_arrival`);
+    try {
+      await axios.post('http://localhost:3001/add_guest_arrival', payload);
+      Swal.fire({
+        icon: 'success',
+        title: 'Guest added',
+        text: 'Guest arrival recorded successfully!',
       });
+      setValues({ number_of_guests: "", foods: "No" });
+    } catch (err) {
+      console.error("Error: ", err);
+      const errorMsg = err.response?.data?.error || err.message || "Network error";
+      Swal.fire({
+        icon: 'error',
+        title: 'Add failed',
+        text: `${errorMsg}. Make sure server is running on http://localhost:3001/add_guest_arrival`,
+      });
+    }
   };
 
   return (
@@ -186,11 +191,6 @@ function AdminAddGuest() {
                       </div>
                       <button type="submit"> Confirm </button>
                     </form>
-                    {statusMessage && (
-                      <p className={`add-status-message ${statusMessage.includes('<i class="fa-solid fa-check"></i>') ? 'success' : 'error'}`}>
-                        {statusMessage}
-                      </p>
-                    )}
                 </div>
             </div>
         </div>

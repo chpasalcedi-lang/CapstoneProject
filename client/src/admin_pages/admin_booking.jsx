@@ -308,7 +308,7 @@ function AdminBooking() {
                                                 <td>{booking.room_number}</td>
                                                 <td>{formatBookingDate(booking.check_in_date)}</td>
                                                 <td>{formatBookingDate(booking.check_out_date)}</td>
-                                                <td>₱{Number(booking.room_price || 0).toLocaleString()}</td>
+                                                <td>₱{Number(booking.total_price || 0).toLocaleString()}</td>
                                                 <td>
                                                     <span className={`status-${(booking.res_status || 'pending').toLowerCase()}`}>
                                                         {booking.res_status || 'pending'}
@@ -318,10 +318,18 @@ function AdminBooking() {
                                                     <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
                                                         view
                                                     </button>
-                                                    <button className="btn guest btn-primary" onClick={() => handleConfirm(booking.id)}>
+                                                    <button
+                                                        className="btn guest btn-primary"
+                                                        onClick={() => handleConfirm(booking.id)}
+                                                        disabled={['confirmed', 'cancelled'].includes((booking.res_status || 'pending').toLowerCase())}
+                                                    >
                                                         confirm
                                                     </button>
-                                                    <button className="btn guest btn-danger" onClick={() => handleCancel(booking.id)}>
+                                                    <button
+                                                        className="btn guest btn-danger"
+                                                        onClick={() => handleCancel(booking.id)}
+                                                        disabled={(booking.res_status || 'pending').toLowerCase() === 'cancelled'}
+                                                    >
                                                         cancel
                                                     </button>
                                                 </td>

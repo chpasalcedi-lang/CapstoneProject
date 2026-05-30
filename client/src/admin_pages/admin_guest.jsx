@@ -19,6 +19,7 @@ function AdminGuest() {
     const [selectedMonthGuest, setSelectedMonthGuest] = useState("");
     const [selectedMonthFeedback, setSelectedMonthFeedback] = useState("");
     const [feedbackList, setFeedbackList] = useState([]);
+    const [loadingFeedback, setLoadingFeedback] = useState(true);
     const [viewModal, setViewModal] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [editModal, setEditModal] = useState(false);
@@ -118,6 +119,8 @@ function AdminGuest() {
                 setFeedbackList(res.data);
             } catch (err) {
                 console.error("Error fetching feedback:", err);
+            } finally {
+                setLoadingFeedback(false);
             }
         };
 
@@ -160,6 +163,10 @@ function AdminGuest() {
         const feedbackDate = new Date(feedback.created_at);
         const feedbackMonth = feedbackDate.getMonth() + 1;
         return feedbackMonth === parseInt(selectedMonthFeedback);
+    });
+
+    const visibleFeedback = filteredFeedback.filter((feedback) => {
+        return String(feedback.name || feedback.email || feedback.message).trim().length > 0;
     });
 
     const handleDeleteBooking = async (id) => {
@@ -527,14 +534,20 @@ function AdminGuest() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredFeedback.length === 0 ? (
+                                        {loadingFeedback ? (
+                                            <tr>
+                                                <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                                                    Loading feedback...
+                                                </td>
+                                            </tr>
+                                        ) : visibleFeedback.length === 0 ? (
                                             <tr>
                                                 <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
                                                     No feedback found.
                                                 </td>
                                             </tr>
                                         ) : (
-                                            filteredFeedback.map((feedback) => (
+                                            visibleFeedback.map((feedback) => (
                                                 <tr key={feedback.id}>
                                                     <td>{feedback.name}</td>
                                                     <td>{feedback.email}</td>

@@ -77,7 +77,7 @@ function UpdateAccountModal({ show, onClose, onSave, initialData }) {
                     <div className="update-acc-modal-footer">
                         <button type="button" className="update-acc-btn-cancel" onClick={onClose}>Cancel</button>
                         <button type="button" className="update-acc-btn-save" onClick={handleSubmit}>Update Account</button>
-                </div>
+                    </div>
             </div>
             </div>
         </div>

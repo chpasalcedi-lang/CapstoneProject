@@ -32,13 +32,32 @@ db.connect((err) => {
 
 const SECRET_KEY = process.env.SECRET_KEY || 'uV9_7lXJ_v_N9Z9pL5mGk1m8n8-v7Z7r9R_vP8N7X2s=';
 
+function getCryptoKey() {
+    return CryptoJS.SHA256(SECRET_KEY);
+}
+
+function getCryptoIv() {
+    return CryptoJS.enc.Utf8.parse(SECRET_KEY.padEnd(16, '0').slice(0, 16));
+}
+
 function encrypt(text) {
     if (text === undefined || text === null) return '';
-    return CryptoJS.AES.encrypt(String(text), SECRET_KEY).toString();
+    const key = getCryptoKey();
+    const iv = getCryptoIv();
+    return CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(String(text)), key, { iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString();
 }
 
 function decrypt(text) {
     if (!text) return '';
+    try {
+        const key = getCryptoKey();
+        const iv = getCryptoIv();
+        const bytes = CryptoJS.AES.decrypt(text, key, { iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        if (decrypted) return decrypted;
+    } catch (_error) {
+        // fall through and try passphrase-based decrypt
+    }
     try {
         const bytes = CryptoJS.AES.decrypt(text, SECRET_KEY);
         return bytes.toString(CryptoJS.enc.Utf8);
@@ -138,24 +157,20 @@ app.delete('/delete_guest_arrival/:id', (req, res) => {
 
 
 app.get('/get_user_accounts', (req, res) => {
-    const sql = "SELECT id, name, email, role, created_at FROM admins ORDER BY name ASC";
+    const sql = "SELECT id, name, email, role, created_at FROM admins";
     db.query(sql, (err, data) => {
         if (err) {
             console.error("Error fetching admin accounts:", err);
             return res.status(500).json({ error: "Database query error!" });
         }
-        return res.status(200).json(data);
-    });
-});
-
-app.get('/get_admin_users', (req, res) => {
-    const sql = "SELECT id, name, email, role, created_at FROM admins WHERE role = 'admin' ORDER BY name ASC";
-    db.query(sql, (err, data) => {
-        if (err) {
-            console.error("Error fetching admin users:", err);
-            return res.status(500).json({ error: "Database query error!" });
-        }
-        return res.status(200).json(data);
+        const decryptedData = data
+            .map((item) => ({
+                ...item,
+                name: decrypt(item.name),
+                email: decrypt(item.email)
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+        return res.status(200).json(decryptedData);
     });
 });
 
@@ -164,9 +179,11 @@ app.post('/add_user_account', (req, res) => {
     const sql = "INSERT INTO admins (name, email, password, role) VALUES (?, ?, ?, ?)";
     const plain = req.body.password || '';
     const hashed = bcrypt.hashSync(plain, 10);
+    const encryptedName = req.body.name ? encrypt(req.body.name) : '';
+    const encryptedEmail = req.body.email ? encrypt(req.body.email) : '';
     const values = [
-        req.body.name || '',
-        req.body.email || '',
+        encryptedName,
+        encryptedEmail,
         hashed,
         req.body.role || ''
     ];
@@ -181,16 +198,16 @@ app.post('/add_user_account', (req, res) => {
 
 app.post('/update_user_account/:id', (req, res) => {
     const userId = parseInt(req.params.id, 10);
-    const fields = [];``
+    const fields = [];
     const values = [];
 
     if (req.body.name) {
         fields.push('name = ?');
-        values.push(req.body.name);
+        values.push(encrypt(req.body.name));
     }
     if (req.body.email) {
         fields.push('email = ?');
-        values.push(req.body.email);
+        values.push(encrypt(req.body.email));
     }
     if (req.body.role) {
         fields.push('role = ?');
@@ -242,16 +259,70 @@ app.post('/login', (req, res) => {
     }
 
     const sql = 'SELECT id, name, email, role, password FROM admins WHERE email = ?';
-    db.query(sql, [email], (err, results) => {
+    db.query(sql, [encrypt(email)], (err, results) => {
         if (err) {
             console.error('Error during login:', err);
             return res.status(500).json({ error: 'Database query error', details: err.message });
         }
-        if (!results.length) {
+        const handleUserRow = (userRow) => {
+            const user = { ...userRow };
+            user.name = decrypt(user.name);
+            user.email = decrypt(user.email);
+            const hash = user.password || '';
+            const isBcrypt = hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$');
+
+            const finishLogin = () => {
+                delete user.password;
+                console.log('Login successful for:', user.email, 'role:', user.role);
+                return res.status(200).json({ message: 'Login successful', user });
+            };
+
+            if (isBcrypt) {
+                bcrypt.compare(password, hash, (bcryptErr, same) => {
+                    if (bcryptErr) {
+                        console.error('Bcrypt compare error:', bcryptErr);
+                        return res.status(500).json({ error: 'Server error' });
+                    }
+                    if (!same) {
+                        return res.status(401).json({ error: 'Invalid email or password' });
+                    }
+                    finishLogin();
+                });
+                return;
+            }
+
+            if (password === hash) {
+                const newHash = bcrypt.hashSync(password, 10);
+                db.query('UPDATE admins SET password = ? WHERE email = ?', [newHash, encrypt(email)], (updateErr) => {
+                    if (updateErr) {
+                        console.error('Error migrating plaintext password:', updateErr);
+                    }
+                    finishLogin();
+                });
+                return;
+            }
+
             return res.status(401).json({ error: 'Invalid email or password' });
+        };
+
+        if (!results.length) {
+            // Legacy fallback for accounts stored with plain email.
+            db.query(sql, [email], (legacyErr, legacyResults) => {
+                if (legacyErr) {
+                    console.error('Error during legacy login:', legacyErr);
+                    return res.status(500).json({ error: 'Database query error', details: legacyErr.message });
+                }
+                if (!legacyResults.length) {
+                    return res.status(401).json({ error: 'Invalid email or password' });
+                }
+                handleUserRow(legacyResults[0]);
+            });
+            return;
         }
 
-        const user = results[0];
+        handleUserRow(results[0]);
+        user.name = decrypt(user.name);
+        user.email = decrypt(user.email);
         const hash = user.password || '';
         const isBcrypt = hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$');
 
@@ -277,7 +348,7 @@ app.post('/login', (req, res) => {
 
         if (password === hash) {
             const newHash = bcrypt.hashSync(password, 10);
-            db.query('UPDATE admins SET password = ? WHERE email = ?', [newHash, email], (updateErr) => {
+            db.query('UPDATE admins SET password = ? WHERE email = ?', [newHash, encrypt(email)], (updateErr) => {
                 if (updateErr) {
                     console.error('Error migrating plaintext password:', updateErr);
                 }
@@ -401,14 +472,19 @@ app.get('/get_reservations', (req, res) => {
             console.error("Error fetching reservations:", err);
             return res.status(500).json({ error: "Database query error!" });
         }
-        const decryptedData = data.map((item) => ({
-            ...item,
-            last_name: decrypt(item.last_name),
-            first_name: decrypt(item.first_name),
-            phone_number: decrypt(item.phone_number),
-            email: decrypt(item.email),
-            notes: decrypt(item.notes)
-        }));
+        const decryptedData = data.map((item) => {
+            const first = decrypt(item.first_name);
+            const last = decrypt(item.last_name);
+            return {
+                ...item,
+                first_name: first,
+                last_name: last,
+                guest_name: (first + ' ' + last).trim(),
+                phone_number: decrypt(item.phone_number),
+                email: decrypt(item.email),
+                notes: decrypt(item.notes),
+            };
+        });
         return res.status(200).json(decryptedData);
     });
 });

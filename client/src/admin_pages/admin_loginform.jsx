@@ -60,13 +60,6 @@ function AdminLoginForm() {
                     <h2>Messiah Admin Login</h2>
                     <p>authorized users only</p>
                 </div>
-
-                 <div className="admin-form-group">
-                        <p className="admin-login-note">
-                            {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
-                        </p>
-                    </div>
-
                 <form onSubmit={handleSubmit}>
                     <div className="admin-form-group">
                         <label>Email</label>
@@ -77,11 +70,6 @@ function AdminLoginForm() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                    </div>
-                    <div className="admin-form-group">
-                        <p className="admin-login-note">
-                            {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
-                        </p>
                     </div>
                     <div className="admin-form-group">
                         <label>Password</label>

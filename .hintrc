@@ -7,7 +7,12 @@
       "default",
       {
         "ignore": [
-          "-webkit-overflow-scrolling"
+          "-webkit-overflow-scrolling",
+          "background-color: color-mix(in srgb, var(--swal2-confirm-button-background-color), var(--swal2-action-button-hover))",
+          "background-color: color-mix(in srgb, var(--swal2-confirm-button-background-color), var(--swal2-action-button-active))",
+          "background-color: color-mix(in srgb, var(--swal2-deny-button-background-color), var(--swal2-action-button-hover))",
+          "background-color: color-mix(in srgb, var(--swal2-deny-button-background-color), var(--swal2-action-button-active))",
+          "background-color: color-mix(in srgb, var(--swal2-cancel-button-background-color), var(--swal2-action-button-hover))"
         ]
       }
     ]

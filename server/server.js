@@ -2,12 +2,17 @@ import express from "express";
 import cors from "cors";
 import mysql from "mysql2";
 import bcrypt from 'bcryptjs';
+import CryptoJS from 'crypto-js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
+
 
 
 const db = mysql.createConnection({
@@ -24,6 +29,23 @@ db.connect((err) => {
     }
     console.log('Connected to database');
 });
+
+const SECRET_KEY = process.env.SECRET_KEY || 'uV9_7lXJ_v_N9Z9pL5mGk1m8n8-v7Z7r9R_vP8N7X2s=';
+
+function encrypt(text) {
+    if (text === undefined || text === null) return '';
+    return CryptoJS.AES.encrypt(String(text), SECRET_KEY).toString();
+}
+
+function decrypt(text) {
+    if (!text) return '';
+    try {
+        const bytes = CryptoJS.AES.decrypt(text, SECRET_KEY);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        return String(text);
+    }
+}
 
 
 app.post('/add_rooms', (req, res) => {
@@ -159,7 +181,7 @@ app.post('/add_user_account', (req, res) => {
 
 app.post('/update_user_account/:id', (req, res) => {
     const userId = parseInt(req.params.id, 10);
-    const fields = [];
+    const fields = [];``
     const values = [];
 
     if (req.body.name) {
@@ -274,14 +296,14 @@ app.post('/add_reservation', (req, res) => {
     const normalizedTotalPrice = req.body.total_price ? parseFloat(String(req.body.total_price).replace(/,/g, '')) : null;
     const finalTotalPrice = Number.isFinite(normalizedTotalPrice) ? normalizedTotalPrice : null;
     const values = [
-        req.body.last_name || '',
-        req.body.first_name || '',
+        encrypt(req.body.last_name || ''),
+        encrypt(req.body.first_name || ''),
         parseInt(req.body.num_guests, 10) || 0,
-        req.body.phone_number || '',
-        req.body.email || '',
+        encrypt(req.body.phone_number || ''),
+        encrypt(req.body.email || ''),
         req.body.check_in_date || null,
         req.body.check_out_date || null,
-        req.body.notes || '',
+        encrypt(req.body.notes || ''),
         req.body.status || 'pending',
         req.body.room_id || null,
         normalizedRoomPrice,
@@ -309,9 +331,9 @@ app.post('/add_reservation', (req, res) => {
 app.post('/add_feedback', (req, res) => {
     const sql = "INSERT INTO feedback (name, email, message, created_at) VALUES (?, ?, ?, ?)";
     const values = [
-        req.body.name || '',
-        req.body.email || '',
-        req.body.message || '',
+        encrypt(req.body.name || ''),
+        encrypt(req.body.email || ''),
+        encrypt(req.body.message || ''),
         new Date()
     ];
 
@@ -331,7 +353,13 @@ app.get('/get_feedback', (req, res) => {
             console.error("Error fetching feedback:", err);
             return res.status(500).json({ error: "Database query error!", details: err.message });
         }
-        return res.status(200).json(data);
+        const decryptedData = data.map((item) => ({
+            ...item,
+            name: decrypt(item.name),
+            email: decrypt(item.email),
+            message: decrypt(item.message)
+        }));
+        return res.status(200).json(decryptedData);
     });
 });
 
@@ -373,7 +401,15 @@ app.get('/get_reservations', (req, res) => {
             console.error("Error fetching reservations:", err);
             return res.status(500).json({ error: "Database query error!" });
         }
-        return res.status(200).json(data);
+        const decryptedData = data.map((item) => ({
+            ...item,
+            last_name: decrypt(item.last_name),
+            first_name: decrypt(item.first_name),
+            phone_number: decrypt(item.phone_number),
+            email: decrypt(item.email),
+            notes: decrypt(item.notes)
+        }));
+        return res.status(200).json(decryptedData);
     });
 });
 

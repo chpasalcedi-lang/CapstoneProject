@@ -2,9 +2,13 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "alter": "^0.2.0",
+    "bcryptjs": "^3.0.3",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
+    "cors": "^2.8.6",
     "emailjs": "^5.0.0",
+    "express": "^5.2.1",
+    "mysql2": "^3.22.4",
     "otp": "^2.0.1",
     "otp-generator": "^4.0.1",
     "react": "^19.2.6",

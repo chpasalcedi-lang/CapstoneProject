@@ -63,7 +63,7 @@ function AdminSales() {
                     const roomPrice = Number(booking.room_price || 0);
                     const reservationRevenue = Number.isNaN(roomPrice) ? 0 : roomPrice * nights;
 
-                    if (status === 'confirmed') {
+                    if (status === 'confirmed' || status === 'complete') {
                         confirmedTotal += reservationRevenue;
                     } else if (status === 'cancelled' || status === 'canceled') {
                         canceledTotal += reservationRevenue;
@@ -89,7 +89,7 @@ function AdminSales() {
     const totalRevenue = guestSales + bookingConfirmedSales;
 
     const pieChartData = {
-        labels: ['Guest Arrivals', 'Confirmed Reservations', 'Canceled Reservation Loss'],
+        labels: ['Guest Arrivals', 'Confirmed/Completed Reservations', 'Canceled Reservation Loss'],
         datasets: [
             {
                 label: 'Revenue',
@@ -168,7 +168,7 @@ function AdminSales() {
                 idx = date.getFullYear() === selectedYear && date.getMonth() === selectedMonthIndex ? date.getDate() - 1 : -1;
             }
             if (idx < 0 || idx >= stats.length) return;
-            if (status === 'confirmed') {
+            if (status === 'confirmed' || status === 'complete') {
                 stats[idx].confirmed += value;
             } else if (status === 'cancelled' || status === 'canceled') {
                 stats[idx].canceled += value;
@@ -203,7 +203,7 @@ function AdminSales() {
                     borderWidth: 1
                 },
                 {
-                    label: 'Confirmed Reservations',
+                    label: 'Confirmed/Completed Reservations',
                     data: stats.map((item) => Math.round(item.confirmed)),
                     backgroundColor: 'rgba(54, 162, 235, 0.6)',
                     borderColor: 'rgb(54, 162, 235)',

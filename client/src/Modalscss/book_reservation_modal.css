@@ -82,6 +82,12 @@
   color: #111827;
 }
 
+.book-reservation-room-number {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
 .book-reservation-modal-close {
   width: 36px;
   height: 36px;

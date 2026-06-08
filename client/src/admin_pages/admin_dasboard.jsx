@@ -7,13 +7,13 @@ import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
+    total_revenue: 0,
+    todays_sales: 0,
+    booking_sales: 0,
     total_rooms: 0,
     todays_checkins: 0,
     pending_bookings: 0,
-    total_guests: 0,
-    total_revenue: 0,
-    todays_sales: 0,
-    booking_sales: 0
+    total_guests: 0
   });
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -30,24 +30,110 @@ function AdminDashboard() {
       return { name: "?", role: "?" };
     });
 
+  const fetchStats = async () => {
+    setLoading(true);
+
+    try {
+      const [guestRes, bookingRes, roomRes] = await Promise.all([
+        axios.get("http://localhost:3001/get_guest_arrivals"),
+        axios.get("http://localhost:3001/get_reservations"),
+        axios.get("http://localhost:3001/get_rooms")
+      ]);
+
+      const guestData = guestRes.data || [];
+      const bookingData = bookingRes.data || [];
+      const roomData = roomRes.data || [];
+
+      const today = new Date().toISOString().split("T")[0];
+
+      const guestRevenue = guestData.reduce((sum, guest) => {
+        return sum + Number(guest.total_price || 0);
+      }, 0);
+
+      const todaysSales = guestData.reduce((sum, guest) => {
+        const guestDate = guest.created_at
+          ? new Date(guest.created_at).toISOString().split("T")[0]
+          : null;
+
+        if (guestDate === today) {
+          return sum + Number(guest.total_price || 0);
+        }
+
+        return sum;
+      }, 0);
+
+      let bookingRevenue = 0;
+
+      bookingData.forEach((booking) => {
+        const status = (booking.res_status || "").toLowerCase();
+        if (status === "confirmed" || status === "complete") {
+          const checkIn = new Date(booking.check_in_date);
+          const checkOut = new Date(booking.check_out_date);
+
+          const nights =
+            checkOut > checkIn
+              ? Math.max(
+                  1,
+                  Math.ceil((checkOut - checkIn) / 86400000)
+                )
+              : 1;
+
+          bookingRevenue += Number(booking.room_price || 0) * nights;
+        }
+      });
+
+      const todaysCheckins = guestData.filter((guest) => {
+        const checkinDate = guest.check_in_date
+          ? new Date(guest.check_in_date).toISOString().split("T")[0]
+          : null;
+
+        return checkinDate === today;
+      }).length;
+
+      const confirmedBookings = bookingData.filter(
+        (booking) => {
+          const status = (booking.res_status || "").toLowerCase();
+          return status === "confirmed" || status === "complete";
+        }
+      ).length;
+
+      const totalGuestArrivals = guestData.reduce((sum, guest) => {
+        const guestCount = Number(guest.number_of_guests || guest.num_guests || 0);
+        return sum + (Number.isNaN(guestCount) ? 0 : guestCount);
+      }, 0);
+
+      const totalBookingGuests = bookingData.reduce((sum, booking) => {
+        const status = (booking.res_status || "").toLowerCase();
+        if (status !== "confirmed" && status !== "complete") {
+          return sum;
+        }
+        const bookingCount = Number(booking.num_guests || 0);
+        return sum + (Number.isNaN(bookingCount) ? 0 : bookingCount);
+      }, 0);
+
+      setStats({
+        total_revenue: guestRevenue + bookingRevenue,
+        todays_sales: todaysSales,
+        booking_sales: bookingRevenue,
+        total_rooms: roomData.length,
+        todays_checkins: todaysCheckins,
+        pending_bookings: confirmedBookings,
+        total_guests: totalGuestArrivals + totalBookingGuests
+      });
+    } catch (err) {
+      console.error("Error fetching dashboard stats:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Failed to fetch dashboard statistics."
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await axios.get('http://localhost:3001/get_dashboard_stats');
-        console.log("Fetched dashboard stats:", res.data);
-        setStats(res.data);
-      } catch (err) {
-        console.error("Error fetching dashboard stats:", err);
-        Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to fetch dashboard statistics. Please check the server connection.' });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStats();
-
-    const interval = setInterval(fetchStats, 5000);
 
     const handleStorageChange = (e) => {
       if (e.key === 'dashboardRefreshTrigger') {
@@ -58,11 +144,10 @@ function AdminDashboard() {
     window.addEventListener('storage', handleStorageChange);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
-  
+
   const formatCurrency = (amount = 0) => {
     const value = Number(amount || 0);
     return `₱${value.toLocaleString()}`;
@@ -231,7 +316,7 @@ function AdminDashboard() {
                   <h2 className="dashboard-stat-title">
                     {loading ? "..." : stats.pending_bookings}
                   </h2>
-                  <p className="dashboard-stat-eyebrow">Pending bookings</p>
+                  <p className="dashboard-stat-eyebrow">Confirmed / Completed bookings</p>
                 </div>
               </div>
 

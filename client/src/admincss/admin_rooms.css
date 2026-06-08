@@ -220,9 +220,36 @@ body {
   border-radius: 3px;
 }
 
+.rooms-room-status {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  z-index: 2;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.rooms-room-status.available {
+  background: #22c55e;
+}
+
+.rooms-room-status.occupied {
+  background: #f97316;
+}
+
+.rooms-room-status.maintenance {
+  background: #ef4444;
+}
+
 .rooms-room-rating {
   position: absolute;
-  top: 13px; right: 13px;
+  bottom: 13px; right: 13px;
   z-index: 2;
   background: rgba(8,8,8,0.75);
   color: #888;

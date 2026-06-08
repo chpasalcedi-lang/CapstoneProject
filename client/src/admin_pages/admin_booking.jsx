@@ -57,49 +57,63 @@ function AdminBooking() {
         setViewModal(true);
     };
 
-    const handleConfirm = async (id) => {
+    const handleConfirm = async (booking) => {
         try {
-            //GEt booking details
-            const booking = bookings.find((b) => b.id === id);
             if (!booking) {
                 Swal.fire({ icon: 'error', title: 'Error', text: 'Booking not found' });
                 return;
             }
 
-            // Update reservation status
-            await axios.post(`http://localhost:3001/update_reservation/${id}`, { status: 'confirmed' });
+            const currentStatus = (booking.res_status || 'pending').toLowerCase();
+            let targetStatus = 'confirmed';
 
-            // Prepare email data
-            const templateParams = {
-                email: booking.email,
-                guest_name: `${booking.first_name} ${booking.last_name}`,
-                room_number: booking.room_number,
-                check_in_date: new Date(booking.check_in_date).toLocaleDateString(),
-                check_out_date: new Date(booking.check_out_date).toLocaleDateString(),
-                room_price: `₱${Number(booking.room_price || 0).toLocaleString()}`,
-                num_guests: booking.num_guests,
-            };
-
-            // Send confirmation email
-            try {
-                await emailjs.send(
-                    "service_9fw39gp",
-                    "template_wba3f1m",
-                    templateParams
-                );
-                Swal.fire({ icon: 'success', title: 'Confirmed', text: 'Reservation confirmed and email sent to guest.' });
-            } catch (emailErr) {
-                console.error("Email send error:", emailErr);
-                Swal.fire({ icon: 'warning', title: 'Confirmed', text: 'Reservation confirmed but email failed to send.' });
+            if (currentStatus === 'pending') {
+                targetStatus = 'confirmed';
+            } else if (currentStatus === 'confirmed') {
+                targetStatus = 'complete';
+            } else {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'No action needed',
+                    text: 'This reservation cannot be updated at this time.'
+                });
+                return;
             }
 
-            // Refetch bookings
+            await axios.post(`http://localhost:3001/update_reservation/${booking.id}`, { status: targetStatus });
+
+            if (targetStatus === 'complete') {
+                const templateParams = {
+                    email: booking.email,
+                    guest_name: `${booking.first_name} ${booking.last_name}`,
+                    room_number: booking.room_number,
+                    check_in_date: new Date(booking.check_in_date).toLocaleDateString(),
+                    check_out_date: new Date(booking.check_out_date).toLocaleDateString(),
+                    room_price: `₱${Number(booking.room_price || 0).toLocaleString()}`,
+                    num_guests: booking.num_guests,
+                };
+
+                try {
+                    await emailjs.send(
+                        "service_9fw39gp",
+                        "template_wba3f1m",
+                        templateParams
+                    );
+                    Swal.fire({ icon: 'success', title: 'Complete', text: 'Reservation marked complete and email sent to guest.' });
+                } catch (emailErr) {
+                    console.error("Email send error:", emailErr);
+                    Swal.fire({ icon: 'warning', title: 'Complete', text: 'Reservation marked complete but email failed to send.' });
+                }
+            } else {
+                Swal.fire({ icon: 'success', title: 'Confirmed', text: 'Reservation confirmed successfully.' });
+            }
+
             const res = await axios.get('http://localhost:3001/get_reservations');
             setBookings(res.data);
             localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
         } catch (err) {
             console.error("Error confirming booking:", err);
-            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to confirm booking' });
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to update booking' });
         }
     };
 
@@ -150,7 +164,7 @@ function AdminBooking() {
     const filteredBookings = bookings.filter((booking) => {
         const status = (booking.res_status || 'pending').toLowerCase();
 
-        if (filterStatus === 'completed' && status !== 'confirmed') return false;
+        if (filterStatus === 'complete' && status !== 'complete') return false;
         if (filterStatus === 'pending' && status !== 'pending') return false;
         if (filterStatus === 'cancelled' && status !== 'cancelled') return false;
 
@@ -265,11 +279,10 @@ function AdminBooking() {
                                             type="button" className={filterStatus === 'all' ? 'active' : ''} onClick={() => handleFilterChange('all')}>
                                             all
                                         </button>
-                                        <button type="button" className={filterStatus === 'completed' ? 'active' : ''} onClick={() => handleFilterChange('completed')}>
-                                            Completed
+                                        <button type="button" className={filterStatus === 'complete' ? 'active' : ''} onClick={() => handleFilterChange('complete')}>
+                                            Complete
                                         </button>
-                                        <button type="button" className={filterStatus === 'pending' ? 'active' : ''}onClick={() => handleFilterChange('pending')}
-    >
+                                        <button type="button" className={filterStatus === 'pending' ? 'active' : ''} onClick={() => handleFilterChange('pending')}>
                                             Pending
                                         </button>
                                         <button type="button" className={filterStatus === 'cancelled' ? 'active' : ''} onClick={() => handleFilterChange('cancelled')}>
@@ -302,39 +315,42 @@ function AdminBooking() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredBookings.map((booking) => (
-                                            <tr key={booking.id}>
-                                                <td>{booking.first_name} {booking.last_name}</td>
-                                                <td>{booking.room_number}</td>
-                                                <td>{formatBookingDate(booking.check_in_date)}</td>
-                                                <td>{formatBookingDate(booking.check_out_date)}</td>
-                                                <td>₱{Number(booking.total_price || 0).toLocaleString()}</td>
-                                                <td>
-                                                    <span className={`status-${(booking.res_status || 'pending').toLowerCase()}`}>
-                                                        {booking.res_status || 'pending'}
-                                                    </span>
-                                                </td>
-                                                <td className="actions-cell">
-                                                    <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
-                                                        view
-                                                    </button>
-                                                    <button
-                                                        className="btn guest btn-primary"
-                                                        onClick={() => handleConfirm(booking.id)}
-                                                        disabled={['confirmed', 'cancelled'].includes((booking.res_status || 'pending').toLowerCase())}
-                                                    >
-                                                        confirm
-                                                    </button>
-                                                    <button
-                                                        className="btn guest btn-danger"
-                                                        onClick={() => handleCancel(booking.id)}
-                                                        disabled={(booking.res_status || 'pending').toLowerCase() === 'cancelled'}
-                                                    >
-                                                        cancel
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {filteredBookings.map((booking) => {
+                                            const status = (booking.res_status || 'pending').toLowerCase();
+                                            return (
+                                                <tr key={booking.id}>
+                                                    <td>{booking.first_name} {booking.last_name}</td>
+                                                    <td>{booking.room_number}</td>
+                                                    <td>{formatBookingDate(booking.check_in_date)}</td>
+                                                    <td>{formatBookingDate(booking.check_out_date)}</td>
+                                                    <td>₱{Number(booking.total_price || 0).toLocaleString()}</td>
+                                                    <td>
+                                                        <span className={`status-${status}`}>
+                                                            {booking.res_status || 'pending'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="actions-cell">
+                                                        <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                            view
+                                                        </button>
+                                                        <button
+                                                            className="btn guest btn-primary"
+                                                            onClick={() => handleConfirm(booking)}
+                                                            disabled={['cancelled', 'complete'].includes(status)}
+                                                        >
+                                                            {status === 'pending' ? 'Confirm' : status === 'confirmed' ? 'Done' : 'Done'}
+                                                        </button>
+                                                        <button
+                                                            className="btn guest btn-danger"
+                                                            onClick={() => handleCancel(booking.id)}
+                                                            disabled={['cancelled', 'complete'].includes(status)}
+                                                        >
+                                                            cancel
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

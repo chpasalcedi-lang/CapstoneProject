@@ -4,8 +4,9 @@ import Swal from 'sweetalert2';
 import "../Modalscss/book_reservation_modal.css";
 
 
-function BookReservationModal({ showModal, setShowModal, refreshData, roomId, roomPrice }) {
+function BookReservationModal({ showModal, setShowModal, refreshData, roomId, roomPrice, roomNumber }) {
     const userEmail = localStorage.getItem('userEmail') || "";
+    const [reservations, setReservations] = useState([]);
 
   const getTodayISO = () => {
     const t = new Date();
@@ -50,6 +51,35 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         }));
     }, [roomId, roomPrice, userEmail]);
 
+    useEffect(() => {
+        if (showModal && roomId) {
+            axios.get('http://localhost:3001/get_reservations')
+                .then((res) => {
+                    const allReservations = res.data || [];
+                    const roomReservations = allReservations.filter((r) => {
+                        const status = (r.res_status || '').toLowerCase();
+                        return r.room_id === roomId && ['confirmed', 'complete', 'occupied'].includes(status);
+                    });
+                    setReservations(roomReservations);
+                })
+                .catch((err) => {
+                    console.error('Error fetching reservations:', err);
+                });
+        }
+    }, [showModal, roomId]);
+
+    const isDateRangeAvailable = (checkIn, checkOut) => {
+        if (!checkIn || !checkOut) return true;
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        
+        return !reservations.some((res) => {
+            const resCheckIn = new Date(res.check_in_date);
+            const resCheckOut = new Date(res.check_out_date);
+            return checkInDate < resCheckOut && checkOutDate > resCheckIn;
+        });
+    };
+
     const closeModal = () => {
         setShowModal(false);
     };
@@ -60,7 +90,20 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
             Swal.fire({ icon: 'error', title: 'Invalid check-in', text: 'Check-in cannot be in the past.' });
             return;
         }
+        if (val && values.check_out_date && !isDateRangeAvailable(val, values.check_out_date)) {
+            Swal.fire({ icon: 'error', title: 'Room not available', text: 'This date range is already booked. Please select different dates.' });
+            return;
+        }
         setValues({ ...values, check_in_date: val });
+    };
+
+    const handleCheckOutDateChange = (e) => {
+        const val = e.target.value;
+        if (val && values.check_in_date && !isDateRangeAvailable(values.check_in_date, val)) {
+            Swal.fire({ icon: 'error', title: 'Room not available', text: 'This date range is already booked. Please select different dates.' });
+            return;
+        }
+        setValues({ ...values, check_out_date: val });
     };
     const calculateTotalPrice = (checkIn, checkOut, price) => {
         const start = new Date(checkIn);
@@ -155,8 +198,10 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
             <div className="book-reservation-modal">
                 <div className="book-reservation-modal-header">
                   <div>
-                    <p className="book-reservation-modal-eyebrow">New Record</p>
                     <h2 className="book-reservation-modal-title">Book Reservation</h2>
+                    {roomNumber && (
+                        <p className="book-reservation-room-number">Room number: {roomNumber}</p>
+                    )}
                   </div>
                   <button className="book-reservation-modal-close" onClick={closeModal}><i className="fa-solid fa-xmark"></i></button>
                 </div>
@@ -199,7 +244,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                           required
                           min={values.check_in_date ? getTomorrowISO(values.check_in_date) : getTomorrowISO()}
                           value={values.check_out_date}
-                          onChange={(e)=> setValues({...values, check_out_date: e.target.value})}
+                          onChange={handleCheckOutDateChange}
                           className="book-input"
                         />
                       </div>

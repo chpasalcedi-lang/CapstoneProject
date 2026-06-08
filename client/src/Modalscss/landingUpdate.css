@@ -1,0 +1,281 @@
+.landing-edit-booking-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(-12px);
+  transition: transform 0.22s ease, opacity 0.22s ease, visibility 0.22s ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.landing-edit-booking-modal.-hidden {
+  display: none ;
+}
+
+.landing-edit-booking-modal.modal-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.landing-edit-booking-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.landing-edit-booking-form-card {
+  background: #ffffff;
+  width: 520px;
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 10px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+}
+
+.landing-edit-booking-form-card h2 {
+  color: #111827;
+  margin-bottom: 8px;
+  font-size: 26px;
+}
+
+.landing-edit-booking-modal-header {
+  height: 72px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eef2f7;
+}
+.landing-edit-booking-modal-eyebrow {
+  margin: 0 0 3px 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #6b7280;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.landing-edit-booking-modal-close {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.12s ease, color 0.12s ease;
+  font-size: 1rem;
+}
+
+.landing-edit-booking-modal-close:hover {
+  background: #e5e7eb;
+  transform: scale(1.03);
+  color: #111827;
+}
+
+.landing-edit-booking-form-card p {
+  color: #374151;
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+
+.landing-edit-booking-modal-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 20px 24px 20px; 
+  background: #f7f9fc;
+}
+
+.landing-edit-booking-form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.landing-edit-booking-form-row .landing-edit-booking-form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.landing-edit-booking-form-group {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-edit-booking-form-group:last-child {
+  margin-bottom: 4px;
+}
+
+.landing-edit-booking-form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.landing-edit-booking-form-group label .optional {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 0.74rem;
+}
+
+.landing-edit-booking-form-group input,
+.landing-edit-booking-form-group select,
+.landing-edit-booking-form-group textarea {
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #ffffff;
+  color: #111827;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.landing-edit-booking-form-group input::placeholder,
+.landing-edit-booking-form-group textarea::placeholder {
+  color: #c4c9d4;
+}
+
+.landing-edit-booking-form-group input:hover,
+.landing-edit-booking-form-group select:hover,
+.landing-edit-booking-form-group textarea:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+.landing-edit-booking-form-group select option {
+  color: #0c0c0c;
+  background: #ffffff;
+}
+
+.landing-edit-booking-form-group textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.landing-edit-booking-modal-footer {
+  height: 72px; 
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid #eef2f7;
+  background: #ffffff;
+}
+.landing-edit-booking-btn-cancel,
+.landing-edit-booking-btn-save {
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.12s ease;
+}
+
+.landing-edit-booking-btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.landing-edit-booking-btn-cancel:hover {
+  background: #e9eaec;
+}
+
+.landing-edit-booking-btn-save {
+  background: #1d1d1e;
+  color: #ececec;
+  border: none;
+}
+
+.landing-edit-booking-btn-save:hover {
+  background: #2d2d2e;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+
+.landing-edit-booking-status-message {
+  margin-top: 18px;
+  color: #6b7280;
+  font-size: 14px;
+  background: rgba(15,23,42,0.03);
+  border: 1px solid rgba(15,23,42,0.05);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+
+@media (max-width: 600px) {
+  .landing-edit-booking-form-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 10px;
+  }
+
+  .landing-edit-booking-modal-header {
+    padding: 14px 16px;
+  }
+
+  .landing-edit-booking-modal-title {
+    font-size: 1.1rem;
+  }
+
+  .landing-edit-booking-modal-body {
+    padding: 16px 16px 10px;
+  }
+
+  .landing-edit-booking-form-row {
+    gap: 10px;
+  }
+
+  .landing-edit-booking-modal-footer {
+    padding: 12px 16px;
+  }
+
+  .landing-edit-booking-btn-cancel,
+  .landing-edit-booking-btn-save {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .landing-edit-booking-form-row {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .landing-edit-booking-form-row .landing-edit-booking-form-group {
+    margin-bottom: 14px;
+  }
+}

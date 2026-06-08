@@ -130,8 +130,9 @@ function AdminGuest() {
     }, []);
 
     const filteredBookings = bookings.filter((booking) => {
-        const isConfirmed = booking.res_status?.toLowerCase() === 'confirmed';
-        if (!isConfirmed) return false;
+        const status = booking.res_status?.toLowerCase();
+        const isVisible = status === 'confirmed' || status === 'complete';
+        if (!isVisible) return false;
 
         const query = searchTerm.toLowerCase();
         const searchMatch = (

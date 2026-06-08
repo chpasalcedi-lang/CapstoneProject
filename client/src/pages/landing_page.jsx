@@ -4,6 +4,8 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import ViewLanding from "../Modals/view_landing.jsx";
+import LandingUpdate from "../Modals/landingUpdate.jsx";
 import "../pagescss/landing_page.css";
 
 
@@ -13,6 +15,11 @@ function LandingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [reservations, setReservations] = useState([]);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [loadingReservations, setLoadingReservations] = useState(false);
   const menuButtonRef = useRef(null);
   const [userEmail, setUserEmail] = useState(() => {
     // Read auth info synchronously to avoid a flash of the "sign in" button
@@ -41,7 +48,30 @@ function LandingPage() {
       return next;
     });
   };
-  const toggleProfile = () => setProfileOpen((prev) => !prev);
+  const fetchUserReservations = async (email) => {
+    if (!email) return;
+    setLoadingReservations(true);
+    try {
+      const res = await axios.get('http://localhost:3001/get_reservations');
+      const allReservations = res.data || [];
+      const userReservations = allReservations.filter(
+        (r) => r.email && r.email.toLowerCase() === email.toLowerCase()
+      );
+      setReservations(userReservations);
+    } catch (error) {
+      console.error('Error fetching reservations:', error);
+      setReservations([]);
+    } finally {
+      setLoadingReservations(false);
+    }
+  };
+
+  const toggleProfile = () => {
+    if (!profileOpen && userEmail) {
+      fetchUserReservations(userEmail);
+    }
+    setProfileOpen((prev) => !prev);
+  };
 
   const handleLogout = () => {
     // clear both possible login keys and update UI immediately
@@ -58,6 +88,21 @@ function LandingPage() {
       menuButtonRef.current.focus();
     }
   };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (location.hash === "#about-pool") {
+      const section = document.getElementById("about-pool");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } else if (location.pathname === "/Home") {
+      scrollToTop();
+    }
+  }, [location]);
 
   useEffect(() => {
     if (!menuOpen && menuButtonRef.current) {
@@ -129,13 +174,11 @@ function LandingPage() {
             <div className="logo">
               <h1>MESSIAH</h1>
             </div>
-
             <ul className="landing-nav-links">
-              <li><Link to="/Home">Home</Link></li>
+              <li><Link to="/Home" onClick={scrollToTop}>Home</Link></li>
               <li><Link to="/Reservation">Room</Link></li>
-              <li><a href="#about-pool">About</a></li>
+              <li><Link to="/Home#about-pool">About</Link></li>
             </ul>
-
             <div className="nav-actions">
               {userEmail ? (
                 <div className="profile-dropdown-wrapper">
@@ -146,13 +189,50 @@ function LandingPage() {
                   {profileOpen && (
                     <div className="profile-dropdown">
                       <div className="profile-dropdown-info">
-                        <div className="profile-dropdown-avatar">
-                          <i className="fa-solid fa-circle-user"></i>
-                        </div>
+                        <div className="profile-dropdown-avatar"><i className="fa-solid fa-user"></i></div>
                         <div className="profile-dropdown-email">{userEmail}</div>
                       </div>
-                      <div className="profile-dropdown-divider"/>
-
+                      <div className="profile-dropdown-divider"></div>
+                      <div className="profile-dropdown-credentials">
+                        {loadingReservations ? (
+                          <p className="profile-credentials-loading">Loading reservations...</p>
+                        ) : reservations.length === 0 ? (
+                          <p className="profile-credentials-empty">No reservations found</p>
+                        ) : (
+                          reservations.map((booking) => (
+                            <div className="profile-dropdown-credential-card" key={booking.id}>
+                              <div className="profile-credential-header">
+                                <h4>{booking.room_name || 'Room Reservation'}</h4>
+                                <span className={`profile-credential-status ${(booking.res_status || 'pending').toLowerCase()}`}>
+                                  {booking.res_status || 'Pending'}
+                                </span>
+                              </div>
+                              <div className="profile-credential-dates">
+                                <span className="profile-credential-date-label">Check-in</span>
+                                <span className="profile-credential-date-value">{new Date(booking.check_in_date).toLocaleDateString()}</span>
+                                <span className="profile-credential-date-label">Check-out</span>
+                                <span className="profile-credential-date-value">{new Date(booking.check_out_date).toLocaleDateString()}</span>
+                              </div>
+                              <div className="profile-credential-info">
+                                <span><strong>Room Type:</strong> {booking.room_type || 'N/A'}</span>
+                                <span><strong>Guests:</strong> {booking.num_guests || 'N/A'}</span>
+                                <span><strong>Total:</strong> ₱{booking.total_price || '0'}</span>
+                              </div>
+                              <div className="profile-credential-actions">
+                                <button className="profile-credential-btn-view" onClick={() => { setSelectedBooking(booking); setShowViewModal(true); }}>
+                                  View Details
+                                </button>
+                                {((!booking.res_status) || (['confirmed','complete'].indexOf(String(booking.res_status).toLowerCase()) === -1)) && (
+                                  <button className="profile-credential-btn-edit" onClick={() => { setSelectedBooking(booking); setShowEditModal(true); }}>
+                                    Update
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      <div className="profile-dropdown-divider"></div>
                       <button className="profile-dropdown-item profile-dropdown-logout" onClick={handleLogout}>
                         <i className="fa-solid fa-right-from-bracket"></i> Logout
                       </button>
@@ -162,7 +242,7 @@ function LandingPage() {
               ) : (
                 <Link to="/Login">
                   <button className="landing-btn">
-                    sign in
+                    SIGN IN
                   </button>
                 </Link>
               )}
@@ -173,7 +253,7 @@ function LandingPage() {
         </div>
 
         <div id="mobile-menu" className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen} inert={!menuOpen}>
-          <Link to="/Home" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>Home</Link>
+          <Link to="/Home" tabIndex={menuOpen ? 0 : -1} onClick={() => { closeMenu(); scrollToTop(); }}>Home</Link>
           <Link to="/Reservation" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>Room</Link>
           <a href="#about-pool" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>About</a>
         </div>
@@ -329,6 +409,30 @@ function LandingPage() {
           </form>
         </div>
       </section>
+
+      <ViewLanding
+        show={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        booking={selectedBooking}
+        onEdit={() => {
+          setShowViewModal(false);
+          setShowEditModal(true);
+        }}
+      />
+      <LandingUpdate
+        show={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedBooking(null);
+          if (userEmail) fetchUserReservations(userEmail);
+        }}
+        booking={selectedBooking}
+        onUpdate={() => {
+          setShowEditModal(false);
+          setSelectedBooking(null);
+          if (userEmail) fetchUserReservations(userEmail);
+        }}
+      />
 
       <footer className="landing-footer">
         <div className="landing-footer-content">

@@ -28,7 +28,63 @@ function AdminRooms() {
 
     const fetchData = () => {
         axios.get("http://localhost:3001/get_rooms")
-            .then((res) => setData(res.data))
+            .then((res) => {
+                const rooms = res.data || [];
+                
+                // If room has maintenance status set, use that. Otherwise calculate occupancy.
+                const mapped = rooms.map((room) => {
+                    // If admin set maintenance status, show that
+                    if (room.room_status?.toLowerCase() === 'maintenance') {
+                        return {
+                            ...room,
+                            room_status: 'Maintenance',
+                            _isMaintenance: true
+                        };
+                    }
+                    return room;
+                });
+                
+                // For non-maintenance rooms, fetch reservations to determine occupancy
+                axios.get('http://localhost:3001/get_reservations')
+                    .then((rres) => {
+                        const reservations = rres.data || [];
+                        const today = new Date();
+                        const occupiedRoomIds = new Set();
+                        
+                        reservations.forEach((r) => {
+                            if (!r.room_id) return;
+                            const status = (r.res_status || '').toLowerCase();
+                            if (status !== 'confirmed' && status !== 'pending') return;
+                            const rStart = new Date(r.check_in_date);
+                            const rEnd = new Date(r.check_out_date);
+                            if (today >= rStart && today < rEnd) {
+                                occupiedRoomIds.add(Number(r.room_id));
+                            }
+                        });
+                        
+                        const finalMapped = mapped.map((room) => {
+                            // If maintenance, keep that status
+                            if (room._isMaintenance) {
+                                return room;
+                            }
+                            // Otherwise show occupancy
+                            return {
+                                ...room,
+                                room_status: occupiedRoomIds.has(Number(room.id)) ? 'Occupied' : 'Available'
+                            };
+                        });
+                        
+                        setData(finalMapped);
+                    })
+                    .catch((err) => {
+                        console.error("Error fetching reservations:", err);
+                        const defaultMapped = mapped.map((room) => {
+                            if (room._isMaintenance) return room;
+                            return { ...room, room_status: 'Available' };
+                        });
+                        setData(defaultMapped);
+                    });
+            })
             .catch((err) => console.error("Error sa pagkuha sang data:", err));
     };
 
@@ -155,6 +211,9 @@ function AdminRooms() {
                                 <div className="rooms-room-card-img">
                                     <img src={room.room_image} alt={room.room_name} />
                                     <span className="rooms-room-badge">{room.room_type}</span>
+                                    <span className={`rooms-room-status ${room.room_status === 'Occupied' ? 'occupied' : room.room_status === 'Maintenance' ? 'maintenance' : 'available'}`}>
+                                        {room.room_status || 'Available'}
+                                    </span>
                                     {room.room_type?.toLowerCase() !== 'event' && (
                                         <span className="rooms-room-rating">Room : {room.room_number}</span>
                                     )}

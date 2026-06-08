@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../Modalscss/Edit_booking_modal.css';
+import '../Modalscss/landingUpdate.css';
 
 const formatDateForInput = (dateStr) => {
     if (!dateStr) return '';
@@ -14,7 +14,7 @@ const formatDateForInput = (dateStr) => {
     return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0];
 };
 
-function EditBookingModal({ show, onClose, booking, onUpdate }) {
+function LandingUpdate({ show, onClose, booking, onUpdate }) {
     const [values, setValues] = useState({
         last_name: '',
         first_name: '',
@@ -44,6 +44,8 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         }
     }, [booking]);
 
+    const isConfirmed = booking && booking.res_status && ['confirmed','approved','occupied','complete'].includes(String(booking.res_status).toLowerCase());
+
     useEffect(() => {
         axios.get("http://localhost:3001/get_rooms")
             .then((res) => {
@@ -72,6 +74,10 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (isConfirmed) {
+            return;
+        }
 
         const selectedRoom = rooms.find(room => String(room.room_number) === String(values.room_number));
         const roomId = selectedRoom ? selectedRoom.id : booking.room_id;
@@ -116,33 +122,39 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     };
 
     return (
-        <div className={(show ? "edit-booking-modal modal-visible" : "edit-booking-modal modal-hidden")} id="modal">
-            <div className="edit-booking-container">
-                <div className="edit-booking-form-card">
-                    <div className="edit-booking-modal-header">
-                        <h2 className="edit-booking-modal-title">Edit Booking</h2>
-                        <button className="edit-booking-modal-close" onClick={handleCancel}><i className="fa-solid fa-xmark"></i></button>
+        <div className={(show ? "landing-edit-booking-modal modal-visible" : "landing-edit-booking-modal modal-hidden")} id="modal">
+            <div className="landing-edit-booking-container">
+                <div className="landing-edit-booking-form-card">
+                    <div className="landing-edit-booking-modal-header">
+                        <h2 className="landing-edit-booking-modal-title">Edit Booking</h2>
+                        <button className="landing-edit-booking-modal-close" onClick={handleCancel}><i className="fa-solid fa-xmark"></i></button>
                     </div>
-                    <div className="edit-booking-modal-body">
-                        <form onSubmit={handleSubmit}>
-                            <div className="edit-booking-form-row">
-                                <div className="edit-booking-form-group">
+                    <div className="landing-edit-booking-modal-body">
+                        {isConfirmed ? (
+                            <div style={{padding: '16px'}}>
+                                <p style={{marginTop:0, color:'#374151'}}>This reservation has been confirmed by admin and cannot be edited.</p>
+                                <p style={{color:'#6b7280'}}>If you need changes, please contact support.</p>
+                            </div>
+                        ) : (
+                            <form id="landing-edit-form" onSubmit={handleSubmit}>
+                            <div className="landing-edit-booking-form-row">
+                                <div className="landing-edit-booking-form-group">
                                     <label>Last Name</label>
-                                    <input type="text" name="last_name" required value={values.last_name} onChange={handleChange} placeholder="e.g. Family Name" />
+                                    <input type="text" name="last_name" required value={values.last_name} onChange={handleChange} placeholder="e.g. Family Name" readOnly={isConfirmed} />
                                 </div>
-                                <div className="edit-booking-form-group">
+                                <div className="landing-edit-booking-form-group">
                                     <label>First Name</label>
-                                    <input type="text" name="first_name" required value={values.first_name} onChange={handleChange} placeholder="e.g. First Name" />
+                                    <input type="text" name="first_name" required value={values.first_name} onChange={handleChange} placeholder="e.g. First Name" readOnly={isConfirmed} />
                                 </div>
                             </div>
-                            <div className="edit-booking-form-row">
-                                <div className="edit-booking-form-group">
+                            <div className="landing-edit-booking-form-row">
+                                <div className="landing-edit-booking-form-group">
                                     <label>No. of Guests</label>
                                     <input type="number" name="num_guests" required value={values.num_guests} onChange={handleChange} placeholder="e.g. 2" />
                                 </div>
-                                <div className="edit-booking-form-group">
+                                <div className="landing-edit-booking-form-group">
                                     <label>Room Number</label>
-                                    <select name="room_number" required value={values.room_number} onChange={handleChange}>
+                                    <select name="room_number" required value={values.room_number} onChange={handleChange} disabled={isConfirmed}>
                                         <option value="">Select Room</option>
                                         {rooms.map(room => (
                                             <option key={room.id} value={String(room.room_number)}>
@@ -152,34 +164,35 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                                     </select>
                                 </div>
                             </div>
-                            <div className="edit-booking-form-group">
+                            <div className="landing-edit-booking-form-group">
                                 <label>Phone Number</label>
                                 <input type="text" name="phone_number" inputMode="numeric" pattern="\d{11}" required value={values.phone_number} onChange={handleChange} placeholder="e.g. 09XXXXXXXXX" />
                             </div>
-                            <div className="edit-booking-form-group">
+                            <div className="landing-edit-booking-form-group">
                                 <label>Email</label>
                                 <input type="email" name="email" required value={values.email} onChange={handleChange} placeholder="e.g. example@email.com" />
                             </div>
-                            <div className="edit-booking-form-row">
-                                <div className="edit-booking-form-group">
+                            <div className="landing-edit-booking-form-row">
+                                <div className="landing-edit-booking-form-group">
                                     <label>Check-in Date</label>
-                                    <input type="date" name="check_in_date" required value={values.check_in_date} onChange={handleChange} className="edit-booking-input" />
+                                    <input type="date" name="check_in_date" required value={values.check_in_date} onChange={handleChange} className="landing-edit-booking-input" />
                                 </div>
-                                <div className="edit-booking-form-group">
+                                <div className="landing-edit-booking-form-group">
                                     <label>Check-out Date</label>
-                                    <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} className="edit-booking-input" />
+                                    <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} className="landing-edit-booking-input" />
                                 </div>
                             </div>
 
-                            <div className="edit-booking-form-group">
+                            <div className="landing-edit-booking-form-group">
                                 <label>Notes <span className="optional">Optional</span></label>
                                 <textarea name="notes" rows="3" value={values.notes} onChange={handleChange} placeholder="..."></textarea>
                             </div>
-                        </form>
+                            </form>
+                        )}
                     </div>
-                    <div className="edit-booking-modal-footer">
-                        <button type="button" className="edit-booking-btn-cancel" onClick={handleCancel}>Cancel</button>
-                        <button type="submit" className="edit-booking-btn-save" onClick={handleSubmit}>Update Reservation</button>
+                            <div className="landing-edit-booking-modal-footer">
+                        <button type="button" className="landing-edit-booking-btn-cancel" onClick={handleCancel}>Cancel</button>
+                        <button type="submit" form="landing-edit-form" className="landing-edit-booking-btn-save" disabled={isConfirmed}>Update Reservation</button>
                     </div>
                 </div>
             </div>
@@ -187,4 +200,4 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     );
 }
 
-export default EditBookingModal;
+export default LandingUpdate;

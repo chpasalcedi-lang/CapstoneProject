@@ -321,43 +321,6 @@ app.post('/login', (req, res) => {
         }
 
         handleUserRow(results[0]);
-        user.name = decrypt(user.name);
-        user.email = decrypt(user.email);
-        const hash = user.password || '';
-        const isBcrypt = hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$');
-
-        const finishLogin = () => {
-            delete user.password;
-            console.log('Login successful for:', user.email, 'role:', user.role);
-            return res.status(200).json({ message: 'Login successful', user });
-        };
-
-        if (isBcrypt) {
-            bcrypt.compare(password, hash, (bcryptErr, same) => {
-                if (bcryptErr) {
-                    console.error('Bcrypt compare error:', bcryptErr);
-                    return res.status(500).json({ error: 'Server error' });
-                }
-                if (!same) {
-                    return res.status(401).json({ error: 'Invalid email or password' });
-                }
-                finishLogin();
-            });
-            return;
-        }
-
-        if (password === hash) {
-            const newHash = bcrypt.hashSync(password, 10);
-            db.query('UPDATE admins SET password = ? WHERE email = ?', [newHash, encrypt(email)], (updateErr) => {
-                if (updateErr) {
-                    console.error('Error migrating plaintext password:', updateErr);
-                }
-                finishLogin();
-            });
-            return;
-        }
-
-        return res.status(401).json({ error: 'Invalid email or password' });
     });
 });
 
@@ -454,38 +417,37 @@ app.delete('/delete_feedback/:id', (req, res) => {
 });
 
 app.get('/get_reservations', (req, res) => {
-    const sql = `
-        SELECT
-            r.*,
-            COALESCE(r.room_price, rm.room_price) AS room_price,
-            COALESCE(rm.room_number, 'N/A') AS room_number,
-            rm.room_name,
-            rm.room_label,
-            GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS nights,
-            COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS total_price
-        FROM reservations r
-        LEFT JOIN rooms rm ON r.room_id = rm.id
-        ORDER BY r.id DESC
-    `;
-    db.query(sql, (err, data) => {
-        if (err) {
-            console.error("Error fetching reservations:", err);
-            return res.status(500).json({ error: "Database query error!" });
+    const markDoneSql = `UPDATE reservations SET res_status = 'complete' WHERE res_status = 'confirmed' AND DATE(check_out_date) < CURDATE()`;
+
+    db.query(markDoneSql, (updateErr) => {
+        if (updateErr) {
+            console.error('Error auto-updating reservations to complete:', updateErr);
         }
-        const decryptedData = data.map((item) => {
-            const first = decrypt(item.first_name);
-            const last = decrypt(item.last_name);
-            return {
-                ...item,
-                first_name: first,
-                last_name: last,
-                guest_name: (first + ' ' + last).trim(),
-                phone_number: decrypt(item.phone_number),
-                email: decrypt(item.email),
-                notes: decrypt(item.notes),
-            };
+
+        const sql = `
+            SELECT r.*, COALESCE(r.room_price, rm.room_price) AS room_price,COALESCE(rm.room_number, 'N/A') AS room_number, rm.room_name, rm.room_label, rm.room_type, GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS nights, COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS total_price 
+            FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id ORDER BY r.id DESC`;
+
+        db.query(sql, (err, data) => {
+            if (err) {
+                console.error("Error fetching reservations:", err);
+                return res.status(500).json({ error: "Database query error!" });
+            }
+            const decryptedData = data.map((item) => {
+                const first = decrypt(item.first_name);
+                const last = decrypt(item.last_name);
+                return {
+                    ...item,
+                    first_name: first,
+                    last_name: last,
+                    guest_name: (first + ' ' + last).trim(),
+                    phone_number: decrypt(item.phone_number),
+                    email: decrypt(item.email),
+                    notes: decrypt(item.notes),
+                };
+            });
+            return res.status(200).json(decryptedData);
         });
-        return res.status(200).json(decryptedData);
     });
 });
 
@@ -525,12 +487,42 @@ app.get('/', (req, res) => {
 
 app.post('/update_reservation/:id', (req, res) => {
     const reservationId = parseInt(req.params.id, 10);
-    const { status } = req.body;
-    if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+    if (Number.isNaN(reservationId)) {
+        return res.status(400).json({ error: 'Invalid reservation ID.' });
+    }
+
+    const { status, last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, room_id } = req.body;
+
+    if (status !== undefined && !['pending', 'confirmed', 'cancelled', 'complete'].includes(status)) {
         return res.status(400).json({ error: 'Invalid status.' });
     }
 
-    // Get the reservation details
+    const updateFields = {};
+    if (status !== undefined && status !== '') 
+        updateFields.res_status = status;
+    if (last_name !== undefined && last_name !== '') 
+        updateFields.last_name = encrypt(last_name);
+    if (first_name !== undefined && first_name !== '') 
+        updateFields.first_name = encrypt(first_name);
+    if (num_guests !== undefined && num_guests !== '') 
+        updateFields.num_guests = parseInt(num_guests, 10) || 0;
+    if (phone_number !== undefined && phone_number !== '') 
+        updateFields.phone_number = encrypt(phone_number);
+    if (email !== undefined && email !== '') 
+        updateFields.email = encrypt(email);
+    if (check_in_date !== undefined && check_in_date !== '') 
+        updateFields.check_in_date = check_in_date;
+    if (check_out_date !== undefined && check_out_date !== '') 
+        updateFields.check_out_date = check_out_date;
+    if (notes !== undefined && notes !== '') 
+        updateFields.notes = encrypt(notes);
+    if (room_id !== undefined && room_id !== null && room_id !== '') 
+        updateFields.room_id = room_id;
+
+    if (Object.keys(updateFields).length === 0) {
+        return res.status(400).json({ error: 'No valid fields to update.' });
+    }
+
     const getReservationSql = `SELECT room_id, room_price FROM reservations WHERE id = ?`;
     db.query(getReservationSql, [reservationId], (err, results) => {
         if (err || results.length === 0) {
@@ -539,41 +531,21 @@ app.post('/update_reservation/:id', (req, res) => {
         }
 
         const reservation = results[0];
-        
-        // When confirming, ALWAYS fetch room_price from rooms table if room_id exists
-        if (status === 'confirmed' && reservation.room_id) {
-            const getRoomPriceSql = `SELECT room_price FROM rooms WHERE id = ?`;
-            db.query(getRoomPriceSql, [reservation.room_id], (err, roomResults) => {
-                let finalRoomPrice = reservation.room_price;
-                
-                if (!err && roomResults.length > 0) {
-                    const fetchedPrice = parseFloat(String(roomResults[0].room_price).replace(/,/g, ''));
-                    if (!isNaN(fetchedPrice) && fetchedPrice > 0) {
-                        finalRoomPrice = fetchedPrice;
-                    }
-                }
-                
-                console.log(`Updating reservation ${reservationId}: status=${status}, room_price=${finalRoomPrice}`);
-                
-                // Update both status and room_price
-                const updateSql = `UPDATE reservations SET res_status = ?, room_price = ? WHERE id = ?`;
-                db.query(updateSql, [status, finalRoomPrice, reservationId], (updateErr, result) => {
-                    if (updateErr) {
-                        console.error('Error updating reservation:', updateErr);
-                        return res.status(500).json({ error: 'Database error.' });
-                    }
-                    if (result.affectedRows === 0) {
-                        return res.status(404).json({ error: 'Reservation not found.' });
-                    }
-                    console.log(`Reservation ${reservationId} confirmed with room_price=${finalRoomPrice}`);
-                    return res.status(200).json({ message: 'Reservation updated successfully.' });
-                });
-            });
-        } else {
-            // For pending or cancelled, just update the status
-            console.log(`Updating reservation ${reservationId}: status=${status}`);
-            const updateSql = `UPDATE reservations SET res_status = ? WHERE id = ?`;
-            db.query(updateSql, [status, reservationId], (updateErr, result) => {
+        const activeRoomId = updateFields.room_id || reservation.room_id;
+        const shouldRefreshRoomPrice = updateFields.room_id && String(updateFields.room_id) !== String(reservation.room_id);
+        const shouldRefreshPriceForStatus = updateFields.res_status && ['confirmed', 'complete'].includes(updateFields.res_status);
+
+        const performUpdate = (roomPrice) => {
+            if (roomPrice !== undefined) {
+                updateFields.room_price = roomPrice;
+            }
+
+            const columns = Object.keys(updateFields);
+            const updateSql = `UPDATE reservations SET ${columns.map(col => `${col} = ?`).join(', ')} WHERE id = ?`;
+            const values = columns.map((col) => updateFields[col]);
+            values.push(reservationId);
+
+            db.query(updateSql, values, (updateErr, result) => {
                 if (updateErr) {
                     console.error('Error updating reservation:', updateErr);
                     return res.status(500).json({ error: 'Database error.' });
@@ -581,9 +553,24 @@ app.post('/update_reservation/:id', (req, res) => {
                 if (result.affectedRows === 0) {
                     return res.status(404).json({ error: 'Reservation not found.' });
                 }
-                console.log(`Reservation ${reservationId} status changed to ${status}`);
                 return res.status(200).json({ message: 'Reservation updated successfully.' });
             });
+        };
+
+        if ((shouldRefreshRoomPrice || shouldRefreshPriceForStatus) && activeRoomId) {
+            const getRoomPriceSql = `SELECT room_price FROM rooms WHERE id = ?`;
+            db.query(getRoomPriceSql, [activeRoomId], (roomErr, roomResults) => {
+                let finalRoomPrice = reservation.room_price;
+                if (!roomErr && roomResults.length > 0) {
+                    const fetchedPrice = parseFloat(String(roomResults[0].room_price).replace(/,/g, ''));
+                    if (!isNaN(fetchedPrice) && fetchedPrice > 0) {
+                        finalRoomPrice = fetchedPrice;
+                    }
+                }
+                performUpdate(finalRoomPrice);
+            });
+        } else {
+            performUpdate();
         }
     });
 });
@@ -606,31 +593,6 @@ app.delete('/delete_reservation/:id', (req, res) => {
         return res.status(200).json({ message: 'Reservation deleted successfully.' });
     });
 });
-
-app.get('/get_dashboard_stats', (req, res) => {
-    // Query with very strict data validation to exclude invalid records
-    const sql = `
-        SELECT
-            (SELECT COUNT(*) FROM rooms) as total_rooms,
-            (SELECT COUNT(*) FROM reservations WHERE res_status IN ('confirmed', 'pending') AND DATE(check_in_date) = CURDATE() AND first_name IS NOT NULL AND first_name != '' AND last_name IS NOT NULL AND last_name != '' AND num_guests >= 1 AND num_guests <= 20 AND room_price IS NOT NULL AND room_price > 500) as todays_checkins,
-            (SELECT COUNT(*) FROM reservations WHERE res_status = 'pending' AND first_name IS NOT NULL AND first_name != '' AND last_name IS NOT NULL AND last_name != '' AND num_guests >= 1 AND num_guests <= 20 AND room_price IS NOT NULL AND room_price > 500) as pending_bookings,
-            (SELECT COALESCE(SUM(num_guests), 0) FROM reservations WHERE res_status IN ('confirmed', 'pending') AND first_name IS NOT NULL AND first_name != '' AND last_name IS NOT NULL AND last_name != '' AND num_guests >= 1 AND num_guests <= 20 AND room_price IS NOT NULL AND room_price > 500) as total_guests,
-            (SELECT COALESCE(SUM(COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed' AND r.first_name IS NOT NULL AND r.first_name != '' AND r.last_name IS NOT NULL AND r.last_name != '' AND r.num_guests >= 1 AND r.num_guests <= 20 AND COALESCE(r.room_price, rm.room_price) IS NOT NULL AND COALESCE(r.room_price, rm.room_price) > 500) as total_revenue,
-            (SELECT COALESCE(SUM(COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status = 'confirmed' AND DATE(r.check_in_date) = CURDATE() AND r.first_name IS NOT NULL AND r.first_name != '' AND r.last_name IS NOT NULL AND r.last_name != '' AND r.num_guests >= 1 AND r.num_guests <= 20 AND COALESCE(r.room_price, rm.room_price) IS NOT NULL AND COALESCE(r.room_price, rm.room_price) > 500) as todays_sales,
-            (SELECT COALESCE(SUM(COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)), 0) FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id WHERE r.res_status IN ('confirmed', 'pending') AND r.first_name IS NOT NULL AND r.first_name != '' AND r.last_name IS NOT NULL AND r.last_name != '' AND r.num_guests >= 1 AND r.num_guests <= 20 AND COALESCE(r.room_price, rm.room_price) IS NOT NULL AND COALESCE(r.room_price, rm.room_price) > 500) as booking_sales,
-            (SELECT COUNT(*) FROM reservations WHERE res_status = 'cancelled' AND first_name IS NOT NULL AND first_name != '' AND last_name IS NOT NULL AND last_name != '') as cancelled_count
-    `;
-
-    db.query(sql, (err, data) => {
-        if (err) {
-            console.error("Error fetching dashboard stats:", err);
-            return res.status(500).json({ error: "Database query error!" });
-        }
-        console.log("Dashboard stats:", data[0]);
-        return res.status(200).json(data[0]); 
-    });
-});
-
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

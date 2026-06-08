@@ -50,7 +50,7 @@ function AdminProfile() {
                 const confirmedTotal = bookings.reduce((sum, b) => {
                     const status = (b.res_status || "").toLowerCase();
                     const val = Number(b.total_price || b.room_price || 0);
-                    return status === "confirmed" ? sum + (Number.isNaN(val) ? 0 : val) : sum;
+                    return (status === "confirmed" || status === "complete") ? sum + (Number.isNaN(val) ? 0 : val) : sum;
                 }, 0);
 
                 setGuestSales(guestTotal);
@@ -72,7 +72,7 @@ function AdminProfile() {
                 const monthlyConfirmedTotal = (bookings || []).reduce((sum, b) => {
                     const status = (b.res_status || "").toLowerCase();
                     const d = parseDateValue(b.check_in_date);
-                    if (status === 'confirmed' && d && d.getFullYear() === year && d.getMonth() === month) {
+                    if ((status === 'confirmed' || status === 'complete') && d && d.getFullYear() === year && d.getMonth() === month) {
                         const val = Number(b.total_price || b.room_price || 0);
                         return sum + (Number.isNaN(val) ? 0 : val);
                     }

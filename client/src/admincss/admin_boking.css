@@ -385,6 +385,11 @@ body {
   font-weight: 500;
 }
 
+.status-complete {
+  color: #4f8ef7;
+  font-weight: 500;
+}
+
 .status-cancelled {
   color: #e07070;
   font-weight: 500;

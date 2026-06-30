@@ -317,17 +317,17 @@ function LandingPage() {
                   </div>
                   <div className="carousel-inner">
                       <div className="carousel-item active" data-bs-interval="10000">
-                          <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/33/df/62/souphattra-hotel.jpg?w=700&h=-1&s=1" className="d-block w-100" alt="..." />
+                          <img src="/src/image/pool1.jpg" className="d-block w-100" alt="..." />
                       <div className="carousel-caption d-none d-md-block">
                       </div>
                       </div>
                       <div className="carousel-item" data-bs-interval="2000">
-                          <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/33/df/62/souphattra-hotel.jpg?w=700&h=-1&s=1" className="d-block w-100" alt="..."/>
+                          <img src="/src/image/pool2.jpg" className="d-block w-100" alt="..."/>
                       <div className="carousel-caption d-none d-md-block">
                       </div>
                       </div>
                       <div className="carousel-item">
-                          <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/33/df/62/souphattra-hotel.jpg?w=700&h=-1&s=1" className="d-block w-100" alt="..."/>
+                          <img src="/src/image/pool3.jpg" className="d-block w-100" alt="..."/>
                       <div className="carousel-caption d-none d-md-block">
                       </div>
                       </div>

@@ -114,15 +114,6 @@ function AdminUsersAcc() {
   const hasAdminAccount = () => users.some((user) => user.role?.toLowerCase() === 'admin');
 
   const handleCreateUser = async (userData) => {
-    if (userData.role?.toLowerCase() === 'admin' && hasAdminAccount()) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'Admin exists',
-        text: 'Only one admin account is allowed.',
-      });
-      return;
-    }
-
     try {
       await axios.post("http://localhost:3001/add_user_account", userData);
       await fetchUsers();

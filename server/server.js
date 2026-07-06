@@ -175,7 +175,6 @@ app.get('/get_user_accounts', (req, res) => {
 });
 
 app.post('/add_user_account', (req, res) => {
-    // Create admin account (all users are stored in `admins` table)
     const sql = "INSERT INTO admins (name, email, password, role) VALUES (?, ?, ?, ?)";
     const plain = req.body.password || '';
     const hashed = bcrypt.hashSync(plain, 10);

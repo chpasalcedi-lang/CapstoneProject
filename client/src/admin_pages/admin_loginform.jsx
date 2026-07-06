@@ -21,7 +21,7 @@ function AdminLoginForm() {
 
         const fetchAdminUsers = async () => {
             try {
-                const response = await axios.get("http://localhost:3001/get_admin_users");
+                const response = await axios.get("http://localhost:3001/get_user_accounts");
                 setAdminUsers(response.data || []);
             } catch (error) {
                 console.error("Failed to fetch admin users:", error);

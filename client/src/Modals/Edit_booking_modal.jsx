@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import '../Modalscss/Edit_booking_modal.css';
 
 const formatDateForInput = (dateStr) => {
@@ -106,12 +107,14 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         try {
             const res = await axios.post(`http://localhost:3001/update_reservation/${booking.id}`, updateData);
             console.log("Success:", res.data);
+            Swal.fire({ icon: 'success', title: 'Updated', text: 'Reservation updated successfully.' });
             onUpdate();
             setTimeout(() => {
                 onClose();
             }, 2000);
         } catch (err) {
             console.error("Error updating:", err);
+            Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.error || err.message || 'Failed to update reservation.' });
         }
     };
 

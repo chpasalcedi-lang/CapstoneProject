@@ -25,6 +25,22 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
         }
     };
 
+    const handleRoomLabelChange = (e) => {
+        setValues((prev) => ({ ...prev, room_label: e.target.value }));
+    };
+
+    const handleRoomLabelKeyDown = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            const { selectionStart, selectionEnd, value } = e.target;
+            const newValue = `${value.slice(0, selectionStart)}\n${value.slice(selectionEnd)}`;
+            setValues((prev) => ({ ...prev, room_label: newValue }));
+            requestAnimationFrame(() => {
+                e.target.selectionStart = e.target.selectionEnd = selectionStart + 1;
+            });
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         axios.post('http://localhost:3001/add_rooms', values)
@@ -104,7 +120,16 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
                             </div>
                             <div className="add-room-form-group">
                                 <label>Room Label</label>
-                                <textarea name="room_label" rows="3" required onChange={(e) => setValues({ ...values, room_label: e.target.value })} placeholder="..."></textarea>
+                                <textarea
+                                    name="room_label"
+                                    rows="4"
+                                    required
+                                    value={values.room_label}
+                                    onChange={handleRoomLabelChange}
+                                    onKeyDown={handleRoomLabelKeyDown}
+                                    placeholder="...."
+                                    style={{ resize: "vertical", whiteSpace: "pre-wrap" }}
+                                ></textarea>
                             </div>
                         </form>
                     </div>

@@ -56,7 +56,6 @@ function decrypt(text) {
         const decrypted = bytes.toString(CryptoJS.enc.Utf8);
         if (decrypted) return decrypted;
     } catch (_error) {
-        // fall through and try passphrase-based decrypt
     }
     try {
         const bytes = CryptoJS.AES.decrypt(text, SECRET_KEY);

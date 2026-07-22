@@ -308,6 +308,8 @@ body {
   margin-top: 1px;
   flex: 1;               
   overflow: hidden;
+  white-space: pre-line;
+  word-break: break-word;
 }
 
 .rooms-room-card-footer {

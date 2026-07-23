@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import os from 'os';
 import serverless from 'serverless-http';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,29 +16,33 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, './.env') });
 
 // If Aiven (or other providers) provide a CA certificate, use it for SSL.
-// Support writing CA from env var `DB_CA` (useful on Vercel where files can't be committed).
+// On serverless platforms the project directory may be read-only, so write CA to the OS temp dir.
 let sslConfig = { rejectUnauthorized: false };
 try {
-    const caPath = path.resolve(__dirname, 'ca.pem');
+    // Prefer a temp-path for writing the CA when DB_CA is provided via env
+    const tmpCaPath = path.join(os.tmpdir(), 'aiven_ca.pem');
+    const repoCaPath = path.resolve(__dirname, 'ca.pem');
 
-    // If DB_CA env is set, write it to ca.pem (overwrites existing contents).
     if (process.env.DB_CA) {
         try {
-            // Normalize newline escapes if someone put literal "\n" in the env value
             const caContent = process.env.DB_CA.replace(/\\r?\\n/g, '\n');
-            fs.writeFileSync(caPath, caContent, { encoding: 'utf8' });
-            console.log('Wrote DB_CA environment variable to', caPath);
+            fs.writeFileSync(tmpCaPath, caContent, { encoding: 'utf8' });
+            console.log('Wrote DB_CA environment variable to', tmpCaPath);
         } catch (writeErr) {
-            console.warn('Failed to write DB_CA to file:', writeErr && writeErr.message);
+            console.warn('Failed to write DB_CA to tmp file:', writeErr && writeErr.message);
         }
     }
 
-    if (fs.existsSync(caPath)) {
-        sslConfig = { ca: fs.readFileSync(caPath) };
-        console.log('Using SSL CA from', caPath);
+    // Prefer the tmp file (if exists), otherwise the repository ca.pem
+    if (fs.existsSync(tmpCaPath)) {
+        sslConfig = { ca: fs.readFileSync(tmpCaPath) };
+        console.log('Using SSL CA from', tmpCaPath);
+    } else if (fs.existsSync(repoCaPath)) {
+        sslConfig = { ca: fs.readFileSync(repoCaPath) };
+        console.log('Using SSL CA from', repoCaPath);
     } else {
-        // No CA available — fall back to disabled verification (not recommended for prod without CA)
         sslConfig = { rejectUnauthorized: false };
+        console.log('No CA found; using rejectUnauthorized=false fallback');
     }
 } catch (err) {
     console.warn('Could not load CA file for SSL:', err && err.message);
@@ -70,11 +75,20 @@ const db = mysql.createPool({
 
 db.getConnection((err, connection) => {
     if (err) {
-        console.error('Database connection failed:', err.message);
+        console.error('Database connection failed:', err && err.message);
+        // do not throw; allow the serverless function to start and return errors on DB usage
         return;
     }
     console.log('Connected to Aiven MySQL Database.');
     connection.release();
+});
+
+// Global catch-all for unexpected errors to avoid crashing the serverless function silently
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught exception:', err && (err.stack || err.message || err));
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled rejection:', reason);
 });
 
 const SECRET_KEY = process.env.SECRET_KEY || 'uV9_7lXJ_v_N9Z9pL5mGk1m8n8-v7Z7r9R_vP8N7X2s=';
@@ -670,6 +684,22 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Export serverless handler for Vercel / serverless platforms
-export default serverless(app);
+const _handler = serverless(app);
+
+// Wrap the handler so we can log and return a safe 500 if initialization throws synchronously
+export default async function handler(req, res) {
+    try {
+        return await _handler(req, res);
+    } catch (err) {
+        console.error('Serverless handler error:', err && (err.stack || err.message || err));
+        try {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Internal server error' }));
+        } catch (_e) {
+            // ignore
+        }
+    }
+}
 
 module.exports = app;

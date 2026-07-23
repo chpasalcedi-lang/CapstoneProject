@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import serverless from 'serverless-http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,12 +15,29 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, './.env') });
 
 // If Aiven (or other providers) provide a CA certificate, use it for SSL.
+// Support writing CA from env var `DB_CA` (useful on Vercel where files can't be committed).
 let sslConfig = { rejectUnauthorized: false };
 try {
     const caPath = path.resolve(__dirname, 'ca.pem');
+
+    // If DB_CA env is set, write it to ca.pem (overwrites existing contents).
+    if (process.env.DB_CA) {
+        try {
+            // Normalize newline escapes if someone put literal "\n" in the env value
+            const caContent = process.env.DB_CA.replace(/\\r?\\n/g, '\n');
+            fs.writeFileSync(caPath, caContent, { encoding: 'utf8' });
+            console.log('Wrote DB_CA environment variable to', caPath);
+        } catch (writeErr) {
+            console.warn('Failed to write DB_CA to file:', writeErr && writeErr.message);
+        }
+    }
+
     if (fs.existsSync(caPath)) {
         sslConfig = { ca: fs.readFileSync(caPath) };
         console.log('Using SSL CA from', caPath);
+    } else {
+        // No CA available — fall back to disabled verification (not recommended for prod without CA)
+        sslConfig = { rejectUnauthorized: false };
     }
 } catch (err) {
     console.warn('Could not load CA file for SSL:', err && err.message);
@@ -30,6 +48,9 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// simple health endpoint for quick deploy checks
+app.get('/api/health', (req, res) => res.json({ ok: true, ts: Date.now() }));
 
 
 
@@ -641,8 +662,14 @@ app.delete('/delete_reservation/:id', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server (dev) running on http://localhost:${PORT}`);
+    });
+}
+
+// Export serverless handler for Vercel / serverless platforms
+export default serverless(app);
 
 module.exports = app;

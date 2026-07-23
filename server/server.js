@@ -6,11 +6,24 @@ import CryptoJS from 'crypto-js';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, './.env') });
+
+// If Aiven (or other providers) provide a CA certificate, use it for SSL.
+let sslConfig = { rejectUnauthorized: false };
+try {
+    const caPath = path.resolve(__dirname, 'ca.pem');
+    if (fs.existsSync(caPath)) {
+        sslConfig = { ca: fs.readFileSync(caPath) };
+        console.log('Using SSL CA from', caPath);
+    }
+} catch (err) {
+    console.warn('Could not load CA file for SSL:', err && err.message);
+}
 
 const app = express();
 
@@ -26,7 +39,7 @@ const db = mysql.createPool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: Number(process.env.DB_PORT) || 3306,
-    ssl: { rejectUnauthorized: false },
+    ssl: sslConfig,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,

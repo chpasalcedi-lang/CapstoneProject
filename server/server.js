@@ -70,7 +70,7 @@ const db = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0,
     connectTimeout: 10000,
-    acquireTimeout: 10000
+    // acquireTimeout removed: mysql2 warns if unknown options are passed to Connection
 });
 
 db.getConnection((err, connection) => {
@@ -701,5 +701,4 @@ export default async function handler(req, res) {
         }
     }
 }
-
-module.exports = app;
+// No CommonJS exports — using ESM `export default` for serverless handler above.

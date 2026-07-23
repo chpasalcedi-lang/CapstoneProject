@@ -12,6 +12,10 @@ function AdminRooms() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [data, setData] = useState([]);
+    const [roomsRaw, setRoomsRaw] = useState([]);
+    const [reservations, setReservations] = useState([]);
+    const [checkerDate, setCheckerDate] = useState(() => new Date().toISOString().slice(0, 10));
+    const [checkerSearch, setCheckerSearch] = useState('');
     const [adminData] = useState(() => {
         const storedUser = localStorage.getItem('adminUser');
         if (storedUser) {
@@ -33,7 +37,7 @@ function AdminRooms() {
                 
                 // If room has maintenance status set, use that. Otherwise calculate occupancy.
                 const mapped = rooms.map((room) => {
-                    // If admin set maintenance status, show that
+                    // If admin set maintenance status, use that.
                     if (room.room_status?.toLowerCase() === 'maintenance') {
                         return {
                             ...room,
@@ -43,6 +47,7 @@ function AdminRooms() {
                     }
                     return room;
                 });
+                setRoomsRaw(mapped);
                 
                 // For non-maintenance rooms, fetch reservations to determine occupancy
                 axios.get('http://localhost:3001/get_reservations')
@@ -74,6 +79,7 @@ function AdminRooms() {
                             };
                         });
                         
+                        setReservations(reservations);
                         setData(finalMapped);
                     })
                     .catch((err) => {
@@ -91,6 +97,55 @@ function AdminRooms() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    const parseIsoDate = (value) => {
+        if (!value) return null;
+        const parsed = new Date(`${value}T00:00:00`);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    const getRoomStatusOnDate = (room, date) => {
+        if (room._isMaintenance) return 'Maintenance';
+        if (!date || !reservations.length) return room.room_status || 'Available';
+
+        const isOccupied = reservations.some((r) => {
+            if (Number(r.room_id) !== Number(room.id)) return false;
+            const status = (r.res_status || '').toLowerCase();
+            if (status !== 'confirmed' && status !== 'pending') return false;
+            const start = new Date(r.check_in_date);
+            const end = new Date(r.check_out_date);
+            return date >= start && date < end;
+        });
+
+        return isOccupied ? 'Occupied' : 'Available';
+    };
+
+    const checkerDateObj = parseIsoDate(checkerDate);
+    const checkerRooms = roomsRaw.map((room) => ({
+        ...room,
+        checkerStatus: getRoomStatusOnDate(room, checkerDateObj),
+    }));
+    const filteredCheckerRooms = checkerRooms.filter((room) => {
+        const term = checkerSearch.trim().toLowerCase();
+        if (!term) return true;
+        const roomName = String(room.room_name || '').toLowerCase();
+        const roomNumber = String(room.room_number || room.id || '').toLowerCase();
+        const roomType = String(room.room_type || '').toLowerCase();
+        const status = String(room.checkerStatus || '').toLowerCase();
+        return (
+            roomName.includes(term) ||
+            roomNumber.includes(term) ||
+            roomType.includes(term) ||
+            status.includes(term)
+        );
+    });
+
+    const checkerCounts = {
+        total: checkerRooms.length,
+        available: checkerRooms.filter((room) => room.checkerStatus === 'Available').length,
+        occupied: checkerRooms.filter((room) => room.checkerStatus === 'Occupied').length,
+        maintenance: checkerRooms.filter((room) => room.checkerStatus === 'Maintenance').length,
+    };
 
     const handleEdit = (room) => {
         setSelectedRoom(room);
@@ -205,15 +260,66 @@ function AdminRooms() {
                         </div>
                     </div>
 
+                    <div className="rooms-stats-checker">
+                        <div className="rooms-stats-header">
+                            <div>
+                                <h2>Room Checker</h2>
+                            </div>
+                            <div className="rooms-stats-controls">
+                                <span>Date</span>
+                                <input type="date" value={checkerDate} onChange={(e) => setCheckerDate(e.target.value)}/>
+                            </div>
+                        </div>
+
+                        <div className="rooms-stats-summary">
+                            <div className="rooms-stats-card available">
+                                <span>Total</span>
+                                <h1>{checkerCounts.total}</h1>
+                            </div>
+                            <div className="rooms-stats-card available">
+                                <span>Available</span>
+                                <h1>{checkerCounts.available}</h1>
+                            </div>
+                            <div className="rooms-stats-card occupied">
+                                <span>Occupied</span>
+                                <h1>{checkerCounts.occupied}</h1>
+                            </div>
+                            <div className="rooms-stats-card maintenance">
+                                <span>Maintenance</span>
+                                <h1>{checkerCounts.maintenance}</h1>
+                            </div>
+                        </div>
+
+                        <div className="rooms-stats-search">
+                            <h3>Rooms</h3>
+                            <div className="rooms-stats-searchbar">
+                                <span>Rooms Status</span>
+                                <input type="text" className="rooms-stats-search-input" placeholder="Search by room, number, type" value={checkerSearch} onChange={(e) => setCheckerSearch(e.target.value)}/>
+                            </div>
+                        </div>
+
+                        <div className="rooms-stats-list"> 
+                            {filteredCheckerRooms.map((room) => (
+                                <div className="rooms-stats-item" key={room.id}>
+                                    <div>
+                                        <strong>{room.room_name}</strong>
+                                        <p>#{room.room_number || room.id} · {room.room_type}</p>
+                                    </div>
+                                    <div className={`rooms-stats-badge ${room.checkerStatus.toLowerCase()}`}>
+                                        <span className="rooms-stats-dot"></span>
+                                        {room.checkerStatus}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className="rooms-stats-grid">
                         {data.map((room, index) => (
                             <div className="rooms-stat-card" key={room.id ?? index}>
                                 <div className="rooms-room-card-img">
                                     <img src={room.room_image} alt={room.room_name} />
                                     <span className="rooms-room-badge">{room.room_type}</span>
-                                    <span className={`rooms-room-status ${room.room_status === 'Occupied' ? 'occupied' : room.room_status === 'Maintenance' ? 'maintenance' : 'available'}`}>
-                                        {room.room_status || 'Available'}
-                                    </span>
                                     {room.room_type?.toLowerCase() !== 'event' && (
                                         <span className="rooms-room-rating">Room : {room.room_number}</span>
                                     )}

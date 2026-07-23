@@ -51,6 +51,15 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         }));
     }, [roomId, roomPrice, userEmail]);
 
+    const toDateOnly = (value) => {
+        if (!value) return null;
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return null;
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    };
+
+    const isSameRoom = (a, b) => String(a) === String(b);
+
     useEffect(() => {
         if (showModal && roomId) {
             axios.get('http://localhost:3001/get_reservations')
@@ -58,7 +67,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                     const allReservations = res.data || [];
                     const roomReservations = allReservations.filter((r) => {
                         const status = (r.res_status || '').toLowerCase();
-                        return r.room_id === roomId && ['confirmed', 'complete', 'occupied'].includes(status);
+                        return isSameRoom(r.room_id, roomId) && ['pending', 'confirmed', 'complete', 'occupied'].includes(status);
                     });
                     setReservations(roomReservations);
                 })
@@ -70,12 +79,14 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
 
     const isDateRangeAvailable = (checkIn, checkOut) => {
         if (!checkIn || !checkOut) return true;
-        const checkInDate = new Date(checkIn);
-        const checkOutDate = new Date(checkOut);
-        
+        const checkInDate = toDateOnly(checkIn);
+        const checkOutDate = toDateOnly(checkOut);
+        if (!checkInDate || !checkOutDate) return true;
+
         return !reservations.some((res) => {
-            const resCheckIn = new Date(res.check_in_date);
-            const resCheckOut = new Date(res.check_out_date);
+            const resCheckIn = toDateOnly(res.check_in_date);
+            const resCheckOut = toDateOnly(res.check_out_date);
+            if (!resCheckIn || !resCheckOut) return false;
             return checkInDate < resCheckOut && checkOutDate > resCheckIn;
         });
     };
@@ -100,7 +111,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
     const handleCheckOutDateChange = (e) => {
         const val = e.target.value;
         if (val && values.check_in_date && !isDateRangeAvailable(values.check_in_date, val)) {
-            Swal.fire({ icon: 'error', title: 'Room not available', text: 'This date range is already booked. Please select different dates.' });
+            Swal.fire({ icon: 'error', title: 'Room not available', text: 'This date is already booked. Please select different dates.' });
             return;
         }
         setValues({ ...values, check_out_date: val });
@@ -163,6 +174,25 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         const normalizedPrice = roomPrice ? parseFloat(String(roomPrice).replace(/,/g, '')) : null;
 
         try {
+            const latestRes = await axios.get('http://localhost:3001/get_reservations');
+            const latestReservations = (latestRes.data || []).filter((r) => {
+                const status = (r.res_status || '').toLowerCase();
+                return isSameRoom(r.room_id, roomId) && ['pending', 'confirmed', 'complete', 'occupied'].includes(status);
+            });
+            const overlap = latestReservations.some((res) => {
+                const resCheckIn = toDateOnly(res.check_in_date);
+                const resCheckOut = toDateOnly(res.check_out_date);
+                const checkInDate = toDateOnly(values.check_in_date);
+                const checkOutDate = toDateOnly(values.check_out_date);
+                if (!resCheckIn || !resCheckOut || !checkInDate || !checkOutDate) return false;
+                return checkInDate < resCheckOut && checkOutDate > resCheckIn;
+            });
+
+            if (overlap) {
+                Swal.fire({ icon: 'warning', title: 'Room occupied', text: 'The selected dates overlap an existing reservation for this room.' });
+                return;
+            }
+
             const response = await axios.post('http://localhost:3001/add_reservation', {
                 ...values,
                 room_id: roomId,

@@ -323,7 +323,10 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/add_reservation', (req, res) => {
-    const sql = "INSERT INTO reservations ( last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const roomId = req.body.room_id;
+    const checkIn = req.body.check_in_date;
+    const checkOut = req.body.check_out_date;
+
     const normalizedRoomPrice = req.body.room_price ? parseFloat(String(req.body.room_price).replace(/,/g, '')) : null;
     const normalizedTotalPrice = req.body.total_price ? parseFloat(String(req.body.total_price).replace(/,/g, '')) : null;
     const finalTotalPrice = Number.isFinite(normalizedTotalPrice) ? normalizedTotalPrice : null;
@@ -333,31 +336,50 @@ app.post('/add_reservation', (req, res) => {
         parseInt(req.body.num_guests, 10) || 0,
         encrypt(req.body.phone_number || ''),
         encrypt(req.body.email || ''),
-        req.body.check_in_date || null,
-        req.body.check_out_date || null,
+        checkIn || null,
+        checkOut || null,
         encrypt(req.body.notes || ''),
         req.body.status || 'pending',
-        req.body.room_id || null,
+        roomId || null,
         normalizedRoomPrice,
         finalTotalPrice
     ];
 
-    db.query(sql, values, (err, data) => {
-        if (err) {
-            console.error('Error inserting reservation:', err);
-            return res.status(500).json({
-                error: 'Database query error!',
-                details: err.message
+    const insertSql = "INSERT INTO reservations ( last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    const performInsert = () => {
+        db.query(insertSql, values, (err, data) => {
+            if (err) {
+                console.error('Error inserting reservation:', err);
+                return res.status(500).json({
+                    error: 'Database query error!',
+                    details: err.message
+                });
+            }
+            console.log('Reservation added successfully');
+            return res.status(200).json({
+                message: 'Reservation saved successfully!',
+                reservationId: data.insertId
             });
-        }
-        console.log('Reservation added successfully');
-        return res.status(200).json({
-            message: 'Reservation saved successfully!',
-            reservationId: data.insertId
         });
+    };
 
-    });
-
+    if (roomId && checkIn && checkOut) {
+        const overlapSql = `SELECT COUNT(*) AS cnt FROM reservations WHERE room_id = ? AND res_status IN ('pending', 'confirmed', 'complete', 'occupied') AND NOT (check_out_date <= ? OR check_in_date >= ?)`;
+        db.query(overlapSql, [roomId, checkIn, checkOut], (err, rows) => {
+            if (err) {
+                console.error('Error checking reservation overlap:', err);
+                return res.status(500).json({ error: 'Could not verify reservation availability', details: err.message });
+            }
+            const cnt = rows && rows[0] ? rows[0].cnt || rows[0].COUNT || rows[0]['COUNT(*)'] : 0;
+            if (Number(cnt) > 0) {
+                return res.status(409).json({ error: 'Room is already booked for the selected dates' });
+            }
+            performInsert();
+        });
+    } else {
+        performInsert();
+    }
 });
 
 app.post('/add_feedback', (req, res) => {

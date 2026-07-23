@@ -83,6 +83,21 @@ function ResBook() {
     });
   };
 
+  // Check if a room is occupied right now based on reservations
+  const isRoomOccupiedNow = (room) => {
+    if (!room?.id) return false;
+    const today = new Date();
+    return reservations.some((r) => {
+      if (!r.room_id) return false;
+      if (Number(r.room_id) !== Number(room.id)) return false;
+      const status = (r.res_status || '').toLowerCase();
+      if (status !== 'confirmed' && status !== 'pending') return false;
+      const rStart = new Date(r.check_in_date);
+      const rEnd = new Date(r.check_out_date);
+      return today >= rStart && today < rEnd;
+    });
+  };
+
   const handleBookClick = (room) => {
     // Check if room is under maintenance
     if (room.room_status?.toLowerCase() === 'maintenance') {
@@ -245,17 +260,21 @@ function ResBook() {
             return normalizedRoom;
           }
 
-          if (hasDateRange && isRoomUnavailableForRange(normalizedRoom, checkIn, checkOut)) {
-            return {
-              ...normalizedRoom,
-              room_status: 'Occupied'
-            };
-          }
+            // If user provided a date range, mark Occupied when overlapping reservations exist
+            if (hasDateRange) {
+              if (isRoomUnavailableForRange(normalizedRoom, checkIn, checkOut)) {
+                return { ...normalizedRoom, room_status: 'Occupied' };
+              }
+              // No overlap for provided range -> Available (unless maintenance)
+              return { ...normalizedRoom, room_status: 'Available' };
+            }
 
-          return {
-            ...normalizedRoom,
-            room_status: normalizedRoom.room_status?.toLowerCase() === 'occupied' ? 'Occupied' : 'Available'
-          };
+            // No date range selected: preserve actual current occupancy based on reservations
+            if (isRoomOccupiedNow(normalizedRoom) || normalizedRoom.room_status?.toLowerCase() === 'occupied') {
+              return { ...normalizedRoom, room_status: 'Occupied' };
+            }
+
+            return { ...normalizedRoom, room_status: 'Available' };
         });
 
       const filtered = normalizedType
@@ -300,7 +319,6 @@ function ResBook() {
     };
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchData();
         return () => {
           if (loadingTimer.current) {
@@ -475,7 +493,6 @@ function ResBook() {
           ) : (
             <div className="booking-results-grid">
                 {filteredData.map((room) => {
-                  const hasSelectedDates = Boolean(checkIn && checkOut);
                   const isUnavailable = room.room_status === 'Occupied' || room._isMaintenance;
                   return (
                   <div className="booking-room-card" key={room.id}>

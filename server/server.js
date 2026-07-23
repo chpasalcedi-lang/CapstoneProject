@@ -4,8 +4,13 @@ import mysql from "mysql2";
 import bcrypt from 'bcryptjs';
 import CryptoJS from 'crypto-js';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '../client/.env') });
 
 const app = express();
 
@@ -15,19 +20,27 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-const db = mysql.createConnection({
-    host:   'localhost',
-    user:   'root',
-    password: 'Messiah@2026',
-    database: 'resort_managements'
-}); 
+const db = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: Number(process.env.DB_PORT) || 3306,
+    ssl: { rejectUnauthorized: false },
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    connectTimeout: 10000,
+    acquireTimeout: 10000
+});
 
-db.connect((err) => {
+db.getConnection((err, connection) => {
     if (err) {
-        console.error('Database connection failed:', err);
-        process.exit(1);
+        console.error('Database connection failed:', err.message);
+        return;
     }
-    console.log('Connected to database');
+    console.log('Connected to Aiven MySQL Database.');
+    connection.release();
 });
 
 const SECRET_KEY = process.env.SECRET_KEY || 'uV9_7lXJ_v_N9Z9pL5mGk1m8n8-v7Z7r9R_vP8N7X2s=';

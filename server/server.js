@@ -30,8 +30,7 @@ const db = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    connectTimeout: 10000,
-    acquireTimeout: 10000
+    connectTimeout: 10000
 });
 
 db.getConnection((err, connection) => {
@@ -627,7 +626,7 @@ app.delete('/delete_reservation/:id', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

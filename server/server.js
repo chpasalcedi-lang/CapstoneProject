@@ -4,10 +4,17 @@ import mysql from "mysql2";
 import bcrypt from 'bcryptjs';
 import CryptoJS from 'crypto-js';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, '../client/.env') });
 
 const app = express();
+const isVercel = process.env.VERCEL === '1';
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -15,19 +22,29 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-const db = mysql.createConnection({
-    host:   'localhost',
-    user:   'root',
-    password: 'Messiah@2026',
-    database: 'resort_managements'
-}); 
+const db = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: Number(process.env.DB_PORT) || 3306,
+    ssl: { rejectUnauthorized: false },
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    connectTimeout: 10000
+});
 
-db.connect((err) => {
+db.getConnection((err, connection) => {
     if (err) {
-        console.error('Database connection failed:', err);
-        process.exit(1);
+        console.error('Database connection failed:', err.message);
+        console.error('Configured DB host:', process.env.DB_HOST || 'not set');
+        console.error('Configured DB user:', process.env.DB_USER || 'not set');
+        console.error('Configured DB name:', process.env.DB_NAME || 'not set');
+        return;
     }
-    console.log('Connected to database');
+    console.log('Connected to Aiven MySQL Database.');
+    connection.release();
 });
 
 const SECRET_KEY = process.env.SECRET_KEY || 'uV9_7lXJ_v_N9Z9pL5mGk1m8n8-v7Z7r9R_vP8N7X2s=';
@@ -65,6 +82,10 @@ function decrypt(text) {
     }
 }
 
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
 
 app.post('/add_rooms', (req, res) => {
     const sql = "INSERT INTO rooms (room_name, room_number, room_price, room_image, room_type, room_status, room_label) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -614,7 +635,11 @@ app.delete('/delete_reservation/:id', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+const PORT = Number(process.env.PORT) || 3001;
+if (!isVercel) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+}
+
+export default app;

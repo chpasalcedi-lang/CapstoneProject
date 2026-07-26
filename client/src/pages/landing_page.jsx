@@ -222,7 +222,7 @@ function LandingPage() {
                                 <button className="profile-credential-btn-view" onClick={() => { setSelectedBooking(booking); setShowViewModal(true); }}>
                                   View Details
                                 </button>
-                                {((!booking.res_status) || (['confirmed','complete'].indexOf(String(booking.res_status).toLowerCase()) === -1)) && (
+                                {((!booking.res_status) || (['confirmed','complete','cancelled'].indexOf(String(booking.res_status).toLowerCase()) === -1)) && (
                                   <button className="profile-credential-btn-edit" onClick={() => { setSelectedBooking(booking); setShowEditModal(true); }}>
                                     Update
                                   </button>

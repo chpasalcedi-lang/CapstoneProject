@@ -1,4 +1,7 @@
 {
+  "name": "capstoneproject",
+  "version": "1.0.0",
+  "license": "MIT",
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "alter": "^0.2.0",

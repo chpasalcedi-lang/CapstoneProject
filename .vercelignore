@@ -1,6 +1,7 @@
 server/.vercelignore
 server/ca.pem
 server/.env
+client/.env
 server/node_modules
 server/package-lock.json
 node_modules

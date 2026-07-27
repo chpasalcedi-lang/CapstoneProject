@@ -1,4 +1,3 @@
-client/
 server/.vercelignore
 server/ca.pem
 server/.env

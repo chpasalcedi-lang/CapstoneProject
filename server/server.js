@@ -626,7 +626,11 @@ app.delete('/delete_reservation/:id', (req, res) => {
     });
 });
 
-const PORT = 3001;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 3001;
+if (process.env.VERCEL !== '1') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+}
+
+export default app;

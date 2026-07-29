@@ -1,0 +1,11 @@
+# Ignore untracked project folders
+client/
+server/
+
+# Ignore environment files
+*.env
+
+# Ignore temporary files
+*.log
+.DS_Store
+node_modules/

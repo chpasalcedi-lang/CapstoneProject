@@ -6,6 +6,10 @@ server/
 *.env
 
 # Ignore temporary files
+node_modules
+**/node_modules
+server/ca.pem
+client/dist
 *.log
 .DS_Store
 node_modules/

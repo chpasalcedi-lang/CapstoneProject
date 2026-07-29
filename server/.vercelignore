@@ -1,0 +1,10 @@
+ca.pem
+*.pem
+.env
+node_modules
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+logs
+*.log
+.DS_Store

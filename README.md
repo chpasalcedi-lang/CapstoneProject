@@ -1,5 +1,1 @@
-# CapstoneProject
-
-This repository is intentionally kept minimal on `master`.
-
-It currently contains only documentation and ignore rules to preserve the Git history while keeping the branch clean.
+The purpose of this capstone project entitled "Online Reservation and Management System for Messiah Inland Resort" is to provide a fast,convenient,and efficient way of managing reservations and resort operations.This system aims to reduce manual work, improve customer service,organize record accurately, and enchance the overall management and booking experience for customers and staff.

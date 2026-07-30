@@ -10,9 +10,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenv.config({ path: path.resolve(__dirname, '../client/.env') });
 
 const app = express();
+const isVercel = process.env.VERCEL === '1';
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -40,7 +42,10 @@ const db = mysql.createPool({
 
 db.getConnection((err, connection) => {
     if (err) {
-        console.error('Database connection failed:', err.message);
+        console.error('Database connection failed:', err);
+        console.error('Configured DB host:', process.env.DB_HOST || 'not set');
+        console.error('Configured DB user:', process.env.DB_USER || 'not set');
+        console.error('Configured DB name:', process.env.DB_NAME || 'not set');
         return;
     }
     console.log('Connected to Aiven MySQL Database.');
@@ -82,6 +87,10 @@ function decrypt(text) {
     }
 }
 
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
 
 app.post('/add_rooms', (req, res) => {
     const sql = "INSERT INTO rooms (room_name, room_number, room_price, room_image, room_type, room_status, room_label) VALUES (?, ?, ?, ?, ?, ?, ?)";

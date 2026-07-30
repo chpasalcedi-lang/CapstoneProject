@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import axios from "axios";
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -52,7 +52,7 @@ function LandingPage() {
     if (!email) return;
     setLoadingReservations(true);
     try {
-      const res = await axios.get('http://localhost:3001/get_reservations');
+      const res = await apiClient.get('/get_reservations');
       const allReservations = res.data || [];
       const userReservations = allReservations.filter(
         (r) => r.email && r.email.toLowerCase() === email.toLowerCase()
@@ -128,7 +128,7 @@ function LandingPage() {
 
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:3001/add_feedback', feedback);
+      await apiClient.post('/add_feedback', feedback);
       Swal.fire({
         icon: 'success',
         title: 'Thank you!',

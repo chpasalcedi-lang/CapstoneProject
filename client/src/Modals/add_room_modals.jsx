@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../Modalscss/add_room_modal.css";
 
@@ -43,7 +44,7 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        axios.post('http://localhost:3001/add_rooms', values)
+        apiClient.post('/add_rooms', values)
             .then((res) => {
                 console.log("Success: ", res.data);
                 setShowModal(false);

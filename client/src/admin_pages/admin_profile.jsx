@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import apiClient from '../api';
 import "../admincss/admin_profile.css";
 
 function AdminProfile() {
@@ -38,8 +39,8 @@ function AdminProfile() {
         const fetchSales = async () => {
             try {
                 const [guestRes, bookingRes] = await Promise.all([
-                    axios.get("http://localhost:3001/get_guest_arrivals"),
-                    axios.get("http://localhost:3001/get_reservations")
+                    apiClient.get("/get_guest_arrivals"),
+                    apiClient.get("/get_reservations")
                 ]);
 
                 const guests = guestRes.data || [];

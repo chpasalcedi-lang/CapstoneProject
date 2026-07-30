@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import '../Modalscss/book_reservation_modal.css';
 
@@ -78,14 +78,14 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     }, [booking]);
 
     useEffect(() => {
-        axios.get('http://localhost:3001/get_rooms')
+        apiClient.get('/get_rooms')
             .then((res) => setRooms(res.data))
             .catch((err) => console.error('Error fetching rooms:', err));
     }, []);
 
     useEffect(() => {
         if (!show) return;
-        axios.get('http://localhost:3001/get_reservations')
+        apiClient.get('/get_reservations')
             .then((res) => setAllReservations(res.data || []))
             .catch((err) => console.error('Error fetching reservations:', err));
     }, [show]);
@@ -240,7 +240,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         }
 
         try {
-            await axios.post(`http://localhost:3001/update_reservation/${booking.id}`, updateData);
+            await apiClient.post(`/update_reservation/${booking.id}`, updateData);
             Swal.fire({ icon: 'success', title: 'Updated', text: 'Reservation updated successfully.' });
             onUpdate();
             setTimeout(onClose, 1500);

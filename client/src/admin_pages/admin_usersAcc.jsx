@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../admincss/admin_usersAcc.css";
 import AddAccountModal from '../Modals/add_acc_modal';
@@ -34,7 +35,7 @@ function AdminUsersAcc() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3001/get_user_accounts");
+      const res = await apiClient.get("/get_user_accounts");
       setUsers(res.data || []);
     } catch (err) {
       console.error("Error fetching user accounts:", err);
@@ -115,7 +116,7 @@ function AdminUsersAcc() {
 
   const handleCreateUser = async (userData) => {
     try {
-      await axios.post("http://localhost:3001/add_user_account", userData);
+      await apiClient.post("/add_user_account", userData);
       await fetchUsers();
       setShowAddAccModal(false);
       Swal.fire({ icon: 'success', title: 'Created', text: 'Admin account added successfully.' });
@@ -149,7 +150,7 @@ function AdminUsersAcc() {
     }
 
     try {
-      await axios.post(`http://localhost:3001/update_user_account/${selectedUser.id}`, payload);
+      await apiClient.post(`/update_user_account/${selectedUser.id}`, payload);
       await fetchUsers();
       setSelectedUser(null);
       setShowUpdateAccModal(false);
@@ -183,7 +184,7 @@ function AdminUsersAcc() {
     if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`http://localhost:3001/delete_user_account/${id}`);
+      await apiClient.delete(`//delete_user_account/${id}`);
       await fetchUsers();
       Swal.fire({ icon: 'success', title: 'Deleted', text: 'Admin account was removed.' });
     } catch (err) {

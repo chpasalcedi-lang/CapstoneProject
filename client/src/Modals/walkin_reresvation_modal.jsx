@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../Modalscss/walkin_reservation_modal.css";
 
@@ -39,7 +40,7 @@ function AdminWalkinModal({ show, onClose }) {
     const totalPrice = roomPrice && nights > 0 ? roomPrice * nights : 0;
 
     useEffect(() => {
-        axios.get("http://localhost:3001/get_rooms")
+        apiClient.get("/get_rooms")
         .then((res) => {
             const sortedRooms = [...res.data].sort((a, b) => {
             const roomA = parseInt(a.room_number, 10);
@@ -120,8 +121,8 @@ function AdminWalkinModal({ show, onClose }) {
             return;
         }
 
-        axios
-        .post("http://localhost:3001/add_reservation", {
+        apiClient
+        .post('/add_reservation', {
             ...values,
             room_id: selectedRoom.id,
             room_price: roomPrice,

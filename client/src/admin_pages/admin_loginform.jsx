@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../admincss/admin_loginform.css";
 
@@ -21,7 +22,7 @@ function AdminLoginForm() {
 
         const fetchAdminUsers = async () => {
             try {
-                const response = await axios.get("http://localhost:3001/get_user_accounts");
+                const response = await apiClient.get("/get_user_accounts");
                 setAdminUsers(response.data || []);
             } catch (error) {
                 console.error("Failed to fetch admin users:", error);
@@ -37,7 +38,7 @@ function AdminLoginForm() {
         setLoading(true);
 
         try {
-            const response = await axios.post("http://localhost:3001/login", {
+            const response = await apiClient.post("/login", {
                 email,
                 password,
             });

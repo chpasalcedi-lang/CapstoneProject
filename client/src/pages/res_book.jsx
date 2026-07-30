@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../pagescss/res_book.css"; 
 import BookReservationModal from "../Modals/book_reservation_modal.jsx";
@@ -43,7 +43,7 @@ function ResBook() {
     if (!email) return;
     setLoadingReservations(true);
     try {
-      const res = await axios.get('http://localhost:3001/get_reservations');
+      const res = await apiClient.get('/get_reservations');
       const allReservations = res.data || [];
       const userReservations = allReservations.filter(
         (r) => r.email && r.email.toLowerCase() === email.toLowerCase()
@@ -182,7 +182,7 @@ function ResBook() {
         }
       }
 
-      axios.get('http://localhost:3001/get_rooms')
+      apiClient.get('/get_rooms')
         .then((roomsRes) => {
           const rooms = roomsRes.data || [];
           setData(rooms);
@@ -199,7 +199,7 @@ function ResBook() {
             return room;
           });
 
-          axios.get('http://localhost:3001/get_reservations')
+          apiClient.get('/get_reservations')
             .then((rres) => {
               const reservationsList = rres.data || [];
               setReservations(reservationsList);

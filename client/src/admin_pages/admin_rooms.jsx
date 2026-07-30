@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import AddRoomModal from "../Modals/add_room_modals";
 import EditRoomModal from "../Modals/update_room-modal";
@@ -31,7 +31,7 @@ function AdminRooms() {
     const isAdmin = adminData.role?.toString().toLowerCase() === 'admin';
 
     const fetchData = () => {
-        axios.get("http://localhost:3001/get_rooms")
+        apiClient.get("/get_rooms")
             .then((res) => {
                 const rooms = res.data || [];
                 
@@ -50,7 +50,7 @@ function AdminRooms() {
                 setRoomsRaw(mapped);
                 
                 // For non-maintenance rooms, fetch reservations to determine occupancy
-                axios.get('http://localhost:3001/get_reservations')
+                apiClient.get('/get_reservations')
                     .then((rres) => {
                         const reservations = rres.data || [];
                         const today = new Date();
@@ -170,7 +170,7 @@ function AdminRooms() {
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                axios.delete(`http://localhost:3001/delete_room/${roomId}`)
+                apiClient.delete(`//delete_room/${roomId}`)
                     .then((res) => {
                         console.log("Deleted:", res.data);
                         setData((prev) => prev.filter((room) => room.id !== roomId));

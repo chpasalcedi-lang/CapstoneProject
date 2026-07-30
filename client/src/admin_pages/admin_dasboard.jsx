@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../admincss/admin_dashboard.css";
 import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
@@ -35,9 +36,9 @@ function AdminDashboard() {
 
     try {
       const [guestRes, bookingRes, roomRes] = await Promise.all([
-        axios.get("http://localhost:3001/get_guest_arrivals"),
-        axios.get("http://localhost:3001/get_reservations"),
-        axios.get("http://localhost:3001/get_rooms")
+        apiClient.get("/get_guest_arrivals"),
+        apiClient.get("/get_reservations"),
+        apiClient.get("/get_rooms")
       ]);
 
       const guestData = guestRes.data || [];

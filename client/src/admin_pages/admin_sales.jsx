@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../admincss/admin_sales.css";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from "chart.js";
@@ -38,8 +39,8 @@ function AdminSales() {
         const fetchSales = async () => {
             try {
                 const [guestRes, bookingRes] = await Promise.all([
-                    axios.get("http://localhost:3001/get_guest_arrivals"),
-                    axios.get("http://localhost:3001/get_reservations")
+                    apiClient.get("/get_guest_arrivals"),
+                    apiClient.get("/get_reservations")
                 ]);
 
                 const guestData = guestRes.data || [];

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../Modalscss/edit_room_modal.css";
 
@@ -71,7 +72,7 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
             room_status: values.room_status,
             room_label: values.room_label
         };
-        axios.post(`http://localhost:3001/update_rooms/${values.id}`, updateData)
+        apiClient.post(`/update_rooms/${values.id}`, updateData)
             .then((res) => {
                 console.log("Updated:", res.data);
                 Swal.fire({ icon: 'success', title: 'Saved', text: 'Room updated successfully!' });

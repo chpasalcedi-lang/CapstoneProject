@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../admincss/admin_guest.css";
 import EditBookingModal from '../Modals/Edit_booking_modal';
@@ -93,7 +94,7 @@ function AdminGuest() {
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const res = await axios.get("http://localhost:3001/get_reservations");
+                const res = await apiClient.get("/get_reservations");
                 setBookings(res.data);
             } catch (err) {
                 console.error("Error fetching bookings:", err);
@@ -104,7 +105,7 @@ function AdminGuest() {
 
         const fetchGuestArrivals = async () => {
             try {
-                const res = await axios.get("http://localhost:3001/get_guest_arrivals");
+                const res = await apiClient.get("/get_guest_arrivals");
                 setGuestArrivals(res.data);
             } catch (err) {
                 console.error("Error fetching guest arrivals:", err);
@@ -115,7 +116,7 @@ function AdminGuest() {
 
         const fetchFeedback = async () => {
             try {
-                const res = await axios.get("http://localhost:3001/get_feedback");
+                const res = await apiClient.get("/get_feedback");
                 setFeedbackList(res.data);
             } catch (err) {
                 console.error("Error fetching feedback:", err);
@@ -192,8 +193,8 @@ function AdminGuest() {
         if (!result.isConfirmed) return;
 
         try {
-            await axios.delete(`http://localhost:3001/delete_reservation/${id}`);
-            const res = await axios.get('http://localhost:3001/get_reservations');
+            await apiClient.delete(`//delete_reservation/${id}`);
+            const res = await apiClient.get('/get_reservations');
             setBookings(res.data);
             Swal.fire({ icon: 'success', title: 'Deleted', text: 'Booking deleted successfully.' });
         } catch (err) {
@@ -224,8 +225,8 @@ function AdminGuest() {
         if (!result.isConfirmed) return;
 
         try {
-            await axios.delete(`http://localhost:3001/delete_guest_arrival/${id}`);
-            const res = await axios.get('http://localhost:3001/get_guest_arrivals');
+            await apiClient.delete(`//delete_guest_arrival/${id}`);
+            const res = await apiClient.get('/get_guest_arrivals');
             setGuestArrivals(res.data);
             Swal.fire({ icon: 'success', title: 'Deleted', text: 'Guest arrival record deleted successfully.' });
         } catch (err) {
@@ -255,8 +256,8 @@ function AdminGuest() {
         if (!result.isConfirmed) return;
 
         try {
-            await axios.delete(`http://localhost:3001/delete_feedback/${id}`);
-            const res = await axios.get('http://localhost:3001/get_feedback');
+            await apiClient.delete(`//delete_feedback/${id}`);
+            const res = await apiClient.get('/get_feedback');
             setFeedbackList(res.data);
             Swal.fire({ icon: 'success', title: 'Deleted', text: 'Feedback deleted successfully.' });
         } catch (err) {
@@ -569,7 +570,7 @@ function AdminGuest() {
             <EditBookingModal 
                 show={editModal} onClose={() => setEditModal(false)} booking={selectedEditBooking} onUpdate={() => {
                     // Refetch bookings after update
-                    axios.get("http://localhost:3001/get_reservations").then(res => setBookings(res.data));
+                    apiClient.get("/get_reservations").then(res => setBookings(res.data));
                 }}/>
             <ViewBookingModal 
                 show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking} onEdit={handleEdit}/>

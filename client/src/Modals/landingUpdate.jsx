@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../api';
 import '../Modalscss/landingUpdate.css';
 
 const formatDateForInput = (dateStr) => {
@@ -47,7 +47,7 @@ function LandingUpdate({ show, onClose, booking, onUpdate }) {
     const isConfirmed = booking && booking.res_status && ['confirmed','approved','occupied','complete'].includes(String(booking.res_status).toLowerCase());
 
     useEffect(() => {
-        axios.get("http://localhost:3001/get_rooms")
+        apiClient.get("/get_rooms")
             .then((res) => {
                 setRooms(res.data);
             })
@@ -110,7 +110,7 @@ function LandingUpdate({ show, onClose, booking, onUpdate }) {
         }
 
         try {
-            const res = await axios.post(`http://localhost:3001/update_reservation/${booking.id}`, updateData);
+            const res = await apiClient.post(`/update_reservation/${booking.id}`, updateData);
             console.log("Success:", res.data);
             onUpdate();
             setTimeout(() => {

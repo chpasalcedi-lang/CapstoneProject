@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+import apiClient from "../api";
 import Swal from 'sweetalert2';
 import "../Modalscss/book_reservation_modal.css";
 
@@ -62,7 +62,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
 
     useEffect(() => {
         if (showModal && roomId) {
-            axios.get('http://localhost:3001/get_reservations')
+            apiClient.get('/get_reservations')
                 .then((res) => {
                     const allReservations = res.data || [];
                     const roomReservations = allReservations.filter((r) => {
@@ -174,7 +174,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         const normalizedPrice = roomPrice ? parseFloat(String(roomPrice).replace(/,/g, '')) : null;
 
         try {
-            const latestRes = await axios.get('http://localhost:3001/get_reservations');
+            const latestRes = await apiClient.get('/get_reservations');
             const latestReservations = (latestRes.data || []).filter((r) => {
                 const status = (r.res_status || '').toLowerCase();
                 return isSameRoom(r.room_id, roomId) && ['pending', 'confirmed', 'complete', 'occupied'].includes(status);
@@ -193,7 +193,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                 return;
             }
 
-            const response = await axios.post('http://localhost:3001/add_reservation', {
+            const response = await apiClient.post('/add_reservation', {
                 ...values,
                 room_id: roomId,
                 room_price: normalizedPrice,

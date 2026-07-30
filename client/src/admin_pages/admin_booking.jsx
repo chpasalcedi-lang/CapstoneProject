@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import emailjs from "@emailjs/browser";
 import "../admincss/admin_boking.css";
@@ -32,7 +32,7 @@ function AdminBooking() {
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const res = await axios.get('http://localhost:3001/get_reservations');
+                const res = await apiClient.get('/get_reservations');
                 setBookings(res.data);
             } catch (err) {
                 console.error("Error fetching bookings:", err);
@@ -80,7 +80,7 @@ function AdminBooking() {
                 return;
             }
 
-            await axios.post(`http://localhost:3001/update_reservation/${booking.id}`, { status: targetStatus });
+            await apiClient.post(`/update_reservation/${booking.id}`, { status: targetStatus });
 
             if (targetStatus === 'complete') {
                 const templateParams = {
@@ -108,7 +108,7 @@ function AdminBooking() {
                 Swal.fire({ icon: 'success', title: 'Confirmed', text: 'Reservation confirmed successfully.' });
             }
 
-            const res = await axios.get('http://localhost:3001/get_reservations');
+            const res = await apiClient.get('/get_reservations');
             setBookings(res.data);
             localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
         } catch (err) {
@@ -130,8 +130,8 @@ function AdminBooking() {
         if (!result.isConfirmed) return;
 
         try {
-            await axios.post(`http://localhost:3001/update_reservation/${id}`, { status: 'cancelled' });
-            const res = await axios.get('http://localhost:3001/get_reservations');
+            await apiClient.post(`/update_reservation/${id}`, { status: 'cancelled' });
+            const res = await apiClient.get('/get_reservations');
             setBookings(res.data);
             localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
             Swal.fire({ icon: 'success', title: 'Cancelled', text: 'Booking cancelled successfully.' });

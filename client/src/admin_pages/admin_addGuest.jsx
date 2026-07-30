@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../admincss/admin_addguest.css";
 import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
@@ -66,7 +67,7 @@ function AdminAddGuest() {
     };
 
     try {
-      await axios.post('http://localhost:3001/add_guest_arrival', payload);
+      await apiClient.post('/add_guest_arrival', payload);
       Swal.fire({
         icon: 'success',
         title: 'Guest added',
@@ -79,7 +80,7 @@ function AdminAddGuest() {
       Swal.fire({
         icon: 'error',
         title: 'Add failed',
-        text: `${errorMsg}. Make sure server is running on http://localhost:3001/add_guest_arrival`,
+        text: `${errorMsg}. Make sure the backend is available and the API URL is configured correctly`,
       });
     }
   };

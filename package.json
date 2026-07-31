@@ -1,4 +1,8 @@
 {
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix client run build"
+  },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "alter": "^0.2.0",

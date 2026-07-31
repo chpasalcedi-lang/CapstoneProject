@@ -8,21 +8,9 @@
         "distDir": "dist",
         "buildCommand": "npm run build"
       }
-    },
-    {
-      "src": "server/server.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "server/server.js"
-    },
-    {
-      "src": "/",
-      "dest": "client/dist/index.html"
-    },
     {
       "handle": "filesystem"
     },

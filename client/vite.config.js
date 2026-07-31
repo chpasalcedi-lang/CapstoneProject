@@ -15,5 +15,26 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['axios']
+  },
+  build: {
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('chart.js') || id.includes('react-chartjs-2')) {
+              return 'chart-vendor';
+            }
+            if (id.includes('bootstrap')) {
+              return 'bootstrap-vendor';
+            }
+            return 'vendor';
+          }
+        }
+      }
+    }
   }
 })

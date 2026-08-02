@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "npm install --prefix client && npm --prefix client run build",
+    "build": "cd client && npm install && npm run build",
     "start": "npm --prefix server start"
   },
   "dependencies": {

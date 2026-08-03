@@ -174,6 +174,12 @@ function AdminRooms() {
         if (!result.isConfirmed) return;
 
         try {
+            // Log the resolved request URL for debugging network errors
+            const base = (apiClient.defaults && apiClient.defaults.baseURL) || '';
+            const resolvedUrl = `${String(base).replace(/\/$/, '')}/delete_room/${roomId}`;
+            // eslint-disable-next-line no-console
+            console.debug('Deleting room with URL:', resolvedUrl);
+
             const response = await apiClient.delete(`/delete_room/${roomId}`);
             setData((prev) => prev.filter((room) => room.id !== roomId));
             Swal.fire({
@@ -182,9 +188,24 @@ function AdminRooms() {
                 text: response.data?.message || 'Room deleted successfully.',
             });
         } catch (err) {
+            // Enhanced logging to capture network error details
+            // eslint-disable-next-line no-console
             console.error('Error deleting room:', err);
-            const apiError = err?.response?.data;
-            const message = apiError?.error || apiError?.message || 'Unable to delete the room. Please try again.';
+            // axios may have useful fields in err.config and err.response
+            // eslint-disable-next-line no-console
+            console.debug('Axios error config:', err?.config);
+            // eslint-disable-next-line no-console
+            console.debug('Axios error response:', err?.response);
+
+            // Build a friendly message for the user
+            let message = 'Unable to delete the room. Please try again.';
+            if (err?.response && err.response.data) {
+                const apiError = err.response.data;
+                message = apiError.error || apiError.message || message;
+            } else if (err?.message) {
+                message = err.message;
+            }
+
             Swal.fire({ icon: 'error', title: 'Error', text: message });
         }
     };

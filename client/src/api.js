@@ -1,13 +1,18 @@
 import axios from 'axios';
 
-let rawApiUrl = import.meta.env.VITE_API_URL;
-if (!rawApiUrl || rawApiUrl.trim() === '' || rawApiUrl.trim().toLowerCase() === 'https://' || rawApiUrl.trim().toLowerCase() === 'http://') {
-  rawApiUrl = 'https://capstoneproject-bqso.onrender.com/api';
+const envApiUrl = import.meta.env.VITE_API_URL || '';
+let apiUrl = envApiUrl.trim();
+
+if (apiUrl === '' || apiUrl.toLowerCase() === 'http://' || apiUrl.toLowerCase() === 'https://') {
+  apiUrl = 'https://capstoneproject-bqso.onrender.com/api';
 }
-const API_URL = rawApiUrl;
+
+if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+  apiUrl = 'https://capstoneproject-bqso.onrender.com/api';
+}
 
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: apiUrl,
 });
 
 export default apiClient;

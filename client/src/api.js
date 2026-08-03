@@ -5,4 +5,15 @@ const apiClient = axios.create({
   baseURL: apiUrl,
 });
 
+// Expose the resolved base URL for easy debugging in the browser console
+if (typeof window !== 'undefined') {
+  try {
+    /// eslint-disable-next-line no-undef
+    window.__API_BASE = apiClient.defaults && apiClient.defaults.baseURL ? apiClient.defaults.baseURL : apiUrl;
+  } catch (err) {
+    console.error('Error setting window.__API_BASE:', err);
+    // ignore
+  }
+}
+
 export default apiClient;

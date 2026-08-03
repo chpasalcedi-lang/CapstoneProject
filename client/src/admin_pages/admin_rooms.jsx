@@ -177,7 +177,7 @@ function AdminRooms() {
             // Log the resolved request URL for debugging network errors
             const base = (apiClient.defaults && apiClient.defaults.baseURL) || '';
             const resolvedUrl = `${String(base).replace(/\/$/, '')}/delete_room/${roomId}`;
-            // eslint-disable-next-line no-console
+            /// eslint-disable-next-line no-console
             console.debug('Deleting room with URL:', resolvedUrl);
 
             const response = await apiClient.delete(`/delete_room/${roomId}`);
@@ -189,12 +189,12 @@ function AdminRooms() {
             });
         } catch (err) {
             // Enhanced logging to capture network error details
-            // eslint-disable-next-line no-console
+            /// eslint-disable-next-line no-console
             console.error('Error deleting room:', err);
             // axios may have useful fields in err.config and err.response
-            // eslint-disable-next-line no-console
+            /// eslint-disable-next-line no-console
             console.debug('Axios error config:', err?.config);
-            // eslint-disable-next-line no-console
+            /// eslint-disable-next-line no-console
             console.debug('Axios error response:', err?.response);
 
             // Build a friendly message for the user

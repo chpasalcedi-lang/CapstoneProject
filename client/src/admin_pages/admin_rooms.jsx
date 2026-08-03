@@ -174,7 +174,7 @@ function AdminRooms() {
         if (!result.isConfirmed) return;
 
         try {
-            const requestPath = `/api/delete_room/${roomId}`;
+            const requestPath = `/delete_room/${roomId}`;
             console.debug('Deleting room with URL:', requestPath);
 
             const response = await apiClient.delete(requestPath);

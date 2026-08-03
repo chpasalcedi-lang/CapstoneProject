@@ -192,7 +192,7 @@ function AdminGuest() {
         if (!result.isConfirmed) return;
 
         try {
-            await apiClient.delete(`/api/delete_reservation/${id}`);
+            await apiClient.delete(`/delete_reservation/${id}`);
             const res = await apiClient.get('/get_reservations');
             setBookings(res.data);
             Swal.fire({ icon: 'success', title: 'Deleted', text: 'Booking deleted successfully.' });
@@ -224,7 +224,7 @@ function AdminGuest() {
         if (!result.isConfirmed) return;
 
         try {
-            await apiClient.delete(`/api/delete_guest_arrival/${id}`);
+            await apiClient.delete(`/delete_guest_arrival/${id}`);
             const res = await apiClient.get('/get_guest_arrivals');
             setGuestArrivals(res.data);
             Swal.fire({ icon: 'success', title: 'Deleted', text: 'Guest arrival record deleted successfully.' });
@@ -255,7 +255,7 @@ function AdminGuest() {
         if (!result.isConfirmed) return;
 
         try {
-            await apiClient.delete(`/api/delete_feedback/${id}`);
+            await apiClient.delete(`/delete_feedback/${id}`);
             const res = await apiClient.get('/get_feedback');
             setFeedbackList(res.data);
             Swal.fire({ icon: 'success', title: 'Deleted', text: 'Feedback deleted successfully.' });

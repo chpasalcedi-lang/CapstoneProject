@@ -23,15 +23,15 @@ body {
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 80px 0 0;
   white-space: pre-line;
   word-break: break-word;
 }
 
 .booking-calendar {
   background: #0f1e2e;
-  padding: 72px 0 100px;
-  margin-bottom: -140px;
+  padding: 72px 0 40px;
+  margin-bottom: -90px;
   width: 100%;
 }
 
@@ -40,15 +40,19 @@ body {
   max-width: 1320px;
   margin: 0 auto;
   padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 260px;
 }
 
 .booking-text {
-  position: sticky;
-  top: 120px;
+  position: relative;
   z-index: 5;
   width: 100%;
   max-width: 720px;
-  margin-bottom: 130px;
+  margin-bottom: 24px;
 
 }
 
@@ -78,13 +82,15 @@ body {
 }
 
 .booking-search-wrap {
-  margin-top: -70px;
+  margin-top: auto;
   position: relative;
   z-index: 10;
   width: 100%;
   max-width: 1320px;
   margin-left: auto;
   margin-right: auto;
+  display: flex;
+  justify-content: center;
 }
 
 .booking-search-bar {
@@ -150,9 +156,10 @@ body {
 
 .booking-results-area {
   background: rgb(237, 237, 237);
-  padding: 64px 32px 80px;
-  margin-top: -60px;
+  padding: 92px 32px 80px;
+  margin-top: 0;
   width: 100%;
+  min-height: calc(100vh - 420px);
 }
 
 .booking-results-content {
@@ -353,15 +360,18 @@ body {
   .booking-results-area {
     padding-left: 48px;
     padding-right: 48px;
+    display: flex;
+    justify-content: center;
   }
 
   .booking-calendar {
-    padding-top: 66px;
-    padding-bottom: 88px;
+    padding: 72px 0 40px;
+    margin-bottom: -90px;
+    width: 100%;
   }
 
   .booking-search-wrap {
-    margin-top: -60px;
+    margin-top: 0px;
   }
 
   .booking-search-bar {
@@ -375,8 +385,10 @@ body {
   }
 
   .booking-results-area {
-    padding-top: 82px;
-    margin-top: -100px;
+    padding: 92px 32px 80px;
+    margin-top: 0;
+    width: 100%;
+    min-height: calc(100vh - 420px);
   }
 
   .booking-results-grid {
@@ -384,145 +396,21 @@ body {
     gap: 30px;
   }
 }
-@media (min-width: 1250px) and (max-width: 1435px) {
-  .booking-calendar,
-  .booking-search-wrap,
-  .booking-results-area {
-    padding-left: 40px;
-    padding-right: 40px;
-  }
-
-  .booking-calendar {
-    padding-top: 62px;
-    padding-bottom: 84px;
-  }
-
-  .booking-search-wrap {
-    margin-top: -58px;
-  }
-
-  .booking-results-content {
-    width: 100%;
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0;
-  }
-
-  .booking-search-bar {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(170px, 1fr));
-    gap: 16px;
-    padding: 24px 24px;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .booking-field {
-    min-width: 160px;
-  }
-
-  .booking-results-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    justify-content: center;
-    gap: 24px;
-    padding-top: 20px;
-  }
-
-  .booking-room-card {
-    max-width: 380px;
-  }
-
-  .booking-room-card-img {
-    height: 220px;
-  }
-
-  .booking-room-card-body {
-    padding: 20px;
-  }
-}
-
-@media (min-width: 1001px) and (max-width: 1265px) {
-  .booking-calendar,
-  .booking-search-wrap,
-  .booking-results-area {
-    padding-left: 32px;
-    padding-right: 32px;
-  }
-
-  .booking-results-content {
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .booking-search-bar {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(170px, 1fr));
-    padding: 22px 20px;
-    gap: 14px;
-  }
-
-  .booking-field {
-    min-width: 160px;
-  }
-
-  .booking-results-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    padding-top: 18px;
-  }
-
-  .booking-room-card {
-    max-width: 360px;
-  }
-
-  .booking-room-card-img {
-    height: 210px;
-  }
-
-  .booking-room-card-body {
-    padding: 18px;
-  }
-}
-
-@media (min-width: 1001px) and (max-width: 1147px) {
-  .booking-results-content {
-    max-width: 100%;
-    padding: 0 14px;
-  }
-
-  .booking-results-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 18px;
-    justify-items: stretch;
-  }
-
-  .booking-room-card {
-    max-width: none;
-    width: 100%;
-  }
-
-  .booking-room-card-img {
-    height: 200px;
-  }
-
-  .booking-room-card-body {
-    padding: 16px;
-  }
-}
 
 
-@media (min-width: 769px) and (max-width: 1000px) {
+
+@media (max-width: 1000px) {
 
   .booking-calendar,
-  .booking-search-wrap,
   .booking-results-area {
     padding-left: 24px;
     padding-right: 24px;
   }
 
   .booking-calendar {
-    padding-top: 80px;
-    padding-bottom: 90px;
+    padding: 72px 0 40px;
+    margin-bottom: -90px;
+    width: 100%;
   }
 
   .booking-text h1 {
@@ -559,18 +447,24 @@ body {
     width: 100%;
   }
 
+  .booking-search-wrap {
+    margin-top: 32px;
+  }
+
   .booking-results-area {
-    margin-top: -110px;
-    padding-top: 80px;
+    padding: 92px 32px 80px;
+    margin-top: 0;
+    width: 100%;
+    min-height: calc(100vh - 420px);
   }
 
   .booking-results-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 24px;
   }
 
   .booking-room-card {
-    max-width: 100%;
+    max-width: 420px;
   }
 
   .booking-room-card-footer {
@@ -583,7 +477,7 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 700px) {
 
   .booking-calendar,
   .booking-search-wrap,
@@ -593,8 +487,9 @@ body {
   }
 
   .booking-calendar {
-    padding-top: 80px;
-    padding-bottom: 90px;
+    padding: 72px 0 40px;
+    margin-bottom: -90px;
+    width: 100%;
   }
 
   .booking-text h1 {
@@ -603,9 +498,11 @@ body {
 
   .booking-search-bar {
     display: grid;
+    width: 100%;
     grid-template-columns: 1fr;
     padding: 24px 24px;
     gap: 16px;
+    max-width: 700px;
   }
 
   .booking-search-bar > .booking-field:last-child {
@@ -614,11 +511,24 @@ body {
 
   .booking-field {
     flex: 1 1 200px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .booking-search-wrap {
+    margin-top: 32px;
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .booking-results-area {
-    margin-top: -110px;
-    padding-top: 80px;
+    padding: 92px 32px 80px;
+    margin-top: 0;
+    width: 100%;
+    min-height: calc(100vh - 420px);
   }
 
   .booking-results-grid {
@@ -629,6 +539,7 @@ body {
   .booking-room-card {
     max-width: 100%;
   }
+  
 
   .booking-room-card-footer {
     flex-wrap: wrap;
@@ -650,9 +561,9 @@ body {
   }
 
   .booking-calendar {
-    padding-top: 35px;
-    padding-bottom: 100px;
-    margin-bottom: -160px;
+    padding: 72px 0 40px;
+    margin-bottom: -90px;
+    width: 100%;
   }
 
   .booking-text h1 {
@@ -661,7 +572,7 @@ body {
   }
 
   .booking-search-wrap {
-    margin-top: 0;
+    margin-top: 24px;
   }
 
   .booking-search-bar {
@@ -692,9 +603,10 @@ body {
   }
 
   .booking-results-area {
-    padding-top: 52px;
-    padding-bottom: 60px;
-    margin-top: -40px;
+    padding: 92px 32px 80px;
+    margin-top: 0;
+    width: 100%;
+    min-height: calc(100vh - 420px);
   }
 
   .booking-results-grid {

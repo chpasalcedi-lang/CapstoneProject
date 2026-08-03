@@ -170,7 +170,7 @@ function AdminRooms() {
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                apiClient.delete(`//delete_room/${roomId}`)
+                apiClient.delete(`/delete_room/${roomId}`)
                     .then((res) => {
                         console.log("Deleted:", res.data);
                         setData((prev) => prev.filter((room) => room.id !== roomId));

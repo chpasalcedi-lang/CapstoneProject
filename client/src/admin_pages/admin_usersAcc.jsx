@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../admincss/admin_usersAcc.css";
@@ -112,7 +111,6 @@ function AdminUsersAcc() {
     setShowUpdateAccModal(true);
   };
 
-  const hasAdminAccount = () => users.some((user) => user.role?.toLowerCase() === 'admin');
 
   const handleCreateUser = async (userData) => {
     try {
@@ -184,7 +182,7 @@ function AdminUsersAcc() {
     if (!result.isConfirmed) return;
 
     try {
-      await apiClient.delete(`//delete_user_account/${id}`);
+      await apiClient.delete(`/delete_user_account/${id}`);
       await fetchUsers();
       Swal.fire({ icon: 'success', title: 'Deleted', text: 'Admin account was removed.' });
     } catch (err) {

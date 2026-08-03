@@ -151,17 +151,32 @@ app.post('/update_rooms/:id', (req, res) => {
 });
    
 app.delete('/delete_room/:id', (req, res) => {
-    const sql = "DELETE FROM rooms WHERE id = ?";
-    const roomId = req.params.id;
-    db.query(sql, [roomId], (err, result) => {
-        if (err) {
-            console.error("Error deleting room:", err);
-            return res.status(500).json({ error: "Database error!" });
+    const roomId = parseInt(req.params.id, 10);
+    if (Number.isNaN(roomId)) {
+        return res.status(400).json({ error: 'Invalid room id' });
+    }
+
+    const checkSql = "SELECT COUNT(*) AS cnt FROM reservations WHERE room_id = ? AND res_status IN ('pending', 'confirmed', 'complete', 'occupied')";
+    db.query(checkSql, [roomId], (checkErr, checkResult) => {
+        if (checkErr) {
+            console.error('Error checking room reservations before delete:', checkErr);
+            return res.status(500).json({ error: 'Database error!' });
         }
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: "Room not found" });
+        if (checkResult && checkResult[0] && checkResult[0].cnt > 0) {
+            return res.status(400).json({ error: 'Cannot delete room with active reservations. Cancel or remove bookings first.' });
         }
-        return res.status(200).json({ message: "Room deleted successfully" });
+
+        const sql = "DELETE FROM rooms WHERE id = ?";
+        db.query(sql, [roomId], (err, result) => {
+            if (err) {
+                console.error("Error deleting room:", err);
+                return res.status(500).json({ error: "Database error!" });
+            }
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "Room not found" });
+            }
+            return res.status(200).json({ message: "Room deleted successfully" });
+        });
     });
 });
 

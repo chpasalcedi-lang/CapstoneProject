@@ -152,36 +152,40 @@ function AdminRooms() {
         setShowEditModal(true);
     };
 
-    const handleDelete = (roomId) => {
+    const handleDelete = async (roomId) => {
         if (!isAdmin) {
-            Swal.fire({
+            await Swal.fire({
                 icon: 'warning',
                 title: 'Access denied',
                 text: 'Only admin can access this action.',
             });
             return;
         }
-        Swal.fire({
+
+        const result = await Swal.fire({
             icon: 'warning',
             title: 'Confirm delete',
             text: 'Are you sure you want to delete this room?',
             showCancelButton: true,
             confirmButtonText: 'Yes, delete it',
             cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                apiClient.delete(`/delete_room/${roomId}`)
-                    .then((res) => {
-                        console.log("Deleted:", res.data);
-                        setData((prev) => prev.filter((room) => room.id !== roomId));
-                        Swal.fire({ icon: 'success', title: 'Deleted', text: 'Room deleted successfully.' });
-                    })
-                    .catch((err) => {
-                        console.error("Error sa pag-delete:", err);
-                        Swal.fire({ icon: 'error', title: 'Error', text: 'May sala sa pag-delete sang data!' });
-                    });
-            }
         });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await apiClient.delete(`/delete_room/${roomId}`);
+            setData((prev) => prev.filter((room) => room.id !== roomId));
+            Swal.fire({
+                icon: 'success',
+                title: 'Deleted',
+                text: response.data?.message || 'Room deleted successfully.',
+            });
+        } catch (err) {
+            console.error('Error deleting room:', err);
+            const message = err?.response?.data?.error || 'Unable to delete the room. Please try again.';
+            Swal.fire({ icon: 'error', title: 'Error', text: message });
+        }
     };
 
     return (

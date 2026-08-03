@@ -3,8 +3,10 @@ import axios from 'axios';
 const configuredApiUrl = typeof import.meta.env.VITE_API_URL === 'string'
   ? import.meta.env.VITE_API_URL.trim()
   : '';
-const isLocalDevelopment = typeof window !== 'undefined' && /localhost|127\.0\.0\.1/.test(window.location.hostname);
-const apiUrl = isLocalDevelopment || !configuredApiUrl ? '/api' : configuredApiUrl;
+const defaultApiUrl = typeof window !== 'undefined' && window.location.host
+  ? `${window.location.protocol}//${window.location.host}/api`
+  : '/api';
+const apiUrl = configuredApiUrl || defaultApiUrl;
 
 const apiClient = axios.create({
   baseURL: apiUrl,
@@ -12,13 +14,8 @@ const apiClient = axios.create({
 
 // Expose the resolved base URL for easy debugging in the browser console
 if (typeof window !== 'undefined') {
-  try {
-    /// eslint-disable-next-line no-undef
-    window.__API_BASE = apiClient.defaults && apiClient.defaults.baseURL ? apiClient.defaults.baseURL : apiUrl;
-  } catch (err) {
-    console.error('Error setting window.__API_BASE:', err);
-    // ignore
-  }
+  window.__API_BASE = apiUrl;
+  window.__API_URL = apiUrl;
 }
 
 export default apiClient;

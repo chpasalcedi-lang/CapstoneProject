@@ -27,11 +27,9 @@ app.use((req, res, next) => {
 
 
 const useSsl = String(process.env.DB_SSL).toLowerCase() === 'true' || String(process.env.DB_SSL) === '1';
-const dbCa = process.env.DB_CA ? String(process.env.DB_CA).replace(/\\n/g, '\n') : undefined;
 const dbSsl = useSsl
     ? {
-          rejectUnauthorized: Boolean(dbCa),
-          ca: dbCa,
+          rejectUnauthorized: false,
       }
     : undefined;
 

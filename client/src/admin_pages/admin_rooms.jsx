@@ -183,7 +183,8 @@ function AdminRooms() {
             });
         } catch (err) {
             console.error('Error deleting room:', err);
-            const message = err?.response?.data?.error || 'Unable to delete the room. Please try again.';
+            const apiError = err?.response?.data;
+            const message = apiError?.error || apiError?.message || 'Unable to delete the room. Please try again.';
             Swal.fire({ icon: 'error', title: 'Error', text: message });
         }
     };

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const rawApiUrl = import.meta.env.VITE_API_URL || '/api';
+const rawApiUrl = import.meta.env.VITE_API_URL || 'https://capstoneproject-bqso.onrender.com/api';
 export const API_URL = rawApiUrl.startsWith('http') ? rawApiUrl : rawApiUrl;
 
 const apiClient = axios.create({

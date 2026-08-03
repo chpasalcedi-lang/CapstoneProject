@@ -26,10 +26,14 @@ app.use((req, res, next) => {
 });
 
 
-const useSsl = String(process.env.DB_SSL).toLowerCase() === 'true' || String(process.env.DB_SSL) === '1';
+const sslMode = String(process.env.DB_SSL_MODE || process.env.DB_SSL || '').toLowerCase();
+const useSsl = sslMode === 'true' || sslMode === '1' || sslMode === 'required';
+const rawDbCa = process.env.DB_CA || '';
+const dbCa = rawDbCa ? rawDbCa.replace(/\\n/g, '\n') : undefined;
 const dbSsl = useSsl
     ? {
           rejectUnauthorized: false,
+          ...(dbCa ? { ca: dbCa } : {})
       }
     : undefined;
 

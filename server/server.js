@@ -27,13 +27,21 @@ app.use((req, res, next) => {
 });
 
 
+const useSsl = String(process.env.DB_SSL).toLowerCase() === 'true' || String(process.env.DB_SSL) === '1';
+const dbSsl = useSsl
+    ? {
+          rejectUnauthorized: process.env.DB_CA ? true : false,
+          ca: process.env.DB_CA || undefined,
+      }
+    : undefined;
+
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: Number(process.env.DB_PORT) || 3306,
-    ssl: { rejectUnauthorized: false },
+    ssl: dbSsl,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -43,9 +51,6 @@ const db = mysql.createPool({
 db.getConnection((err, connection) => {
     if (err) {
         console.error('Database connection failed:', err);
-        console.error('Configured DB host:', process.env.DB_HOST || 'not set');
-        console.error('Configured DB user:', process.env.DB_USER || 'not set');
-        console.error('Configured DB name:', process.env.DB_NAME || 'not set');
         return;
     }
     console.log('Connected to Aiven MySQL Database.');

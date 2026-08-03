@@ -11,7 +11,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
-dotenv.config({ path: path.resolve(__dirname, '../client/.env') });
 
 const app = express();
 const isVercel = process.env.VERCEL === '1';
@@ -28,10 +27,11 @@ app.use((req, res, next) => {
 
 
 const useSsl = String(process.env.DB_SSL).toLowerCase() === 'true' || String(process.env.DB_SSL) === '1';
+const dbCa = process.env.DB_CA ? String(process.env.DB_CA).replace(/\\n/g, '\n') : undefined;
 const dbSsl = useSsl
     ? {
-          rejectUnauthorized: process.env.DB_CA ? true : false,
-          ca: process.env.DB_CA || undefined,
+          rejectUnauthorized: Boolean(dbCa),
+          ca: dbCa,
       }
     : undefined;
 
@@ -161,26 +161,23 @@ app.delete('/delete_room/:id', (req, res) => {
         return res.status(400).json({ error: 'Invalid room id' });
     }
 
-    const checkSql = "SELECT COUNT(*) AS cnt FROM reservations WHERE room_id = ? AND res_status IN ('pending', 'confirmed', 'complete', 'occupied')";
-    db.query(checkSql, [roomId], (checkErr, checkResult) => {
-        if (checkErr) {
-            console.error('Error checking room reservations before delete:', checkErr);
+    const deleteReservationsSql = 'DELETE FROM reservations WHERE room_id = ?';
+    db.query(deleteReservationsSql, [roomId], (delResErr) => {
+        if (delResErr) {
+            console.error('Error deleting room reservations:', delResErr);
             return res.status(500).json({ error: 'Database error!' });
         }
-        if (checkResult && checkResult[0] && checkResult[0].cnt > 0) {
-            return res.status(400).json({ error: 'Cannot delete room with active reservations. Cancel or remove bookings first.' });
-        }
 
-        const sql = "DELETE FROM rooms WHERE id = ?";
+        const sql = 'DELETE FROM rooms WHERE id = ?';
         db.query(sql, [roomId], (err, result) => {
             if (err) {
-                console.error("Error deleting room:", err);
-                return res.status(500).json({ error: "Database error!" });
+                console.error('Error deleting room:', err);
+                return res.status(500).json({ error: 'Database error!' });
             }
             if (result.affectedRows === 0) {
-                return res.status(404).json({ error: "Room not found" });
+                return res.status(404).json({ error: 'Room not found' });
             }
-            return res.status(200).json({ message: "Room deleted successfully" });
+            return res.status(200).json({ message: 'Room deleted successfully' });
         });
     });
 });

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
 import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../Modalscss/walkin_reservation_modal.css";
@@ -27,6 +26,16 @@ function AdminWalkinModal({ show, onClose }) {
     );
 
     const roomPrice = selectedRoom ? parseFloat(String(selectedRoom.room_price).replace(/,/g, '')) : null;
+
+    const formatRoomPrice = (price) => {
+        const numeric = Number(String(price || '').replace(/,/g, ''));
+        if (!Number.isFinite(numeric)) return '0';
+        const hasDecimals = numeric % 1 !== 0;
+        return numeric.toLocaleString('en-PH', {
+            minimumFractionDigits: hasDecimals ? 2 : 0,
+            maximumFractionDigits: 2,
+        });
+    };
 
     const nights = useMemo(() => {
         if (!values.check_in_date || !values.check_out_date) return 0;
@@ -212,7 +221,7 @@ function AdminWalkinModal({ show, onClose }) {
                             <div>
                                 <p className="walkin-reservation-price-label">Room price / night</p>
                                 <p className="walkin-reservation-price-value">
-                                    {roomPrice ? `₱${roomPrice}` : "0"}
+                                    {roomPrice ? `₱${formatRoomPrice(roomPrice)}` : "0"}
                                 </p>
                             </div>
                         </div>

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../Modalscss/edit_room_modal.css";
@@ -16,11 +15,30 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
         room_label: ""
     });
 
+    const normalizeRoomPriceValue = (value) => {
+        const raw = String(value || '');
+        const cleaned = raw.replace(/[^0-9.]/g, '');
+        const [integer, ...fractionParts] = cleaned.split('.');
+        const normalizedInteger = integer.replace(/^0+(?=\d)/, '') || '0';
+        const fraction = fractionParts.join('').slice(0, 2);
+        return fraction ? `${normalizedInteger}.${fraction}` : normalizedInteger;
+    };
+
+    const formatRoomPriceDisplay = (value) => {
+        const numeric = Number(String(value || '').replace(/,/g, ''));
+        if (!Number.isFinite(numeric)) return '';
+        const hasDecimals = numeric % 1 !== 0;
+        return numeric.toLocaleString('en-PH', {
+            minimumFractionDigits: hasDecimals ? 2 : 0,
+            maximumFractionDigits: 2,
+        });
+    };
+
     const getInitialValues = (data) => ({
         id: data.id || "",
         room_name: data.room_name || "",
         room_number: data.room_number || "",
-        room_price: data.room_price || "",
+        room_price: formatRoomPriceDisplay(data.room_price || ''),
         room_image: data.room_image || "",
         room_type: data.room_type || "",
         room_status: data.room_status || "",
@@ -66,7 +84,7 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
         const updateData = {
             room_name: values.room_name,
             room_number: values.room_number,
-            room_price: values.room_price,
+            room_price: normalizeRoomPriceValue(values.room_price),
             room_image: values.room_image,
             room_type: values.room_type,
             room_status: values.room_status,
@@ -116,9 +134,16 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
                             <div className="edit-room-form-row">
                                 <div className="edit-room-form-group">
                                     <label>Price</label>
-                                    <input type="text" name="room_price" required value={values.room_price}
-                                        onChange={(e) => setValues({ ...values, room_price: e.target.value })}
-                                        placeholder="e.g. 5000" />
+                                    <input
+                                        type="text"
+                                        name="room_price"
+                                        required
+                                        value={values.room_price}
+                                        onFocus={() => setValues((prev) => ({ ...prev, room_price: normalizeRoomPriceValue(prev.room_price) }))}
+                                        onChange={(e) => setValues({ ...values, room_price: normalizeRoomPriceValue(e.target.value) })}
+                                        onBlur={() => setValues((prev) => ({ ...prev, room_price: formatRoomPriceDisplay(prev.room_price) }))}
+                                        placeholder="e.g. 5000"
+                                    />
                                 </div>
                                 <div className="edit-room-form-group">
                                     <label>Image</label>

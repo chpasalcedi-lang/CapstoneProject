@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../admincss/admin_addguest.css";

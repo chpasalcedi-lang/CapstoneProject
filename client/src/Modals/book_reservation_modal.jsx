@@ -127,6 +127,16 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         return Number.isFinite(nightlyRate) ? nightlyRate * nights : null;
     };
 
+    const formatRoomPrice = (price) => {
+        const numeric = Number(String(price || '').replace(/,/g, ''));
+        if (!Number.isFinite(numeric)) return '0';
+        const hasDecimals = numeric % 1 !== 0;
+        return numeric.toLocaleString('en-PH', {
+            minimumFractionDigits: hasDecimals ? 2 : 0,
+            maximumFractionDigits: 2,
+        });
+    };
+
     const totalPrice = useMemo(() => calculateTotalPrice(values.check_in_date, values.check_out_date, roomPrice), [values.check_in_date, values.check_out_date, roomPrice]);
 
     const handleSubmit = async (e) => {
@@ -296,7 +306,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                       <div>
                         <p className="book-reservation-price-label">Room price / night</p>
                         <p className="book-reservation-price-value">
-                          {roomPrice ? `₱${roomPrice}` : "N/A"}
+                          {roomPrice ? `₱${formatRoomPrice(roomPrice)}` : "N/A"}
                         </p>
                       </div>
                     </div>

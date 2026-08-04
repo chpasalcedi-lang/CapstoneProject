@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../Modalscss/add_room_modal.css";
@@ -26,6 +25,25 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
         }
     };
 
+    const normalizeRoomPriceValue = (value) => {
+        const raw = String(value || '');
+        const cleaned = raw.replace(/[^0-9.]/g, '');
+        const [integer, ...fractionParts] = cleaned.split('.');
+        const normalizedInteger = integer.replace(/^0+(?=\d)/, '') || '0';
+        const fraction = fractionParts.join('').slice(0, 2);
+        return fraction ? `${normalizedInteger}.${fraction}` : normalizedInteger;
+    };
+
+    const formatRoomPriceDisplay = (value) => {
+        const numeric = Number(String(value || '').replace(/,/g, ''));
+        if (!Number.isFinite(numeric)) return '';
+        const hasDecimals = numeric % 1 !== 0;
+        return numeric.toLocaleString('en-PH', {
+            minimumFractionDigits: hasDecimals ? 2 : 0,
+            maximumFractionDigits: 2,
+        });
+    };
+
     const handleRoomLabelChange = (e) => {
         setValues((prev) => ({ ...prev, room_label: e.target.value }));
     };
@@ -44,7 +62,11 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        apiClient.post('/add_rooms', values)
+        const normalizedValues = {
+            ...values,
+            room_price: normalizeRoomPriceValue(values.room_price),
+        };
+        apiClient.post('/add_rooms', normalizedValues)
             .then((res) => {
                 console.log("Success: ", res.data);
                 setShowModal(false);
@@ -92,7 +114,16 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
                             <div className="add-room-form-row">
                                 <div className="add-room-form-group">
                                     <label>Price</label>
-                                    <input type="text" name="room_price" required onChange={(e) => setValues({ ...values, room_price: e.target.value })} placeholder="e.g. 5000" />
+                                    <input
+                                        type="text"
+                                        name="room_price"
+                                        required
+                                        value={values.room_price}
+                                        onFocus={() => setValues((prev) => ({ ...prev, room_price: normalizeRoomPriceValue(prev.room_price) }))}
+                                        onChange={(e) => setValues({ ...values, room_price: normalizeRoomPriceValue(e.target.value) })}
+                                        onBlur={() => setValues((prev) => ({ ...prev, room_price: formatRoomPriceDisplay(prev.room_price) }))}
+                                        placeholder="e.g. 5000"
+                                    />
                                 </div>
                                 <div className="add-room-form-group">
                                     <label>Image</label>

@@ -52,6 +52,16 @@ function AdminBooking() {
 
     const pendingCount = bookings.filter((b) => b.res_status?.toLowerCase() === 'pending').length;
 
+    const formatCurrency = (value) => {
+        const numeric = Number(String(value || '').replace(/,/g, ''));
+        if (!Number.isFinite(numeric)) return '0';
+        const hasDecimals = numeric % 1 !== 0;
+        return numeric.toLocaleString('en-PH', {
+            minimumFractionDigits: hasDecimals ? 2 : 0,
+            maximumFractionDigits: 2,
+        });
+    };
+
     const handleView = (booking) => {
         setSelectedBooking(booking);
         setViewModal(true);
@@ -89,7 +99,7 @@ function AdminBooking() {
                     room_number: booking.room_number,
                     check_in_date: new Date(booking.check_in_date).toLocaleDateString(),
                     check_out_date: new Date(booking.check_out_date).toLocaleDateString(),
-                    room_price: `₱${Number(booking.room_price || 0).toLocaleString()}`,
+                    room_price: `₱${formatCurrency(booking.room_price)}`,
                     num_guests: booking.num_guests,
                 };
 
@@ -101,7 +111,7 @@ function AdminBooking() {
                     );
                     Swal.fire({ icon: 'success', title: 'Complete', text: 'Reservation marked complete and email sent to guest.' });
                 } catch (emailErr) {
-                    console.error("Email send error:", emailErr);
+                    console.error('Email send error:', emailErr);
                     Swal.fire({ icon: 'warning', title: 'Complete', text: 'Reservation marked complete but email failed to send.' });
                 }
             } else {
@@ -112,7 +122,7 @@ function AdminBooking() {
             setBookings(res.data);
             localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
         } catch (err) {
-            console.error("Error confirming booking:", err);
+            console.error('Error confirming booking:', err);
             Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to update booking' });
         }
     };
@@ -323,7 +333,7 @@ function AdminBooking() {
                                                     <td>{booking.room_number}</td>
                                                     <td>{formatBookingDate(booking.check_in_date)}</td>
                                                     <td>{formatBookingDate(booking.check_out_date)}</td>
-                                                    <td>₱{Number(booking.total_price || 0).toLocaleString()}</td>
+                                                    <td>₱{formatCurrency(booking.total_price)}</td>
                                                     <td>
                                                         <span className={`status-${status}`}>
                                                             {booking.res_status || 'pending'}

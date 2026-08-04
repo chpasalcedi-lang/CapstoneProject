@@ -42,6 +42,15 @@ function AdminGuest() {
 
     const isAdmin = adminData.role?.toString().toLowerCase() === 'admin';
 
+    const formatCurrency = (value) => {
+        const numeric = Number(String(value || '').replace(/,/g, ''));
+        if (!Number.isFinite(numeric)) return '0';
+        const hasDecimals = numeric % 1 !== 0;
+        return numeric.toLocaleString('en-PH', {
+            minimumFractionDigits: hasDecimals ? 2 : 0,
+            maximumFractionDigits: 2,
+        });
+    };
 
     const handleView = (booking) => {
         setSelectedBooking(booking);
@@ -492,7 +501,7 @@ function AdminGuest() {
                                                 <tr key={guest.id}>
                                                     <td>{guest.number_of_guests}</td>
                                                     <td>{guest.food_service}</td>
-                                                    <td>₱{parseFloat(guest.total_price).toFixed(2)}</td>
+                                                    <td>₱{formatCurrency(guest.total_price)}</td>
                                                     <td>{formatGuestDateTime(guest.created_at)}</td>
                                                     <td className="actions-cell">
                                                         <button className="btn guest btn-danger" onClick={() => handleDeleteGuest(guest.id)}>Delete</button>

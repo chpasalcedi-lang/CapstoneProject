@@ -98,6 +98,16 @@ function ResBook() {
     });
   };
 
+  const formatRoomPrice = (price) => {
+    const numeric = Number(String(price || '').replace(/,/g, ''));
+    if (!Number.isFinite(numeric)) return '0';
+    const hasDecimals = numeric % 1 !== 0;
+    return numeric.toLocaleString('en-PH', {
+      minimumFractionDigits: hasDecimals ? 2 : 0,
+      maximumFractionDigits: 2,
+    });
+  };
+
   const handleBookClick = (room) => {
     // Check if room is under maintenance
     if (room.room_status?.toLowerCase() === 'maintenance') {
@@ -510,7 +520,7 @@ function ResBook() {
                         <p>{room.room_label}</p>
                         <div className="booking-room-card-footer">
                           <div className="booking-room-price">
-                            <span className="booking-room-price-amount">₱{room.room_price}</span>
+                            <span className="booking-room-price-amount">₱{formatRoomPrice(room.room_price)}</span>
                             <span className="booking-room-price-night">per night</span>
                           </div>
                           <button

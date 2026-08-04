@@ -120,6 +120,16 @@ function AdminRooms() {
         return isOccupied ? 'Occupied' : 'Available';
     };
 
+    const formatRoomPrice = (price) => {
+        const numeric = Number(String(price || '').replace(/,/g, ''));
+        if (!Number.isFinite(numeric)) return '0';
+        const hasDecimals = numeric % 1 !== 0;
+        return numeric.toLocaleString('en-PH', {
+            minimumFractionDigits: hasDecimals ? 2 : 0,
+            maximumFractionDigits: 2,
+        });
+    };
+
     const checkerDateObj = parseIsoDate(checkerDate);
     const checkerRooms = roomsRaw.map((room) => ({
         ...room,
@@ -344,7 +354,7 @@ function AdminRooms() {
                                 </div>
                                 <div className="rooms-room-card-body">
                                     <div className="rooms-room-price">
-                                        <span className="rooms-room-price-amount">₱{room.room_price}</span>
+                                        <span className="rooms-room-price-amount">₱{formatRoomPrice(room.room_price)}</span>
                                         <span className="rooms-room-price-night">per night</span>
                                     </div>
                                     <h3>{room.room_name}</h3>

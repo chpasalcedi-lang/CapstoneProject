@@ -3,6 +3,27 @@ import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../Modalscss/edit_room_modal.css";
 
+const formatRoomPriceDisplay = (value) => {
+    const numeric = Number(String(value || '').replace(/,/g, ''));
+    if (!Number.isFinite(numeric)) return '';
+    const hasDecimals = numeric % 1 !== 0;
+    return numeric.toLocaleString('en-PH', {
+        minimumFractionDigits: hasDecimals ? 2 : 0,
+        maximumFractionDigits: 2,
+    });
+};
+
+const getInitialValues = (data) => ({
+    id: data.id || "",
+    room_name: data.room_name || "",
+    room_number: data.room_number || "",
+    room_price: formatRoomPriceDisplay(data.room_price || ''),
+    room_image: data.room_image || "",
+    room_type: data.room_type || "",
+    room_status: data.room_status || "",
+    room_label: data.room_label || ""
+});
+
 function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
     const [values, setValues] = useState({
         id: "",
@@ -23,27 +44,6 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
         const fraction = fractionParts.join('').slice(0, 2);
         return fraction ? `${normalizedInteger}.${fraction}` : normalizedInteger;
     };
-
-    const formatRoomPriceDisplay = (value) => {
-        const numeric = Number(String(value || '').replace(/,/g, ''));
-        if (!Number.isFinite(numeric)) return '';
-        const hasDecimals = numeric % 1 !== 0;
-        return numeric.toLocaleString('en-PH', {
-            minimumFractionDigits: hasDecimals ? 2 : 0,
-            maximumFractionDigits: 2,
-        });
-    };
-
-    const getInitialValues = (data) => ({
-        id: data.id || "",
-        room_name: data.room_name || "",
-        room_number: data.room_number || "",
-        room_price: formatRoomPriceDisplay(data.room_price || ''),
-        room_image: data.room_image || "",
-        room_type: data.room_type || "",
-        room_status: data.room_status || "",
-        room_label: data.room_label || ""
-    });
 
     useEffect(() => {
         if (roomData) {

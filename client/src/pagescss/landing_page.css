@@ -620,7 +620,10 @@ body {
 }
 
 .landing-map-eyebrow {
-  display: inline-flex;
+  display: block;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto 14px;
   align-items: center;
   gap: 12px;
   font-size: 0.68rem;
@@ -628,7 +631,6 @@ body {
   text-transform: uppercase;
   color: #C89A2A;
   font-weight: 600;
-  margin-bottom: 14px;
 }
 
 
@@ -751,6 +753,16 @@ body {
   letter-spacing: 0.08em;
 }
 
+.landing-contact-content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: flex-start;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
 .landing-contact-content-main {
   position: relative;
   z-index: 1;
@@ -759,12 +771,10 @@ body {
 .landing-contact {
   background: #0f1e2e;
   padding: 96px 56px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  align-items: flex-start;
-  max-width: 100%;
+  display: flex;
+  justify-content: center;
   position: relative;
+  max-width: 100%;
 }
 
 .landing-contact::before {
@@ -1175,9 +1185,12 @@ body {
 
 @media (max-width: 900px) {
   .landing-contact {
+    padding: 72px 32px;
+  }
+
+  .landing-contact-content-wrapper {
     grid-template-columns: 1fr;
     gap: 50px;
-    padding: 72px 32px;
   }
 
   .landing-feedback {
@@ -1197,6 +1210,10 @@ body {
 
   .landing-contact {
     padding: 48px 20px;
+    gap: 32px;
+  }
+
+  .landing-contact-content-wrapper {
     gap: 32px;
   }
 

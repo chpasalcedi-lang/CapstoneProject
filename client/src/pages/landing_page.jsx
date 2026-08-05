@@ -367,46 +367,48 @@ function LandingPage() {
       </section>
 
       <section className="landing-contact">
-        <div className="landing-contact-content-main">
-          <span className="landing-contact-eyebrow">Get in Touch</span>
-          <div className="landing-contact-content">
-            <h1>Contact Us</h1>
-            <p>
-              Have questions or need assistance? Our team is here to help.
-              Reach out to us anytime!
-            </p>
-            <div className="contact-info">
-              <p><i className="fa-solid fa-phone"></i> +63 912 345 6789</p>
+        <div className="landing-contact-content-wrapper">
+          <div className="landing-contact-content-main">
+            <span className="landing-contact-eyebrow">Get in Touch</span>
+            <div className="landing-contact-content">
+              <h1>Contact Us</h1>
               <p>
-                <i className="fa-solid fa-envelope"></i>
-                <a href="mailto:info@messiahresort.com">
-                  info@messiahresort.com
-                </a>
+                Have questions or need assistance? Our team is here to help.
+                Reach out to us anytime!
               </p>
+              <div className="contact-info">
+                <p><i className="fa-solid fa-phone"></i> +63 912 345 6789</p>
+                <p>
+                  <i className="fa-solid fa-envelope"></i>
+                  <a href="mailto:info@messiahresort.com">
+                    info@messiahresort.com
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="landing-feedback">
-          <h1>Tell us about your experience</h1>
-          <p>
-            Your feedback helps us improve and provide the best
-            experience possible.
-          </p>
-          <form onSubmit={handleFeedbackSubmit}>
-            <label>Name</label>
-            <input type="text" name="name" placeholder="Your Name" value={feedback.name} onChange={handleFeedbackChange} required/>
+          <div className="landing-feedback">
+            <h1>Tell us about your experience</h1>
+            <p>
+              Your feedback helps us improve and provide the best
+              experience possible.
+            </p>
+            <form onSubmit={handleFeedbackSubmit}>
+              <label>Name</label>
+              <input type="text" name="name" placeholder="Your Name" value={feedback.name} onChange={handleFeedbackChange} required/>
 
-            <label>Email</label>
-            <input type="email" name="email" placeholder="Your Email" value={feedback.email} onChange={handleFeedbackChange} required/>
+              <label>Email</label>
+              <input type="email" name="email" placeholder="Your Email" value={feedback.email} onChange={handleFeedbackChange} required/>
 
-            <label>Message</label>
-            <textarea className="message-box" name="message" placeholder="Your Message" value={feedback.message} onChange={handleFeedbackChange} required/>
+              <label>Message</label>
+              <textarea className="message-box" name="message" placeholder="Your Message" value={feedback.message} onChange={handleFeedbackChange} required/>
 
-            <button type="submit" className="landing-btn-feedback" disabled={submitting}>
-              Submit
-            </button>
-          </form>
+              <button type="submit" className="landing-btn-feedback" disabled={submitting}>
+                Submit
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 

@@ -4,6 +4,9 @@ import apiClient from '../api';
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import pool1 from '../image/pool1.jpg';
+import pool2 from '../image/pool2.jpg';
+import pool3 from '../image/pool3.jpg';
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
 import "../pagescss/landing_page.css";
@@ -317,17 +320,17 @@ function LandingPage() {
                   </div>
                   <div className="carousel-inner">
                       <div className="carousel-item active" data-bs-interval="10000">
-                          <img src="/src/image/pool1.jpg" className="d-block w-100" alt="..." />
+                          <img src={pool1} className="d-block w-100" alt="Pool 1" />
                       <div className="carousel-caption d-none d-md-block">
                       </div>
                       </div>
                       <div className="carousel-item" data-bs-interval="2000">
-                          <img src="/src/image/pool2.jpg" className="d-block w-100" alt="..."/>
+                          <img src={pool2} className="d-block w-100" alt="Pool 2"/>
                       <div className="carousel-caption d-none d-md-block">
                       </div>
                       </div>
                       <div className="carousel-item">
-                          <img src="/src/image/pool3.jpg" className="d-block w-100" alt="..."/>
+                          <img src={pool3} className="d-block w-100" alt="Pool 3"/>
                       <div className="carousel-caption d-none d-md-block">
                       </div>
                       </div>

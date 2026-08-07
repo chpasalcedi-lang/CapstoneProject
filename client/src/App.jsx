@@ -2,7 +2,6 @@ import React from 'react';
 import Home from './pages/landing_page';
 import Reservation from './pages/res_book';
 import UserLogin from './admin_pages/user_login';
-
 import Dashboard from './admin_pages/admin_dasboard';
 import Rooms from './admin_pages/admin_rooms';
 import Booking from './admin_pages/admin_booking';

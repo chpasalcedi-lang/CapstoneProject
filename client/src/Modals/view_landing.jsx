@@ -22,7 +22,7 @@ function ViewLanding({ show, onClose, booking, onEdit }) {
             ? 'This reservation has been completed and cannot be edited.'
             : 'This reservation has been confirmed by admin and cannot be edited.';
 
-    return (
+    return (    
         <div className="landing-modal-overlay" onClick={onClose}>
             <div className="landing-modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="landing-modal-header">

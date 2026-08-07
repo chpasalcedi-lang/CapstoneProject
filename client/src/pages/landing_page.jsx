@@ -9,6 +9,7 @@ import pool2 from '../image/pool2.jpg';
 import pool3 from '../image/pool3.jpg';
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
+import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
 import "../pagescss/landing_page.css";
 
 
@@ -23,6 +24,7 @@ function LandingPage() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [loadingReservations, setLoadingReservations] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const menuButtonRef = useRef(null);
   const [userEmail, setUserEmail] = useState(() => {
     // Read auth info synchronously to avoid a flash of the "sign in" button
@@ -150,6 +152,43 @@ function LandingPage() {
     }
   };
 
+  const handleCancelReservation = async (booking, reason) => {
+    if (!booking?.id) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Unable to request cancellation',
+        text: 'Reservation details were not found.'
+      });
+      return;
+    }
+
+    try {
+      const cancelNote = reason?.trim() || '';
+      await apiClient.post(`/cancel_reservation_request/${booking.id}`, {
+        cancel_notes_request: cancelNote,
+      });
+      Swal.fire({ 
+        icon: 'success', 
+        title: 'Cancellation requested', 
+        text: 'Your cancellation reason was sent to the admin for review.' 
+      });
+      setShowCancelModal(false);
+      setSelectedBooking(null);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('reservation-updated', { detail: { id: booking.id } }));
+        localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
+      }
+      if (userEmail) fetchUserReservations(userEmail);
+    } catch (err) {
+      console.error('Cancel error', err);
+      Swal.fire({ 
+        icon: 'error', 
+        title: 'Error', 
+        text: err.response?.data?.error || err.response?.data?.message || 'Unable to cancel reservation.' 
+      });
+    }
+  };
+
   useEffect(() => {
     if (location.hash === "#about-pool") {
       const section = document.getElementById("about-pool");
@@ -222,14 +261,26 @@ function LandingPage() {
                                 <span><strong>Total:</strong> ₱{booking.total_price || '0'}</span>
                               </div>
                               <div className="profile-credential-actions">
-                                <button className="profile-credential-btn-view" onClick={() => { setSelectedBooking(booking); setShowViewModal(true); }}>
+                                <button className="profile-credential-btn-view" onClick={() => {setSelectedBooking(booking);setShowViewModal(true);}}>
                                   View Details
                                 </button>
-                                {((!booking.res_status) || (['confirmed','complete'].indexOf(String(booking.res_status).toLowerCase()) === -1)) && (
-                                  <button className="profile-credential-btn-edit" onClick={() => { setSelectedBooking(booking); setShowEditModal(true); }}>
-                                    Update
-                                  </button>
-                                )}
+
+                                <div className="profile-credential-actions-icons">
+                                  {(!['cancelled', 'complete'].includes(String(booking.res_status || '').toLowerCase())) && (
+                                    <>
+                                      {((!booking.res_status) || (['confirmed'].indexOf(String(booking.res_status).toLowerCase()) === -1)) && (
+                                        <button className="profile-credential-btn-edit" onClick={() => {setSelectedBooking(booking); setShowEditModal(true);}} aria-label="Edit reservation">
+                                          <i className="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                      )}
+                                      {String(booking.res_status).toLowerCase() !== 'complete' && (
+                                        <button className="profile-credential-btn-cancel" aria-label="Cancel reservation" onClick={() => { setSelectedBooking(booking); setShowCancelModal(true); }}>
+                                          <i className="fa-solid fa-trash-can"></i>
+                                        </button>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           ))
@@ -437,6 +488,13 @@ function LandingPage() {
           setSelectedBooking(null);
           if (userEmail) fetchUserReservations(userEmail);
         }}
+      />
+
+      <CancelReserveModal
+        show={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        booking={selectedBooking}
+        onConfirm={handleCancelReservation}
       />
 
       <footer className="landing-footer">

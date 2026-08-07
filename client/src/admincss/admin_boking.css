@@ -277,6 +277,38 @@ body {
   overflow-x: auto;
 }
 
+.guests-table-container-cancel-request {
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.guests-table-container-cancel-request h1 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #555;
+  font-weight: 500;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 0;
+}
+
+.guests-table-wrapper-cancel-request {
+  max-height: 450px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.guests-table-cancel-request {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
 .guests-table {
   width: 100%;
   border-collapse: collapse;
@@ -289,6 +321,14 @@ body {
   z-index: 10;
 }
 
+.guests-table-cancel-request thead,
+.guests-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.guests-table-cancel-request thead th,
 .guests-table thead th {
   text-align: auto;
   padding: 14px 16px;
@@ -302,7 +342,8 @@ body {
   white-space: nowrap;
 }
 
-.guests-table tbody tr {
+.guests-table tbody tr,
+.guests-table-cancel-request tbody tr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition: background 0.15s;
 }
@@ -311,7 +352,8 @@ body {
   background: rgba(255, 255, 255, 0.02);
 }
 
-.guests-table td {
+.guests-table td,
+.guests-table-cancel-request td {
   padding: 14px 16px;
   font-size: 12px;
   color: #777;
@@ -319,7 +361,8 @@ body {
   vertical-align: middle;
 }
 
-.guests-table td:first-child {
+.guests-table td:first-child,
+.guests-table-cancel-request td:first-child {
   color: #f0ede8;
   font-weight: 500;
   width: 220px;
@@ -354,6 +397,29 @@ body {
   transition: opacity 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.guests-table-cancel-request {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.guests-table-cancel-request thead th {
+  text-align: auto;
+  padding: 14px 16px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #3f3f3f;
+  background: #0f0f0f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+
+.guests-table-cancel-request tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .actions-cell .btn.guest:hover {

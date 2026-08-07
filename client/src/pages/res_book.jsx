@@ -6,6 +6,7 @@ import "../pagescss/res_book.css";
 import BookReservationModal from "../Modals/book_reservation_modal.jsx";
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
+import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
 import "../pagescss/landing_page.css";
 
 function ResBook() {
@@ -30,6 +31,7 @@ function ResBook() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [loadingReservations, setLoadingReservations] = useState(false);
 
   const toggleProfile = () => {
@@ -62,6 +64,38 @@ function ResBook() {
     localStorage.removeItem('adminUser');
     setProfileOpen(false);
     navigate('/Login');
+  };
+
+  const handleCancelReservation = async (booking, reason) => {
+    if (!booking?.id) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Unable to request cancellation',
+        text: 'Reservation details were not found.'
+      });
+      return;
+    }
+
+    try {
+      await apiClient.post(`/cancel_reservation_request/${booking.id}`, {
+        cancel_notes_request: reason?.trim() || '',
+      });
+      Swal.fire({
+        icon: 'success',
+        title: 'Cancellation requested',
+        text: 'Your cancellation reason was sent to the admin for review.'
+      });
+      setShowCancelModal(false);
+      setSelectedBooking(null);
+      if (userEmail) fetchUserReservations(userEmail);
+    } catch (err) {
+      console.error('Cancel error', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.response?.data?.error || err.response?.data?.message || 'Unable to cancel reservation.'
+      });
+    }
   };
 
   const isDateOverlap = (startA, endA, startB, endB) => {
@@ -407,11 +441,22 @@ function ResBook() {
                                 <button className="profile-credential-btn-view" onClick={() => { setSelectedBooking(booking); setShowViewModal(true); }}>
                                   View Details
                                 </button>
-                                {((!booking.res_status) || (['confirmed','complete','cancelled'].indexOf(String(booking.res_status).toLowerCase()) === -1)) && (
-                                  <button className="profile-credential-btn-edit" onClick={() => { setSelectedBooking(booking); setShowEditModal(true); }}>
-                                    Update
-                                  </button>
-                                )}
+                                <div className="profile-credential-actions-icons">
+                                  {(!['cancelled', 'complete'].includes(String(booking.res_status || '').toLowerCase())) && (
+                                    <>
+                                      {((!booking.res_status) || (['confirmed'].indexOf(String(booking.res_status).toLowerCase()) === -1)) && (
+                                        <button className="profile-credential-btn-edit" onClick={() => {setSelectedBooking(booking); setShowEditModal(true);}} aria-label="Edit reservation">
+                                          <i className="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                      )}
+                                      {String(booking.res_status).toLowerCase() !== 'complete' && (
+                                        <button className="profile-credential-btn-cancel" aria-label="Cancel reservation" onClick={() => { setSelectedBooking(booking); setShowCancelModal(true); }}>
+                                          <i className="fa-solid fa-trash-can"></i>
+                                        </button>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           ))
@@ -563,6 +608,12 @@ function ResBook() {
           setSelectedBooking(null);
           if (userEmail) fetchUserReservations(userEmail);
         }}
+      />
+      <CancelReserveModal
+        show={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        booking={selectedBooking}
+        onConfirm={handleCancelReservation}
       />
     </div>
   );

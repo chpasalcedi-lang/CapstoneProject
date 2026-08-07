@@ -546,6 +546,31 @@ app.get('/get_guest_arrivals', (req, res) => {
     });
 });
 
+app.post('/cancel_reservation_request/:id', (req, res) => {
+    const reservationId = parseInt(req.params.id, 10);
+    if (Number.isNaN(reservationId)) {
+        return res.status(400).json({ error: 'Invalid reservation ID.' });
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(req.body, 'cancel_notes_request')) {
+        return res.status(400).json({ error: 'Cancellation note is required.' });
+    }
+
+    const cancelNote = req.body.cancel_notes_request === undefined ? '' : String(req.body.cancel_notes_request);
+    const sql = 'UPDATE reservations SET cancel_notes_request = ? WHERE id = ?';
+
+    db.query(sql, [cancelNote, reservationId], (err, result) => {
+        if (err) {
+            console.error('Error saving cancellation request:', err);
+            return res.status(500).json({ error: 'Database error.' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Reservation not found.' });
+        }
+        return res.status(200).json({ message: 'Cancellation request saved successfully.' });
+    });
+});
+
 app.get('/', (req, res) => {
     res.json({ status: 'ok', message: 'Guest arrival backend is running' });
 });
@@ -557,6 +582,8 @@ app.post('/update_reservation/:id', (req, res) => {
     }
 
     const { status, last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, room_id } = req.body;
+    const hasCancelNotesRequest = Object.prototype.hasOwnProperty.call(req.body, 'cancel_notes_request');
+    const cancel_notes_request = req.body.cancel_notes_request;
 
     if (status !== undefined && !['pending', 'confirmed', 'cancelled', 'complete'].includes(status)) {
         return res.status(400).json({ error: 'Invalid status.' });
@@ -581,6 +608,8 @@ app.post('/update_reservation/:id', (req, res) => {
         updateFields.check_out_date = check_out_date;
     if (notes !== undefined && notes !== '') 
         updateFields.notes = encrypt(notes);
+    if (hasCancelNotesRequest)
+        updateFields.cancel_notes_request = cancel_notes_request ?? '';
     if (room_id !== undefined && room_id !== null && room_id !== '') 
         updateFields.room_id = room_id;
 

@@ -42,6 +42,24 @@ function AdminBooking() {
         };
 
         fetchBookings();
+
+        const handleReservationUpdate = () => {
+            fetchBookings();
+        };
+
+        const handleStorageRefresh = (event) => {
+            if (event.key === 'dashboardRefreshTrigger') {
+                fetchBookings();
+            }
+        };
+
+        window.addEventListener('reservation-updated', handleReservationUpdate);
+        window.addEventListener('storage', handleStorageRefresh);
+
+        return () => {
+            window.removeEventListener('reservation-updated', handleReservationUpdate);
+            window.removeEventListener('storage', handleStorageRefresh);
+        };
     }, []);
 
     const checkInsToday = bookings.filter((b) => {
@@ -92,7 +110,7 @@ function AdminBooking() {
 
             await apiClient.post(`/update_reservation/${booking.id}`, { status: targetStatus });
 
-            if (targetStatus === 'complete') {
+            if (currentStatus === 'pending') {
                 const templateParams = {
                     email: booking.email,
                     guest_name: `${booking.first_name} ${booking.last_name}`,
@@ -109,11 +127,13 @@ function AdminBooking() {
                         "template_wba3f1m",
                         templateParams
                     );
-                    Swal.fire({ icon: 'success', title: 'Complete', text: 'Reservation marked complete and email sent to guest.' });
+                    Swal.fire({ icon: 'success', title: 'Confirmed', text: 'Reservation confirmed and email sent to guest.' });
                 } catch (emailErr) {
                     console.error('Email send error:', emailErr);
-                    Swal.fire({ icon: 'warning', title: 'Complete', text: 'Reservation marked complete but email failed to send.' });
+                    Swal.fire({ icon: 'warning', title: 'Confirmed', text: 'Reservation confirmed but email failed to send.' });
                 }
+            } else if (targetStatus === 'complete') {
+                Swal.fire({ icon: 'success', title: 'Complete', text: 'Reservation marked complete.' });
             } else {
                 Swal.fire({ icon: 'success', title: 'Confirmed', text: 'Reservation confirmed successfully.' });
             }
@@ -190,6 +210,11 @@ function AdminBooking() {
             roomNumber.includes(search) ||
             bookingStatus.includes(search)
         );
+    });
+
+    const cancelRequestBookings = filteredBookings.filter((booking) => {
+        const note = String(booking.cancel_notes_request || '').trim();
+        return note.length > 0;
     });
 
     return (
@@ -349,6 +374,56 @@ function AdminBooking() {
                                                             disabled={['cancelled', 'complete'].includes(status)}
                                                         >
                                                             {status === 'pending' ? 'Confirm' : status === 'confirmed' ? 'Done' : 'Done'}
+                                                        </button>
+                                                        <button
+                                                            className="btn guest btn-danger"
+                                                            onClick={() => handleCancel(booking.id)}
+                                                            disabled={['cancelled', 'complete'].includes(status)}
+                                                        >
+                                                            cancel
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                    <div className="guests-table-container-cancel-request">
+                        <h1>Recent Cancel Requests</h1>
+                        {loading ? (
+                            <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>Loading cancel requests...</p>
+                        ) : cancelRequestBookings.length === 0 ? (
+                            <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>No cancel requests found.</p>
+                        ) : (
+                            <div className="guests-table-wrapper-cancel-request">
+                                <table className="guests-table-cancel-request">
+                                    <thead>
+                                        <tr>
+                                            <th>Guest</th>
+                                            <th>Email</th>
+                                            <th>Room</th>
+                                            <th>Check-date</th>
+                                            <th>Reason</th>
+                                            <th className="actions-header">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {cancelRequestBookings.map((booking) => {
+                                            const status = (booking.res_status || 'pending').toLowerCase();
+                                            return (
+                                                <tr key={booking.id}>
+                                                    <td>{booking.first_name} {booking.last_name}</td>
+                                                    <td>{booking.email}</td>
+                                                    <td>{booking.room_number}</td>
+                                                    <td>{formatBookingDate(booking.check_in_date)}</td>
+                                                    <td>{booking.cancel_notes_request || 'No cancellation note provided.'}</td>
+                                                    
+                                                    <td className="actions-cell">
+                                                        <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                            view
                                                         </button>
                                                         <button
                                                             className="btn guest btn-danger"

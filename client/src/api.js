@@ -6,7 +6,9 @@ const configuredApiUrl = typeof import.meta.env.VITE_API_URL === 'string'
 const defaultApiUrl = typeof window !== 'undefined' && window.location.host
   ? `${window.location.protocol}//${window.location.host}/api`
   : '/api';
-const apiUrl = configuredApiUrl || defaultApiUrl;
+
+const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const apiUrl = (configuredApiUrl && !isLocalhost) ? configuredApiUrl : defaultApiUrl;
 
 const apiClient = axios.create({
   baseURL: apiUrl,

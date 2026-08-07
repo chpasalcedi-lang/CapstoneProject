@@ -1051,6 +1051,10 @@ body {
   margin-bottom: 10px;
   border: 1px solid #f0f0f0;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 220px;
 }
 
 .profile-dropdown-credential-card:hover {
@@ -1148,40 +1152,82 @@ body {
 
 .profile-credential-actions {
   display: flex;
-  gap: 8px;
-  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
 }
 
-.profile-credential-btn-view,
-.profile-credential-btn-edit {
-  flex: 1;
-  padding: 8px 10px;
+.profile-credential-actions-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.profile-credential-btn-view {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 12px 14px;
   border: none;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
   transition: all 0.2s ease;
   color: #fff;
+  background: #0f1e2e;
 }
 
-.profile-credential-btn-view {
-  background: #0f1e2e;
+.profile-credential-btn-cancel,
+.profile-credential-btn-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  flex: 0 0 auto;
 }
 
 .profile-credential-btn-view:hover {
   background: #1a2a3a;
 }
 
+.profile-credential-btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f1e2e;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
 .profile-credential-btn-edit {
-  background: #666;
+  background: #f3f4f6;
+  color: #0f1e2e;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
 }
 
 .profile-credential-btn-edit:hover {
-  background: #555;
+  background: #e5e7eb;
 }
+
+.profile-credential-btn-cancel {
+  background: #fff1f2;
+  color: #b91c1c;
+  border-radius: 6px;
+  border: 1px solid #b91c1c;
+}
+
+.profile-credential-btn-cancel:hover {
+  background: #ffe4e6;
+}
+
+
+
 
 @media (max-width: 900px) {
   .landing-contact {

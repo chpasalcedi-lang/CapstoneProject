@@ -14,7 +14,13 @@ function ViewLanding({ show, onClose, booking, onEdit }) {
     if (!show || !booking) return null;
 
     const status = booking.res_status?.toLowerCase() || 'pending';
-    const isConfirmed = status === 'confirmed' || status === 'approved' || status === 'occupied' || status === 'complete';
+    const nonEditableStatuses = ['confirmed', 'approved', 'occupied', 'complete', 'cancelled', 'canceled'];
+    const canEdit = Boolean(onEdit) && !nonEditableStatuses.includes(status);
+    const statusMessage = status === 'cancelled' || status === 'canceled'
+        ? 'This reservation has been cancelled and cannot be edited.'
+        : status === 'complete'
+            ? 'This reservation has been completed and cannot be edited.'
+            : 'This reservation has been confirmed by admin and cannot be edited.';
 
     return (
         <div className="landing-modal-overlay" onClick={onClose}>
@@ -79,7 +85,7 @@ function ViewLanding({ show, onClose, booking, onEdit }) {
 
                 </div>
                 <div className="landing-modal-footer">
-                    {onEdit && !isConfirmed && (
+                    {canEdit && (
                         <button
                             className="btn-primary"
                             onClick={() => {
@@ -90,9 +96,9 @@ function ViewLanding({ show, onClose, booking, onEdit }) {
                             Edit Booking
                         </button>
                     )}
-                    {isConfirmed && (
+                    {!canEdit && (
                         <div style={{flex:1}}>
-                            <p style={{margin:0, color:'#374151', fontSize:13}}>This reservation has been confirmed by admin and cannot be edited.</p>
+                            <p style={{margin:0, color:'#374151', fontSize:13}}>{statusMessage}</p>
                         </div>
                     )}
                 </div>

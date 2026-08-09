@@ -15,6 +15,7 @@ function AdminWalkinModal({ show, onClose }) {
     check_out_date: "",
     notes: "",
     room_number: "",
+    discount: "0%",
     };
 
     const [values, setValues] = useState(initialValues);
@@ -47,6 +48,8 @@ function AdminWalkinModal({ show, onClose }) {
     }, [values.check_in_date, values.check_out_date]);
 
     const totalPrice = roomPrice && nights > 0 ? roomPrice * nights : 0;
+    const discountPercent = Number(values.discount?.replace("%", "")) || 0;
+    const discountedPrice = totalPrice * (1 - discountPercent / 100);
 
     useEffect(() => {
         apiClient.get("/get_rooms")
@@ -135,7 +138,9 @@ function AdminWalkinModal({ show, onClose }) {
             ...values,
             room_id: selectedRoom.id,
             room_price: roomPrice,
-            total_price: totalPrice,
+            total_price: discountedPrice,
+            discount: values.discount,
+            sub_total: totalPrice,
             status: 'confirmed',
         })
         .then((res) => {
@@ -189,6 +194,18 @@ function AdminWalkinModal({ show, onClose }) {
                                     </select>
                                 </div>
                             </div>
+                            <div className="walkin-reservation-form-row">
+                                <div className="walkin-reservation-form-group">
+                                    <label>Discount</label>
+                                    <select name="discount" value={values.discount} onChange={handleChange}>
+                                        <option value="0%">0%</option>
+                                        <option value="5%">5%</option>
+                                        <option value="10%">10%</option>
+                                        <option value="15%">15%</option>
+                                        <option value="20%">20%</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div className="walkin-reservation-form-group">
                                 <label>Phone Number</label>
                                 <input type="tel" name="phone_number" inputMode="numeric" maxLength={11} pattern="\d{11}" required value={values.phone_number} onChange={handleChange} placeholder="e.g. 09XXXXXXXXX" />
@@ -236,8 +253,13 @@ function AdminWalkinModal({ show, onClose }) {
                                     Total {nights > 0 ? `(${nights} ${nights === 1 ? 'night' : 'nights'})` : ""}
                                 </p>
                                 <p className="walkin-reservation-price-value total">
-                                    {roomPrice !== 0 && nights > 0 ? `₱${totalPrice.toLocaleString()}` : "0"}
+                                    {roomPrice !== 0 && nights > 0 ? `₱${formatRoomPrice(discountedPrice)}` : "0"}
                                 </p>
+                                {discountPercent > 0 && (
+                                    <p className="walkin-reservation-price-note">
+                                        Discount applied: {values.discount} ({`₱${formatRoomPrice(totalPrice - discountedPrice)}`} saved)
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

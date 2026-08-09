@@ -6,8 +6,8 @@ import emailjs from "@emailjs/browser";
 import "../admincss/admin_boking.css";
 import ViewBookingModal from "../Modals/view_booking_modal.jsx";
 
-//emailjs API key
-emailjs.init("-Vq78NrvG691mgYQ3");
+// EmailJS API key
+emailjs.init("VuQPGuRo7jAh72RA6");
 
 function AdminBooking() {
     const [bookings, setBookings] = useState([]);
@@ -147,7 +147,7 @@ function AdminBooking() {
         }
     };
 
-    const handleCancel = async (id) => {
+    const handleCancel = async (booking) => {
         const result = await Swal.fire({
             icon: 'warning',
             title: 'Cancel booking',
@@ -160,11 +160,37 @@ function AdminBooking() {
         if (!result.isConfirmed) return;
 
         try {
-            await apiClient.post(`/update_reservation/${id}`, { status: 'cancelled' });
+            await apiClient.post(`/update_reservation/${booking.id}`, { status: 'cancelled' });
+            const emailParams = {
+                email: booking.email,
+                guest_name: `${booking.first_name} ${booking.last_name}`,
+                room_number: booking.room_number,
+                check_in_date: new Date(booking.check_in_date).toLocaleDateString(),
+                check_out_date: new Date(booking.check_out_date).toLocaleDateString(),
+                total_price: `₱${formatCurrency(booking.total_price)}`,
+                discount: booking.discount || '0%'
+            };
+
+            let emailSent = true;
+            try {
+                await emailjs.send(
+                    "service_mv433ts",
+                    "template_9763lg8",
+                    emailParams
+                );
+            } catch (emailErr) {
+                emailSent = false;
+                console.error('Email send error:', emailErr);
+            }
+
             const res = await apiClient.get('/get_reservations');
             setBookings(res.data);
             localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
-            Swal.fire({ icon: 'success', title: 'Cancelled', text: 'Booking cancelled successfully.' });
+            if (emailSent) {
+                Swal.fire({ icon: 'success', title: 'Cancelled', text: 'Booking cancelled successfully.' });
+            } else {
+                Swal.fire({ icon: 'warning', title: 'Cancelled', text: 'Booking cancelled successfully, but email failed to send.' });
+            }
         } catch (err) {
             console.error("Error cancelling booking:", err);
             Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to cancel booking' });
@@ -344,7 +370,8 @@ function AdminBooking() {
                                             <th>Room</th>
                                             <th>Check-in</th>
                                             <th>Check-out</th>
-                                            <th>Price</th>
+                                            <th>Discount</th>
+                                            <th>Total Price</th>
                                             <th>Status</th>
                                             <th className="actions-header">Actions</th>
                                         </tr>
@@ -358,6 +385,7 @@ function AdminBooking() {
                                                     <td>{booking.room_number}</td>
                                                     <td>{formatBookingDate(booking.check_in_date)}</td>
                                                     <td>{formatBookingDate(booking.check_out_date)}</td>
+                                                    <td>{booking.discount || '0%'}</td>
                                                     <td>₱{formatCurrency(booking.total_price)}</td>
                                                     <td>
                                                         <span className={`status-${status}`}>
@@ -377,7 +405,7 @@ function AdminBooking() {
                                                         </button>
                                                         <button
                                                             className="btn guest btn-danger"
-                                                            onClick={() => handleCancel(booking.id)}
+                                                            onClick={() => handleCancel(booking)}
                                                             disabled={['cancelled', 'complete'].includes(status)}
                                                         >
                                                             cancel
@@ -427,7 +455,7 @@ function AdminBooking() {
                                                         </button>
                                                         <button
                                                             className="btn guest btn-danger"
-                                                            onClick={() => handleCancel(booking.id)}
+                                                            onClick={() => handleCancel(booking)}
                                                             disabled={['cancelled', 'complete'].includes(status)}
                                                         >
                                                             cancel

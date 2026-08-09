@@ -430,7 +430,8 @@ class ReservationController {
                 req.body.status || 'pending',
                 roomId || null,
                 roomPrice,
-                totalPrice
+                totalPrice,
+                req.body.discount || '0%'
             ];
 
             if (roomId && checkIn && checkOut) {
@@ -442,7 +443,7 @@ class ReservationController {
                 }
             }
 
-            const insertSql = 'INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const insertSql = 'INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price, total_price, discount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const result = await this.db.query(insertSql, values);
             return res.status(200).json({ message: 'Reservation saved successfully!', reservationId: result.insertId });
         } catch (error) {
@@ -454,7 +455,7 @@ class ReservationController {
     async getReservations(req, res) {
         try {
             await this.db.query("UPDATE reservations SET res_status = 'complete' WHERE res_status = 'confirmed' AND DATE(check_out_date) < CURDATE()");
-            const sql = `SELECT r.*, COALESCE(r.room_price, rm.room_price) AS room_price, COALESCE(rm.room_number, 'N/A') AS room_number, rm.room_name, rm.room_label, rm.room_type, GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS nights, COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS total_price FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id ORDER BY r.id DESC`;
+            const sql = `SELECT r.*, COALESCE(r.room_price, rm.room_price) AS room_price, COALESCE(rm.room_number, 'N/A') AS room_number, rm.room_name, rm.room_label, rm.room_type, GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS nights, COALESCE(r.total_price, COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)) AS total_price, COALESCE(r.discount, '0%') AS discount FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id ORDER BY r.id DESC`;
             const rows = await this.db.query(sql);
             const reservations = rows.map((row) => {
                 const first = this.crypto.decrypt(row.first_name);

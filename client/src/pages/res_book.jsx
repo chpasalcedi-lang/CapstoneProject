@@ -282,12 +282,12 @@ function ResBook() {
         })
         .catch((err) => console.error("Error sa pagkuha sang data: ", err))
         .finally(() => {
-          // keep loading visible for 5 seconds before revealing cards
+          // keep loading visible for 3 seconds before revealing cards
           if (loadingTimer.current) clearTimeout(loadingTimer.current);
           loadingTimer.current = setTimeout(() => {
             setLoading(false);
             loadingTimer.current = null;
-          }, 1000);
+          }, 3000);
         });
     }, []);
 

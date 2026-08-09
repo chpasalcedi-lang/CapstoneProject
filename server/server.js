@@ -257,6 +257,7 @@ class AdminController {
         app.get('/get_user_accounts', this.getUsers.bind(this));
         app.post('/add_user_account', this.addUser.bind(this));
         app.post('/update_user_account/:id', this.updateUser.bind(this));
+        app.post('/find_admin_by_email', this.findAdminByEmail.bind(this));
         app.delete('/delete_user_account/:id', this.deleteUser.bind(this));
         app.post('/login', this.login.bind(this));
     }
@@ -327,6 +328,27 @@ class AdminController {
             return res.status(200).json({ message: 'Admin account updated successfully' });
         } catch (error) {
             console.error('Error updating admin:', error);
+            return res.status(500).json({ error: 'Database query error!', details: error.message });
+        }
+    }
+
+    async findAdminByEmail(req, res) {
+        try {
+            const email = req.body.email;
+            if (!email) {
+                return res.status(400).json({ error: 'Email is required' });
+            }
+            const encryptedEmail = this.crypto.encrypt(email);
+            let rows = await this.db.query('SELECT id FROM admins WHERE email = ?', [encryptedEmail]);
+            if (!rows.length) {
+                rows = await this.db.query('SELECT id FROM admins WHERE email = ?', [email]);
+            }
+            if (!rows.length) {
+                return res.status(404).json({ error: 'Admin account not found' });
+            }
+            return res.status(200).json({ id: rows[0].id });
+        } catch (error) {
+            console.error('Error finding admin by email:', error);
             return res.status(500).json({ error: 'Database query error!', details: error.message });
         }
     }

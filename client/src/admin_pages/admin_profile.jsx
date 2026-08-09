@@ -105,14 +105,31 @@ function AdminProfile() {
         setAdminData((prevData) => ({ ...prevData, [name]: value }));
     };
 
-    const handleSaveProfile = () => {
+    const handleSaveProfile = async () => {
         const storedUser = localStorage.getItem('adminUser');
-        if (storedUser) {
-            const parsed = JSON.parse(storedUser);
-            const updatedUser = { ...parsed, name: adminData.name, email: adminData.email };
-            localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+        if (!storedUser) {
+            setEditMode(false);
+            return;
         }
-        setEditMode(false);
+
+        const parsed = JSON.parse(storedUser);
+        const updatedUser = { ...parsed, name: adminData.name, email: adminData.email };
+
+        try {
+            await apiClient.post(`/update_user_account/${parsed.id}`, {
+                name: adminData.name,
+                email: adminData.email,
+            });
+            localStorage.setItem('adminUser', JSON.stringify(updatedUser));
+            setEditMode(false);
+        } catch (error) {
+            console.error('Error updating admin profile:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Update failed',
+                text: error.response?.data?.error || 'Unable to update profile. Please try again.',
+            });
+        }
     };
 
     return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import apiClient from '../api';
 import Swal from "sweetalert2";
@@ -21,9 +21,7 @@ function ResBook() {
   const [reservations, setReservations] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const loadingTimer = useRef(null);
   const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
   const [roomType, setRoomType] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -98,11 +96,11 @@ function ResBook() {
     }
   };
 
-  const isDateOverlap = (startA, endA, startB, endB) => {
+  const isDateOverlap = useCallback((startA, endA, startB, endB) => {
     return startA < endB && startB < endA;
-  };
+  }, []);
 
-  const isRoomUnavailableForRange = (room, startDate, endDate) => {
+  const isRoomUnavailableForRange = useCallback((room, startDate, endDate) => {
     if (!room?.id || !startDate || !endDate) return false;
     const rangeStart = new Date(startDate);
     const rangeEnd = new Date(endDate);
@@ -115,10 +113,17 @@ function ResBook() {
       const reservationEnd = new Date(r.check_out_date);
       return isDateOverlap(rangeStart, rangeEnd, reservationStart, reservationEnd);
     });
+  }, [reservations, isDateOverlap]);
+
+  const getNextDayISO = (dateValue) => {
+    if (!dateValue) return '';
+    const nextDay = new Date(dateValue);
+    nextDay.setDate(nextDay.getDate() + 1);
+    return nextDay.toISOString().slice(0, 10);
   };
 
   // Check if a room is occupied right now based on reservations
-  const isRoomOccupiedNow = (room) => {
+  const isRoomOccupiedNow = useCallback((room) => {
     if (!room?.id) return false;
     const today = new Date();
     return reservations.some((r) => {
@@ -130,7 +135,7 @@ function ResBook() {
       const rEnd = new Date(r.check_out_date);
       return today >= rStart && today < rEnd;
     });
-  };
+  }, [reservations]);
 
   const formatRoomPrice = (price) => {
     const numeric = Number(String(price || '').replace(/,/g, ''));
@@ -164,7 +169,7 @@ function ResBook() {
       return;
     }
 
-    const hasSelectedDates = checkIn && checkOut;
+    const hasSelectedDates = Boolean(checkIn);
     const isCurrentlyOccupied = room.room_status === 'Occupied';
 
     if (room.room_status?.toLowerCase() === 'maintenance') {
@@ -185,11 +190,11 @@ function ResBook() {
       return;
     }
 
-    if (hasSelectedDates && isRoomUnavailableForRange(room, checkIn, checkOut)) {
+    if (hasSelectedDates && isRoomUnavailableForRange(room, checkIn, getNextDayISO(checkIn))) {
       Swal.fire({
         icon: 'warning',
         title: 'Room unavailable',
-        text: 'Sorry, this room is not available for the selected dates. Please choose other dates using the check availability form above.',
+        text: 'Sorry, this room is not available for the selected date. Please choose another date using the check availability form above.',
       });
       return;
     }
@@ -209,10 +214,6 @@ function ResBook() {
 
     const fetchData = useCallback(() => {
       setLoading(true);
-      if (loadingTimer.current) {
-        clearTimeout(loadingTimer.current);
-        loadingTimer.current = null;
-      }
 
       // show cached data first to avoid empty results on refresh
       const cached = localStorage.getItem('roomsCache');
@@ -269,6 +270,7 @@ function ResBook() {
                 };
               });
               setFilteredData(finalMapped);
+              setLoading(false);
             })
             .catch((err) => {
               console.error('Error fetching reservations for initial occupancy:', err);
@@ -278,21 +280,18 @@ function ResBook() {
               });
               setReservations([]);
               setFilteredData(defaultMapped);
+              setLoading(false);
             });
         })
-        .catch((err) => console.error("Error sa pagkuha sang data: ", err))
-        .finally(() => {
-          if (loadingTimer.current) clearTimeout(loadingTimer.current);
-          loadingTimer.current = setTimeout(() => {
-            setLoading(false);
-            loadingTimer.current = null;
-          }, 3000);
+        .catch((err) => {
+          console.error("Error sa pagkuha sang data: ", err);
+          setLoading(false);
         });
     }, []);
 
-    const checkAvailability = () => {
+    const computedFiltered = useMemo(() => {
       const normalizedType = roomType?.trim().toLowerCase();
-      const hasDateRange = Boolean(checkIn && checkOut);
+      const hasDateRange = Boolean(checkIn);
       const updated = data
         .map((room) => {
           const normalizedRoom = room.room_status?.toLowerCase() === 'maintenance'
@@ -303,21 +302,21 @@ function ResBook() {
             return normalizedRoom;
           }
 
-            // If user provided a date range, mark Occupied when overlapping reservations exist
-            if (hasDateRange) {
-              if (isRoomUnavailableForRange(normalizedRoom, checkIn, checkOut)) {
-                return { ...normalizedRoom, room_status: 'Occupied' };
-              }
-              // No overlap for provided range -> Available (unless maintenance)
-              return { ...normalizedRoom, room_status: 'Available' };
-            }
-
-            // No date range selected: preserve actual current occupancy based on reservations
-            if (isRoomOccupiedNow(normalizedRoom) || normalizedRoom.room_status?.toLowerCase() === 'occupied') {
+          // If user provided a date range, mark Occupied when overlapping reservations exist
+          if (hasDateRange) {
+            if (isRoomUnavailableForRange(normalizedRoom, checkIn, getNextDayISO(checkIn))) {
               return { ...normalizedRoom, room_status: 'Occupied' };
             }
-
+            // No overlap for provided range -> Available (unless maintenance)
             return { ...normalizedRoom, room_status: 'Available' };
+          }
+
+          // No date range selected: preserve actual current occupancy based on reservations
+          if (isRoomOccupiedNow(normalizedRoom) || normalizedRoom.room_status?.toLowerCase() === 'occupied') {
+            return { ...normalizedRoom, room_status: 'Occupied' };
+          }
+
+          return { ...normalizedRoom, room_status: 'Available' };
         });
 
       const filtered = normalizedType
@@ -327,48 +326,27 @@ function ResBook() {
           })
         : updated;
 
-      setFilteredData(filtered);
-    };
+      return filtered;
+    }, [roomType, checkIn, data, isRoomOccupiedNow, isRoomUnavailableForRange]);
+
+    const refreshAvailability = useCallback(() => {
+      setFilteredData(computedFiltered);
+    }, [computedFiltered]);
+
+    // Availability is updated only when the user clicks "check availability" (refreshAvailability)
 
     const handleCheckInChange = (e) => {
       const val = e.target.value;
       const today = new Date().toISOString().slice(0,10);
       if (val && val < today) {
-        Swal.fire({ icon: 'error', title: 'Invalid date', text: 'Check-in cannot be in the past.' });
+        Swal.fire({ icon: 'error', title: 'Invalid date', text: 'Selected date cannot be in the past.' });
         return;
       }
       setCheckIn(val);
-      if (val && checkOut && checkOut <= val) {
-        setCheckOut('');
-        Swal.fire({ icon: 'info', title: 'Check-out reset', text: 'Please choose a check-out date after the new check-in.' });
-      }
-    };
-
-    const handleCheckOutChange = (e) => {
-      const val = e.target.value;
-      if (checkIn) {
-        if (val <= checkIn) {
-          Swal.fire({ icon: 'error', title: 'Invalid date', text: 'Check-out must be after check-in.' });
-          return;
-        }
-      } else {
-        const today = new Date().toISOString().slice(0,10);
-        if (val < today) {
-          Swal.fire({ icon: 'error', title: 'Invalid date', text: 'Check-out cannot be in the past.' });
-          return;
-        }
-      }
-      setCheckOut(val);
     };
 
     useEffect(() => {
         fetchData();
-        return () => {
-          if (loadingTimer.current) {
-            clearTimeout(loadingTimer.current);
-            loadingTimer.current = null;
-          }
-        };
     }, [fetchData]);
 
     // Close profile dropdown when clicking outside
@@ -498,19 +476,11 @@ function ResBook() {
           <div className="booking-search-wrap">
             <div className="booking-search-bar">
               <div className="booking-field">
-                <label className="booking-field-label">Check-In</label>
+                <label className="booking-field-label">check-dates</label>
                 <input type="date" className="booking-input" value={checkIn} 
                 min={new Date().toISOString().slice(0,10)} 
                 onChange={handleCheckInChange} 
                 placeholder="Select check-in date"/>
-              </div>
-
-              <div className="booking-field">
-                <label className="booking-field-label">Check-Out</label>
-                <input type="date" className="booking-input" value={checkOut} 
-                  min={checkIn ? (() => { const d = new Date(checkIn); d.setDate(d.getDate() + 1); return d.toISOString().slice(0,10); })() : new Date().toISOString().slice(0,10)}
-                  onChange={handleCheckOutChange}
-                  placeholder="Select check-out date"/>
               </div>
 
               <div className="booking-field">
@@ -523,7 +493,7 @@ function ResBook() {
                 </select>
               </div>
               <div className="booking-field">
-                <button className="booking-btn" onClick={checkAvailability}>
+                <button className="booking-btn" onClick={refreshAvailability}>
                   check availability
                 </button>
               </div>

@@ -6,11 +6,19 @@ import "../admincss/admin_addguest.css";
 import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
 
 
-const PRICE_PER_GUEST = 150;
+const PRICE_PER_CHILD = 150;
+const PRICE_PER_ADULT = 175;
+
 const FOOD_CHARGE = 500;
 
 function AdminAddGuest() {
+  const formatCurrency = (value) => {
+    const n = Number(value) || 0;
+    const hasDecimals = Math.abs(n % 1) > 0;
+    return n.toLocaleString('en-PH', { minimumFractionDigits: hasDecimals ? 2 : 0, maximumFractionDigits: hasDecimals ? 2 : 0 });
+  };
   const [values, setValues] = useState({
+    number_of_children: "",
     number_of_guests: "",
     foods: "No",
   });
@@ -39,8 +47,9 @@ function AdminAddGuest() {
   };
 
   const calculateTotalPrice = () => {
-    const numGuests = parseInt(values.number_of_guests) || 0;
-    const guestTotal = numGuests * PRICE_PER_GUEST;
+    const adults = parseInt(values.number_of_guests) || 0;
+    const children = parseInt(values.number_of_children) || 0;
+    const guestTotal = adults * PRICE_PER_ADULT + children * PRICE_PER_CHILD;
     const foodTotal = values.foods === "Yes" ? FOOD_CHARGE : 0;
     return (guestTotal + foodTotal).toFixed(2);
   };
@@ -48,21 +57,24 @@ function AdminAddGuest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!values.number_of_guests || values.number_of_guests <= 0) {
+    const adults = parseInt(values.number_of_guests) || 0;
+    const children = parseInt(values.number_of_children) || 0;
+    const totalGuests = adults + children;
+    if (totalGuests <= 0) {
       await Swal.fire({
         icon: 'warning',
         title: 'Invalid input',
-        text: 'Please enter a valid number of guests.',
+        text: 'Please enter at least one guest (children or adults).',
       });
       return;
     }
 
     const totalPrice = calculateTotalPrice();
     const payload = {
-      number_of_guests: parseInt(values.number_of_guests, 10),
+      number_of_children: children,
+      number_of_guests: totalGuests,
       food_service: values.foods,
-      total_price: parseFloat(totalPrice),
-      created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
+      total_price: parseFloat(totalPrice)
     };
 
     try {
@@ -72,7 +84,7 @@ function AdminAddGuest() {
         title: 'Guest added',
         text: 'Guest arrival recorded successfully!',
       });
-      setValues({ number_of_guests: "", foods: "No" });
+      setValues({ number_of_children: "", number_of_guests: "", foods: "No" });
     } catch (err) {
       console.error("Error: ", err);
       const errorMsg = err.response?.data?.error || err.message || "Network error";
@@ -163,11 +175,22 @@ function AdminAddGuest() {
                 <div className="add-guest-form">
                     <h2>Add New Guest Arrival</h2>
                     <form onSubmit={handleSubmit}>
-                      <p className="price-display">Guest Rate: ₱{PRICE_PER_GUEST} | Food Service: ₱{FOOD_CHARGE}</p>
-                      <div className="add-form-group">
-                        <label>Number of Guests:</label>
-                        <input type="number" name="number_of_guests" required value={values.number_of_guests} onChange={handleChange} placeholder="e.g. 2" min="1"/>
+                      <p className="price-display">Guest Rate: ₱{formatCurrency(PRICE_PER_CHILD)}/child | ₱{formatCurrency(PRICE_PER_ADULT)}/adult | Food Service: ₱{formatCurrency(FOOD_CHARGE)}</p>
+                      <div className="add-form-row">
+                        <div className="add-form-group half-width">
+                          <label>children / senior / pwd</label>
+                          <input type="number" name="number_of_children" value={values.number_of_children} onChange={handleChange} placeholder="e.g. 2" min="0"/>
+                        </div>
+                        <div className="add-form-group half-width">
+                          <label>adults</label>
+                          <input type="number" name="number_of_guests" value={values.number_of_guests} onChange={handleChange} placeholder="e.g. 2" min="0"/>
+                        </div>
                       </div>
+                      <div className="add-form-group total-row">
+                        <label>Total guests</label>
+                        <div className="total-count">{(parseInt(values.number_of_children) || 0) + (parseInt(values.number_of_guests) || 0)}</div>
+                      </div>
+
                       <div className="add-form-group add-form-checkbox">
                         <label>Include Food Service (₱{FOOD_CHARGE})</label>
                         <input type="checkbox" name="foods" checked={values.foods === "Yes"} onChange={handleFoodsToggle}/>
@@ -176,17 +199,17 @@ function AdminAddGuest() {
                       <div className="add-form-summary">
                         <div>
                           <p className="summary-label">Guest Total:</p>
-                          <p className="summary-price">₱{((parseInt(values.number_of_guests) || 0) * PRICE_PER_GUEST).toFixed(2)}</p>
+                          <p className="summary-price">₱{formatCurrency((parseInt(values.number_of_children) || 0) * PRICE_PER_CHILD + (parseInt(values.number_of_guests) || 0) * PRICE_PER_ADULT)}</p>
                         </div>
                         {values.foods === "Yes" && (
                           <div>
                             <p className="summary-label">Food Charge:</p>
-                            <p className="summary-price">₱{FOOD_CHARGE}</p>
+                            <p className="summary-price">₱{formatCurrency(FOOD_CHARGE)}</p>
                           </div>
                         )}
                         <div>
                           <p className="summary-label">Total Price:</p> 
-                          <p className="summary-price-total">₱{calculateTotalPrice()}</p> 
+                          <p className="summary-price-total">₱{formatCurrency(calculateTotalPrice())}</p> 
                         </div>
                       </div>
                       <button type="submit"> Confirm </button>

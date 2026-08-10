@@ -15,11 +15,12 @@ function AdminWalkinModal({ show, onClose }) {
     check_out_date: "",
     notes: "",
     room_number: "",
-    discount: "0%",
+    last_price: "",
     };
 
     const [values, setValues] = useState(initialValues);
     const [rooms, setRooms] = useState([]);
+    const [discountEnabled, setDiscountEnabled] = useState(false);
 
     const selectedRoom = useMemo(
         () => rooms.find(room => String(room.room_number) === String(values.room_number)),
@@ -48,8 +49,10 @@ function AdminWalkinModal({ show, onClose }) {
     }, [values.check_in_date, values.check_out_date]);
 
     const totalPrice = roomPrice && nights > 0 ? roomPrice * nights : 0;
-    const discountPercent = Number(values.discount?.replace("%", "")) || 0;
-    const discountedPrice = totalPrice * (1 - discountPercent / 100);
+    const lastPriceValue = Number(values.last_price || 0);
+    const discountSaved = discountEnabled ? Math.max(0, totalPrice - Math.min(totalPrice, lastPriceValue)) : 0;
+    const finalPrice = discountEnabled ? Math.max(0, Math.min(totalPrice, lastPriceValue)) : totalPrice;
+    const discountPercent = totalPrice > 0 ? (discountSaved / totalPrice) * 100 : 0;
 
     useEffect(() => {
         apiClient.get("/get_rooms")
@@ -73,16 +76,32 @@ function AdminWalkinModal({ show, onClose }) {
 
     const handleCancel = () => {
         setValues(initialValues);
+        setDiscountEnabled(false);
         onClose();
     };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, checked } = e.target;
         if (name === 'phone_number') {
             const digits = value.replace(/\D/g, '');
             setValues((prev) => ({ ...prev, [name]: digits }));
             return;
         }
+
+        if (name === 'apply_discount') {
+            setDiscountEnabled(checked);
+            if (!checked) {
+                setValues((prev) => ({ ...prev, last_price: "" }));
+            }
+            return;
+        }
+
+        if (name === 'last_price') {
+            const sanitizedValue = value.replace(/[^\d.]/g, '');
+            setValues((prev) => ({ ...prev, [name]: sanitizedValue }));
+            return;
+        }
+
         setValues((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -133,19 +152,22 @@ function AdminWalkinModal({ show, onClose }) {
             return;
         }
 
+        const discountValue = discountEnabled && discountPercent > 0 ? Number(discountPercent.toFixed(2)) : 0;
+
         apiClient
         .post('/add_reservation', {
             ...values,
             room_id: selectedRoom.id,
             room_price: roomPrice,
-            total_price: discountedPrice,
-            discount: values.discount,
+            total_price: finalPrice,
+            discount: discountValue,
             sub_total: totalPrice,
             status: 'confirmed',
         })
         .then((res) => {
             console.log("Success:", res.data);
             setValues(initialValues);
+            setDiscountEnabled(false);
             onClose();
             Swal.fire({ icon: 'success', title: 'Saved', text: 'Walk-in reservation saved successfully!' });
         })
@@ -194,18 +216,6 @@ function AdminWalkinModal({ show, onClose }) {
                                     </select>
                                 </div>
                             </div>
-                            <div className="walkin-reservation-form-row">
-                                <div className="walkin-reservation-form-group">
-                                    <label>Discount</label>
-                                    <select name="discount" value={values.discount} onChange={handleChange}>
-                                        <option value="0%">0%</option>
-                                        <option value="5%">5%</option>
-                                        <option value="10%">10%</option>
-                                        <option value="15%">15%</option>
-                                        <option value="20%">20%</option>
-                                    </select>
-                                </div>
-                            </div>
                             <div className="walkin-reservation-form-group">
                                 <label>Phone Number</label>
                                 <input type="tel" name="phone_number" inputMode="numeric" maxLength={11} pattern="\d{11}" required value={values.phone_number} onChange={handleChange} placeholder="e.g. 09XXXXXXXXX" />
@@ -229,12 +239,9 @@ function AdminWalkinModal({ show, onClose }) {
                                 <textarea name="notes" rows="3" value={values.notes} onChange={handleChange} placeholder="..."></textarea>
                             </div>
                         </form>
-                    </div>
-                    <div className="walkin-reservation-form-price sticky-price">
+                    
+                    <div className="walkin-reservation-form-price">
                         <div className="walkin-reservation-price-item">
-                            <div className="walkin-reservation-price-icon">
-                                <i className="fa-solid fa-building" />
-                            </div>
                             <div>
                                 <p className="walkin-reservation-price-label">Room price / night</p>
                                 <p className="walkin-reservation-price-value">
@@ -245,32 +252,81 @@ function AdminWalkinModal({ show, onClose }) {
 
                         <div className="walkin-reservation-price-divider" />
                         <div className="walkin-reservation-price-item">
-                            <div className="walkin-reservation-price-icon total">
-                                <i className="fa-solid fa-receipt" />
-                            </div>
                             <div>
                                 <p className="walkin-reservation-price-label">
-                                    Total {nights > 0 ? `(${nights} ${nights === 1 ? 'night' : 'nights'})` : ""}
+                                    Total {nights > 0 ? `(${nights} ${nights === 1 ? 'night' : 'nights'})` : "0"}
                                 </p>
-                                <p className="walkin-reservation-price-value total">
-                                    {roomPrice !== 0 && nights > 0 ? `₱${formatRoomPrice(discountedPrice)}` : "0"}
+                                <p className="walkin-reservation-price-value">
+                                    {totalPrice ? `₱${formatRoomPrice(totalPrice)}` : "0"}
                                 </p>
-                                {discountPercent > 0 && (
-                                    <p className="walkin-reservation-price-note">
-                                        Discount applied: {values.discount} ({`₱${formatRoomPrice(totalPrice - discountedPrice)}`} saved)
-                                    </p>
-                                )}
                             </div>
                         </div>
+                    </div>
+                    
+
+                    <div className="walkin-reservation-form-price discount-section">
+                        <div className="discount-section-header">
+                            <div>
+                                <h3>Discount</h3>
+                                <p>Apply a fixed amount and see the percentage.</p>
+                            </div>
+                            <label className="discount-toggle">
+                                <input type="checkbox" name="apply_discount" checked={discountEnabled} onChange={handleChange} />   
+                                <span>Enable</span>
+                            </label>
+                        </div>
+
+                        {discountEnabled && (
+                            <>
+                                <div className="walkin-reservation-form-group discount-input-group">
+                                    <label htmlFor="last_price">Last Price</label>
+                                    <input
+                                        type="number"
+                                        name="last_price"
+                                        value={values.last_price}
+                                        onChange={handleChange}
+                                        placeholder="e.g. 2500"
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                </div>
+
+                                <div className="discount-result-box">
+                                    <span className="discount-result-label">Discount saved</span>
+                                    <strong>
+                                        {values.last_price && Number(values.last_price) > 0
+                                            ? `₱${formatRoomPrice(discountSaved)}`
+                                            : '₱0.00'}
+                                    </strong>
+                                </div>
+                                <div className="discount-result-box">
+                                    <span className="discount-result-label">Discount</span>
+                                    <strong>
+                                        {values.last_price && Number(values.last_price) > 0
+                                            ? `${discountPercent.toFixed(2)}%`
+                                            : '0%'}
+                                    </strong>
+                                </div>
+                                <div className="discount-result-box">
+                                    <span className="discount-result-label">Final Price</span>
+                                    <strong>
+                                        {values.last_price && Number(values.last_price) > 0
+                                            ? `₱${formatRoomPrice(finalPrice)}`
+                                            : `₱${formatRoomPrice(totalPrice)}`}
+                                    </strong>
+                                </div>
+                            </>
+                        )}
+                    </div>
                     </div>
 
                     <div className="walkin-reservation-modal-footer">
                         <button type="button" className="walkin-reservation-btn-cancel" onClick={handleCancel}>Cancel</button>
                         <button type="submit" className="walkin-reservation-btn-save" onClick={handleSubmit}>Save Reservation</button>
                     </div>
-                 </div>
                 </div>
             </div>
+        </div>
     );
 }
 

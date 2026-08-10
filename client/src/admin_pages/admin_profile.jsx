@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import apiClient from '../api';
+import Swal from 'sweetalert2';
 import "../admincss/admin_profile.css";
 
 function AdminProfile() {

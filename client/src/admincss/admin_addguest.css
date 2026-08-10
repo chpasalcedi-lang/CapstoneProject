@@ -96,6 +96,33 @@
   margin-bottom: 20px;
 }
 
+.add-form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.add-form-row .half-width {
+  flex: 1 1 0;
+  min-width: 120px;
+}
+
+.total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.total-row .total-count {
+  font-size: 16px;
+  font-weight: 700;
+  color: #d5d5d5;
+}
+
 .add-form-group label {
   color: #d5d5d5;
   font-size: 12px;
@@ -294,6 +321,13 @@
   .add-form-summary {
     flex-direction: column;
     align-items: stretch;
+  }
+  .add-form-row {
+    flex-direction: column;
+  }
+  .total-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

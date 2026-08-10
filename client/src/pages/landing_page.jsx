@@ -434,8 +434,8 @@ function LandingPage() {
                 <p><i className="fa-solid fa-phone"></i> +63 912 345 6789</p>
                 <p>
                   <i className="fa-solid fa-envelope"></i>
-                  <a href="mailto:info@messiahresort.com">
-                    info@messiahresort.com
+                  <a href="mailto:messiahinlandresort@gmail.com">
+                    messiahinlandresort@gmail.com
                   </a>
                 </p>
               </div>

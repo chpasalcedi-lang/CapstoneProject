@@ -322,17 +322,16 @@ function AdminLoginForm() {
                             <button type="submit" className="login-btn" disabled={loading}>
                                 {loading ? "Signing in..." : "access system"}
                             </button>
-                            <div className="admin-form-group">
-                                <button type="button" className="login-btn" onClick={switchToForgot}>
-                                    Forgot password?
-                                </button>
-                            </div>
                         </form>
                         <div className="admin-form-group">
                             <p className="admin-login-note">
                                 {adminLoading ? "Loading admin accounts..." : adminUsers.length > 0 ? "Use your admin credentials to access the dashboard." : "No admin accounts found. Please contact support."}
                             </p>
                         </div>
+                      
+                        <a href="#" className="login-a" role="button" onClick={(e) => { e.preventDefault(); switchToForgot(); }}>
+                            Forgot password?
+                        </a>
                         <div className="admin-login-footer">
                             <p>authorized users can access only</p>
                         </div>

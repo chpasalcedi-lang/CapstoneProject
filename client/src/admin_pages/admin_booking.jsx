@@ -168,7 +168,7 @@ function AdminBooking() {
                 check_in_date: new Date(booking.check_in_date).toLocaleDateString(),
                 check_out_date: new Date(booking.check_out_date).toLocaleDateString(),
                 total_price: `₱${formatCurrency(booking.total_price)}`,
-                discount: booking.discount || '0%'
+                discount: booking.discount !== undefined && booking.discount !== null ? `${booking.discount}%` : '0%'
             };
 
             let emailSent = true;
@@ -385,7 +385,7 @@ function AdminBooking() {
                                                     <td>{booking.room_number}</td>
                                                     <td>{formatBookingDate(booking.check_in_date)}</td>
                                                     <td>{formatBookingDate(booking.check_out_date)}</td>
-                                                    <td>{booking.discount || '0%'}</td>
+                                                    <td>{booking.discount !== undefined && booking.discount !== null ? `${booking.discount}%` : '0%'}</td>
                                                     <td>₱{formatCurrency(booking.total_price)}</td>
                                                     <td>
                                                         <span className={`status-${status}`}>

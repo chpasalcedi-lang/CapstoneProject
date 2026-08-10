@@ -42,38 +42,54 @@ function ViewBookingModal({ show, onClose, booking, onEdit }) {
                             <label>Room</label>
                             <p>{booking.room_number ?? 'Unassigned'}</p>
                         </div>
+                        <div className="booking-field">
+                            <label>Room Type</label>
+                            <p>{booking.room_type ?? '—'}</p>
+                        </div>
                         <div className="booking-field full-span">
                             <label>Email</label>
                             <p>{booking.email ?? '—'}</p>
                         </div>
+                         
                     </div>
-                    <div className="booking-detail grid-2">
-                        <div className="booking-field">
-                            <label>Check-in</label>
-                            <p className="date-value">
-                                {formatDate(booking.check_in_date)}
-                            </p>
-                        </div>
-                        <div className="booking-field">
-                            <label>Check-out</label>
-                            <p className="date-value">
-                                {formatDate(booking.check_out_date)}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="booking-detail status-row">
-                        <label>Status</label>
-                        <span className={`status ${status}`}>
-                            {booking.res_status || 'Pending'}
-                        </span>
-                    </div>
-                    {booking.notes && (
+                    {booking.cancel_notes_request && String(booking.cancel_notes_request).trim() ? (
                         <div className="booking-detail">
-                            <div className="booking-field">
-                                <label>Notes</label>
-                                <p className="notes-text">{booking.notes}</p>
+                            <div className="booking-field full-span">
+                                <label>Cancel Request</label>
+                                <p className="notes-text">{booking.cancel_notes_request}</p>
                             </div>
                         </div>
+                    ) : (
+                        <>
+                            <div className="booking-detail grid-2">
+                                <div className="booking-field">
+                                    <label>Check-in</label>
+                                    <p className="date-value">
+                                        {formatDate(booking.check_in_date)}
+                                    </p>
+                                </div>
+                                <div className="booking-field">
+                                    <label>Check-out</label>
+                                    <p className="date-value">
+                                        {formatDate(booking.check_out_date)}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="booking-detail status-row">
+                                <label>Status</label>
+                                <span className={`status ${status}`}>
+                                    {booking.res_status || 'Pending'}
+                                </span>
+                            </div>
+                            {booking.notes && (
+                                <div className="booking-detail">
+                                    <div className="booking-field">
+                                        <label>Notes</label>
+                                        <p className="notes-text">{booking.notes}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
 
                 </div>

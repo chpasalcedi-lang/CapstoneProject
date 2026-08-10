@@ -198,7 +198,7 @@ function AdminBooking() {
     };
 
     const handleFilterChange = (status) => {
-        setFilterStatus(status);
+        setFilterStatus((prev) => (prev === status ? 'all' : status));
     };
 
     const handleSearchChange = (e) => {
@@ -220,6 +220,7 @@ function AdminBooking() {
     const filteredBookings = bookings.filter((booking) => {
         const status = (booking.res_status || 'pending').toLowerCase();
 
+        if (filterStatus === 'confirmed' && status !== 'confirmed') return false;
         if (filterStatus === 'complete' && status !== 'complete') return false;
         if (filterStatus === 'pending' && status !== 'pending') return false;
         if (filterStatus === 'cancelled' && status !== 'cancelled') return false;
@@ -238,7 +239,9 @@ function AdminBooking() {
         );
     });
 
-    const cancelRequestBookings = filteredBookings.filter((booking) => {
+    // Cancel requests list should show all bookings that submitted a cancel request
+    // and should NOT be affected by the filter buttons or search box.
+    const cancelRequestBookings = bookings.filter((booking) => {
         const note = String(booking.cancel_notes_request || '').trim();
         return note.length > 0;
     });
@@ -340,6 +343,9 @@ function AdminBooking() {
                                             type="button" className={filterStatus === 'all' ? 'active' : ''} onClick={() => handleFilterChange('all')}>
                                             all
                                         </button>
+                                        <button type="button" className={filterStatus === 'confirmed' ? 'active' : ''} onClick={() => handleFilterChange('confirmed')}>
+                                            Confirmed   
+                                        </button>
                                         <button type="button" className={filterStatus === 'complete' ? 'active' : ''} onClick={() => handleFilterChange('complete')}>
                                             Complete
                                         </button>
@@ -434,6 +440,7 @@ function AdminBooking() {
                                             <th>Email</th>
                                             <th>Room</th>
                                             <th>Check-date</th>
+                                            <th>Total Price</th>
                                             <th>Reason</th>
                                             <th className="actions-header">Actions</th>
                                         </tr>
@@ -447,6 +454,7 @@ function AdminBooking() {
                                                     <td>{booking.email}</td>
                                                     <td>{booking.room_number}</td>
                                                     <td>{formatBookingDate(booking.check_in_date)}</td>
+                                                    <td>₱{formatCurrency(booking.total_price)}</td>
                                                     <td>{booking.cancel_notes_request || 'No cancellation note provided.'}</td>
                                                     
                                                     <td className="actions-cell">

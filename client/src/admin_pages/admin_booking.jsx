@@ -17,6 +17,9 @@ function AdminBooking() {
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentBookingPage, setCurrentBookingPage] = useState(1);
+    const [currentCancelPage, setCurrentCancelPage] = useState(1);
+    const itemsPerPage = 10;
     const [adminData] = useState(() => {
         const storedUser = localStorage.getItem('adminUser');
         if (storedUser) {
@@ -203,6 +206,19 @@ function AdminBooking() {
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
+        setCurrentBookingPage(1);
+    };
+
+    const handleBookingPageChange = (page) => {
+        if (page >= 1 && page <= Math.ceil(filteredBookings.length / itemsPerPage)) {
+            setCurrentBookingPage(page);
+        }
+    };
+
+    const handleCancelPageChange = (page) => {
+        if (page >= 1 && page <= Math.ceil(cancelRequestBookings.length / itemsPerPage)) {
+            setCurrentCancelPage(page);
+        }
     };
 
     const formatBookingDate = (dateString) => {
@@ -245,6 +261,32 @@ function AdminBooking() {
         const note = String(booking.cancel_notes_request || '').trim();
         return note.length > 0;
     });
+
+    // Pagination for bookings
+    const totalBookingPages = Math.ceil(filteredBookings.length / itemsPerPage);
+    const bookingStartIndex = (currentBookingPage - 1) * itemsPerPage;
+    const paginatedBookings = filteredBookings.slice(bookingStartIndex, bookingStartIndex + itemsPerPage);
+
+    // Pagination for cancel requests
+    const totalCancelPages = Math.ceil(cancelRequestBookings.length / itemsPerPage);
+    const cancelStartIndex = (currentCancelPage - 1) * itemsPerPage;
+    const paginatedCancelRequests = cancelRequestBookings.slice(cancelStartIndex, cancelStartIndex + itemsPerPage);
+
+    useEffect(() => {
+        setCurrentBookingPage(1);
+    }, [filterStatus, searchTerm]);
+
+    useEffect(() => {
+        if (totalBookingPages > 0 && currentBookingPage > totalBookingPages) {
+            setCurrentBookingPage(totalBookingPages);
+        }
+    }, [currentBookingPage, totalBookingPages]);
+
+    useEffect(() => {
+        if (totalCancelPages > 0 && currentCancelPage > totalCancelPages) {
+            setCurrentCancelPage(totalCancelPages);
+        }
+    }, [currentCancelPage, totalCancelPages]);
 
     return (
         <div>
@@ -368,63 +410,96 @@ function AdminBooking() {
                         ) : filteredBookings.length === 0 ? (
                             <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>No bookings found.</p>
                         ) : (
-                            <div className="guests-table-wrapper">
-                                <table className="guests-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Guest</th>
-                                            <th>Room</th>
-                                            <th>Check-in</th>
-                                            <th>Check-out</th>
-                                            <th>Discount</th>
-                                            <th>Total Price</th>
-                                            <th>Status</th>
-                                            <th className="actions-header">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredBookings.map((booking) => {
-                                            const status = (booking.res_status || 'pending').toLowerCase();
-                                            return (
-                                                <tr key={booking.id}>
-                                                    <td>{booking.first_name} {booking.last_name}</td>
-                                                    <td>{booking.room_number}</td>
-                                                    <td>{formatBookingDate(booking.check_in_date)}</td>
-                                                    <td>{formatBookingDate(booking.check_out_date)}</td>
-                                                    <td>{booking.discount !== undefined && booking.discount !== null ? `${booking.discount}%` : '0%'}</td>
-                                                    <td>₱{formatCurrency(booking.total_price)}</td>
-                                                    <td>
-                                                        <span className={`status-${status}`}>
-                                                            {booking.res_status || 'pending'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="actions-cell">
-                                                        <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
-                                                            view
-                                                        </button>
-                                                        <button
-                                                            className="btn guest btn-primary"
-                                                            onClick={() => handleConfirm(booking)}
-                                                            disabled={['cancelled', 'complete'].includes(status)}
-                                                        >
-                                                            {status === 'pending' ? 'Confirm' : status === 'confirmed' ? 'Done' : 'Done'}
-                                                        </button>
-                                                        <button
-                                                            className="btn guest btn-danger"
-                                                            onClick={() => handleCancel(booking)}
-                                                            disabled={['cancelled', 'complete'].includes(status)}
-                                                        >
-                                                            cancel
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <>
+                                <div className="guests-table-wrapper">
+                                    <table className="guests-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Guest</th>
+                                                <th>Room</th>
+                                                <th>Check-in</th>
+                                                <th>Check-out</th>
+                                                <th>Discount</th>
+                                                <th>Total Price</th>
+                                                <th>Status</th>
+                                                <th className="actions-header">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {paginatedBookings.map((booking) => {
+                                                const status = (booking.res_status || 'pending').toLowerCase();
+                                                return (
+                                                    <tr key={booking.id}>
+                                                        <td>{booking.first_name} {booking.last_name}</td>
+                                                        <td>{booking.room_number}</td>
+                                                        <td>{formatBookingDate(booking.check_in_date)}</td>
+                                                        <td>{formatBookingDate(booking.check_out_date)}</td>
+                                                        <td>{booking.discount !== undefined && booking.discount !== null ? `${booking.discount}%` : '0%'}</td>
+                                                        <td>₱{formatCurrency(booking.total_price)}</td>
+                                                        <td>
+                                                            <span className={`status-${status}`}>
+                                                                {booking.res_status || 'pending'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="actions-cell">
+                                                            <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                                view
+                                                            </button>
+                                                            <button className="btn guest btn-primary"onClick={() => handleConfirm(booking)} 
+                                                                disabled={['cancelled', 'complete'].includes(status)} >
+                                                                {status === 'pending' ? 'Confirm' : 'Done'}
+                                                            </button>
+                                                            <button className="btn guest btn-danger"onClick={() => handleCancel(booking)}
+                                                                 disabled={['cancelled', 'complete'].includes(status)} >
+                                                                cancel
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                            </>
                         )}
                     </div>
+                    {filteredBookings.length > 0 && (
+                                    <div className="pagination-container">
+                                        <button className="pagination-btn prev-btn" 
+                                            onClick={() => handleBookingPageChange(currentBookingPage - 1)} disabled={currentBookingPage === 1} aria-label="Previous page">
+                                            &lt;
+                                        </button>
+                                        <div className="pagination-numbers">
+                                            {Array.from({ length: Math.min(totalBookingPages, 5) }, (_, i) => {
+                                                let pageNum;
+                                                if (totalBookingPages <= 5) {
+                                                    pageNum = i + 1;
+                                                } else if (currentBookingPage <= 3) {
+                                                    pageNum = i + 1;
+                                                } else if (currentBookingPage >= totalBookingPages - 2) {
+                                                    pageNum = totalBookingPages - 4 + i;
+                                                } else {
+                                                    pageNum = currentBookingPage - 2 + i;
+                                                }
+                                                return (
+                                                    <button key={pageNum}className={`pagination-number ${currentBookingPage === pageNum ? 'active' : ''}`} 
+                                                        onClick={() => handleBookingPageChange(pageNum)}>
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <button 
+                                            className="pagination-btn next-btn" 
+                                            onClick={() => handleBookingPageChange(currentBookingPage + 1)}
+                                            disabled={currentBookingPage === totalBookingPages}
+                                            aria-label="Next page"
+                                        >
+                                            &gt;
+                                        </button>
+                                    </div>
+                                )}
                     <div className="guests-table-container-cancel-request">
                         <h1>Recent Cancel Requests</h1>
                         {loading ? (
@@ -432,51 +507,86 @@ function AdminBooking() {
                         ) : cancelRequestBookings.length === 0 ? (
                             <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>No cancel requests found.</p>
                         ) : (
-                            <div className="guests-table-wrapper-cancel-request">
-                                <table className="guests-table-cancel-request">
-                                    <thead>
-                                        <tr>
-                                            <th>Guest</th>
-                                            <th>Email</th>
-                                            <th>Room</th>
-                                            <th>Check-date</th>
-                                            <th>Total Price</th>
-                                            <th>Reason</th>
-                                            <th className="actions-header">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {cancelRequestBookings.map((booking) => {
-                                            const status = (booking.res_status || 'pending').toLowerCase();
-                                            return (
-                                                <tr key={booking.id}>
-                                                    <td>{booking.first_name} {booking.last_name}</td>
-                                                    <td>{booking.email}</td>
-                                                    <td>{booking.room_number}</td>
-                                                    <td>{formatBookingDate(booking.check_in_date)}</td>
-                                                    <td>₱{formatCurrency(booking.total_price)}</td>
-                                                    <td>{booking.cancel_notes_request || 'No cancellation note provided.'}</td>
-                                                    
-                                                    <td className="actions-cell">
-                                                        <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
-                                                            view
-                                                        </button>
-                                                        <button
-                                                            className="btn guest btn-danger"
-                                                            onClick={() => handleCancel(booking)}
-                                                            disabled={['cancelled', 'complete'].includes(status)}
-                                                        >
-                                                            cancel
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <>
+                                <div className="guests-table-wrapper-cancel-request">
+                                    <table className="guests-table-cancel-request">
+                                        <thead>
+                                            <tr>
+                                                <th>Guest</th>
+                                                <th>Email</th>
+                                                <th>Room</th>
+                                                <th>Check-date</th>
+                                                <th>Total Price</th>
+                                                <th>Reason</th>
+                                                <th className="actions-header">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {paginatedCancelRequests.map((booking) => {
+                                                const status = (booking.res_status || 'pending').toLowerCase();
+                                                return (
+                                                    <tr key={booking.id}>
+                                                        <td>{booking.first_name} {booking.last_name}</td>
+                                                        <td>{booking.email}</td>
+                                                        <td>{booking.room_number}</td>
+                                                        <td>{formatBookingDate(booking.check_in_date)}</td>
+                                                        <td>₱{formatCurrency(booking.total_price)}</td>
+                                                        <td>{booking.cancel_notes_request || 'No cancellation note provided.'}</td>
+                                                        
+                                                        <td className="actions-cell">
+                                                            <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                                view
+                                                            </button>
+                                                            <button
+                                                                className="btn guest btn-danger"
+                                                                onClick={() => handleCancel(booking)}
+                                                                disabled={['cancelled', 'complete'].includes(status)}
+                                                            >
+                                                                cancel
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </>
                         )}
                     </div>
+
+                    {cancelRequestBookings.length > 0 && (
+                                    <div className="pagination-container">
+                                        <button className="pagination-btn prev-btn" onClick={() => handleCancelPageChange(currentCancelPage - 1)} 
+                                        disabled={currentCancelPage === 1}aria-label="Previous page">
+                                            &lt;
+                                        </button>
+                                        <div className="pagination-numbers">
+                                            {Array.from({ length: Math.min(totalCancelPages, 5) }, (_, i) => {
+                                                let pageNum;
+                                                if (totalCancelPages <= 5) {
+                                                    pageNum = i + 1;
+                                                } else if (currentCancelPage <= 3) {
+                                                    pageNum = i + 1;
+                                                } else if (currentCancelPage >= totalCancelPages - 2) {
+                                                    pageNum = totalCancelPages - 4 + i;
+                                                } else {
+                                                    pageNum = currentCancelPage - 2 + i;
+                                                }
+                                                return (
+                                                    <button key={pageNum} className={`pagination-number ${currentCancelPage === pageNum ? 'active' : ''}`}
+                                                        onClick={() => handleCancelPageChange(pageNum)}>
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <button className="pagination-btn next-btn" 
+                                            onClick={() => handleCancelPageChange(currentCancelPage + 1)} disabled={currentCancelPage === totalCancelPages} aria-label="Next page">
+                                            &gt;
+                                        </button>
+                                    </div>
+                                )}
                 
 
                 </div>

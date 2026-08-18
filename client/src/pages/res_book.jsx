@@ -221,12 +221,45 @@ function ResBook() {
         try {
           const parsed = JSON.parse(cached);
           setData(parsed);
-          setFilteredData(parsed);
+          // attempt to read cached reservations so we can mark occupied rooms immediately
+          let cachedReservations = [];
+          try {
+            const rc = localStorage.getItem('reservationsCache');
+            if (rc) cachedReservations = JSON.parse(rc) || [];
+          } catch (e) {
+            console.warn('reservationsCache parse error', e);
+          }
+          if (cachedReservations.length) setReservations(cachedReservations);
+
+          const today = new Date();
+          const occupiedRoomIds = new Set();
+          cachedReservations.forEach((r) => {
+            if (!r.room_id) return;
+            const status = (r.res_status || '').toLowerCase();
+            if (status !== 'confirmed' && status !== 'pending') return;
+            const rStart = new Date(r.check_in_date);
+            const rEnd = new Date(r.check_out_date);
+            if (today >= rStart && today < rEnd) occupiedRoomIds.add(Number(r.room_id));
+          });
+
+          // show cached rooms immediately, but mark as Occupied if reservations indicate so
+          const cachedMapped = parsed.map((room) => {
+            if (room.room_status?.toLowerCase() === 'maintenance') {
+              return { ...room, room_status: 'Maintenance', _isMaintenance: true };
+            }
+            return {
+              ...room,
+              room_status: occupiedRoomIds.has(Number(room.id)) ? 'Occupied' : 'Available',
+              _isAvailable: !occupiedRoomIds.has(Number(room.id))
+            };
+          });
+          setFilteredData(cachedMapped);
+          setLoading(false);
         } catch (e) {
           console.warn('roomsCache parse error', e);
         }
       }
-
+      // Fetch fresh rooms, show them as soon as they're available, then fetch reservations
       apiClient.get('/get_rooms')
         .then((roomsRes) => {
           const rooms = roomsRes.data || [];
@@ -241,13 +274,39 @@ function ResBook() {
                 _isMaintenance: true
               };
             }
-            return room;
+            return { ...room };
           });
 
+          // Show rooms immediately without waiting for reservations
+          // compute occupancy using any already-known reservations (e.g., cached)
+          const today = new Date();
+          const occupiedRoomIdsNow = new Set();
+          (reservations || []).forEach((r) => {
+            if (!r.room_id) return;
+            const status = (r.res_status || '').toLowerCase();
+            if (status !== 'confirmed' && status !== 'pending') return;
+            const rStart = new Date(r.check_in_date);
+            const rEnd = new Date(r.check_out_date);
+            if (today >= rStart && today < rEnd) occupiedRoomIdsNow.add(Number(r.room_id));
+          });
+
+          const initiallyMapped = mapped.map((room) => {
+            if (room._isMaintenance) return room;
+            return {
+              ...room,
+              room_status: occupiedRoomIdsNow.has(Number(room.id)) ? 'Occupied' : (room.room_status || 'Available'),
+              _isAvailable: !occupiedRoomIdsNow.has(Number(room.id))
+            };
+          });
+          setFilteredData(initiallyMapped);
+          setLoading(false);
+
+          // Fetch reservations in background and update occupancy when available
           apiClient.get('/get_reservations')
             .then((rres) => {
               const reservationsList = rres.data || [];
               setReservations(reservationsList);
+              try { localStorage.setItem('reservationsCache', JSON.stringify(reservationsList)); } catch (e) { console.warn('reservationsCache set error', e); }
               const today = new Date();
               const occupiedRoomIds = new Set();
               reservationsList.forEach((r) => {
@@ -260,9 +319,7 @@ function ResBook() {
               });
 
               const finalMapped = mapped.map((room) => {
-                if (room._isMaintenance) {
-                  return room;
-                }
+                if (room._isMaintenance) return room;
                 return {
                   ...room,
                   room_status: occupiedRoomIds.has(Number(room.id)) ? 'Occupied' : 'Available',
@@ -270,17 +327,9 @@ function ResBook() {
                 };
               });
               setFilteredData(finalMapped);
-              setLoading(false);
             })
             .catch((err) => {
-              console.error('Error fetching reservations for initial occupancy:', err);
-              const defaultMapped = mapped.map((room) => {
-                if (room._isMaintenance) return room;
-                return { ...room, room_status: 'Available', _isAvailable: true };
-              });
-              setReservations([]);
-              setFilteredData(defaultMapped);
-              setLoading(false);
+              console.error('Error fetching reservations for occupancy update:', err);
             });
         })
         .catch((err) => {
@@ -504,7 +553,7 @@ function ResBook() {
      
       <section className="booking-results-area">
         <div className="booking-results-content">
-          {loading ? (
+          { loading ? (
             <div className="booking-loading">Loading rooms...</div>
           ) : filteredData.length === 0 ? (
             <div className="booking-results-grid booking-empty">
@@ -521,9 +570,9 @@ function ResBook() {
                   return (
                   <div className="booking-room-card" key={room.id}>
                       <div className="booking-room-card-img">
-                        <img src={room.room_image} alt={room.room_name} />
+                        <img src={room.room_image} alt={room.room_name} loading="lazy" />
                         <span className={`booking-room-status ${room.room_status === 'Occupied' ? 'occupied' : room.room_status === 'Maintenance' ? 'maintenance' : 'available'}`}>
-                          {room.room_status || 'Available'}
+                          {room.room_status}
                         </span>
                         {room.room_type?.toLowerCase() !== 'event' && (
                             <span className="booking-room-rating">Room : {room.room_number}</span>

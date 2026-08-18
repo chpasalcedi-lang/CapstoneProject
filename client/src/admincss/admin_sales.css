@@ -290,6 +290,49 @@
 	gap: 16px;
 	flex-wrap: wrap;
 }
+/* Chart selects container */
+.admin-sales-chart-selects {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* Styled select and date input inside the chart controls */
+.admin-sales-chart-selects select,
+.admin-sales-chart-selects input[type="date"],
+.admin-sales-chart-selects .year-search-input {
+	background: rgba(13,13,13,0.6);
+	border: 1px solid rgba(255,255,255,0.08);
+	color: #f0ede8;
+	padding: 8px 12px;
+	border-radius: 8px;
+	min-width: 140px;
+	font-size: 0.95rem;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+.admin-sales-chart-selects select:focus,
+.admin-sales-chart-selects input[type="date"]:focus,
+.admin-sales-chart-selects .year-search-input:focus {
+	outline: none;
+	border-color: #c8a96e;
+	box-shadow: 0 0 0 4px rgba(200,169,110,0.06);
+}
+
+/* Add a custom arrow to native select */
+.admin-sales-chart-selects select {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-position: right 10px center;
+	background-size: 12px;
+}
+
+/* Date input: show calendar-like icon */
+.admin-sales-chart-selects input[type="date"] {
+	padding-right: 36px;
+	background-size: 14px;
+}
 .admin-sales-chart-card-header-stats-btn-nav h1 {
 	margin: 0;
 	font-size: 1.05rem;
@@ -332,6 +375,87 @@
 	color:#555; 
 }
 
+.admin-sales-chart-card-box {
+	display: flex;
+	gap: 18px;
+	align-items: flex-start;
+}
+
+.admin-sales-chart-card-stats {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.admin-sales-chart-card-stats label {
+	font-size: 12px;
+	color: #aaa;
+}
+
+
+
+.admin-sales-chart-card-box {
+	flex: 0 0 360px;
+	min-width: 260px;
+}
+/* Clean stats list inside the metrics area */
+.admin-sales-chart-card-stats {
+	background: #0d0d0d;
+	border: 1px solid rgba(255,255,255,0.04);
+	padding: 18px;
+	border-radius: 12px;
+	width: 100%;
+	max-width: 360px;
+
+}
+
+.admin-sales-chart-card-labels {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 8px 0;
+	border-bottom: 1px dashed rgba(255,255,255,0.03);
+}
+.admin-sales-chart-card-labels:last-child {
+	border-bottom: none;
+}
+.admin-sales-chart-card-labels label {
+	color: #bdbdbd;
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+.admin-sales-chart-card-labels h1 {
+	margin: 0;
+	font-size: 1.45rem;
+	color: #f0ede8;
+	font-weight: 700;
+}
+
+/* Center pie chart and make it responsive */
+.admin-sales-chart-card-box > .admin-sales-chart-card {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 18px;
+	min-height: 220px;
+}
+
+/* Specific pie container height */
+.admin-sales-pie {
+	min-height: 320px;
+	height: 350px;
+	max-height: 480px;
+}
+
+
+.admin-sales-chart-card{
+	width: 100%;
+}
+
 @media (max-width: 1100px) {
 	.sales-stats-grid { 
 		grid-template-columns: repeat(2,1fr); 
@@ -341,6 +465,16 @@
 @media (max-width: 900px) {
 	.admin-sales-main-content { 
 		padding:36px 24px 56px; 
+	}
+	.admin-sales-chart-card-box {
+		flex-direction: column;
+	}
+	.admin-sales-chart-card-box > .admin-sales-chart-card {
+		width: 100%;
+		min-width: 0;
+	}
+	.admin-sales-pie {
+		height: 280px;
 	}
 }
 @media (max-width: 768px) {
@@ -391,5 +525,39 @@
   .admin-sales-topbar h1 { 
 	font-size: 30px; 
   }
+}
+
+/* Searchable year dropdown styles */
+.year-search-dropdown{
+	position: relative;
+	display: inline-block;
+}
+.year-search-input{
+	background: transparent;
+	border: 1px solid rgba(255,255,255,0.08);
+	color: #f0ede8;
+	padding: 6px 8px;
+	border-radius: 6px;
+	min-width: 120px;
+}
+.year-dropdown-list{
+	position: absolute;
+	top: 42px;
+	left: 0;
+	right: 0;
+	background: #111;
+	max-height: 220px;
+	overflow: auto;
+	border: 1px solid rgba(255,255,255,0.06);
+	border-radius: 6px;
+	z-index: 40;
+}
+.year-dropdown-list li{
+	padding: 8px 10px;
+	cursor: pointer;
+	color: #f0ede8;
+}
+.year-dropdown-list li:hover{
+	background: rgba(255,255,255,0.03);
 }
 

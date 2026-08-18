@@ -27,6 +27,10 @@ function AdminGuest() {
     const [feedbackModal, setFeedbackModal] = useState(false);
     const [selectedFeedback, setSelectedFeedback] = useState(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [currentBookingPage, setCurrentBookingPage] = useState(1);
+    const [currentGuestPage, setCurrentGuestPage] = useState(1);
+    const [currentFeedbackPage, setCurrentFeedbackPage] = useState(1);
+    const itemsPerPage = 10;
 
     const [adminData] = useState(() => {
         const storedUser = localStorage.getItem('adminUser');
@@ -179,6 +183,39 @@ function AdminGuest() {
         return String(feedback.name || feedback.email || feedback.message).trim().length > 0;
     });
 
+    // Pagination for bookings
+    const totalBookingPages = Math.ceil(filteredBookings.length / itemsPerPage);
+    const bookingStartIndex = (currentBookingPage - 1) * itemsPerPage;
+    const paginatedBookings = filteredBookings.slice(bookingStartIndex, bookingStartIndex + itemsPerPage);
+
+    // Pagination for guests
+    const totalGuestPages = Math.ceil(filteredGuestArrivals.length / itemsPerPage);
+    const guestStartIndex = (currentGuestPage - 1) * itemsPerPage;
+    const paginatedGuestArrivals = filteredGuestArrivals.slice(guestStartIndex, guestStartIndex + itemsPerPage);
+
+    // Pagination for feedback
+    const totalFeedbackPages = Math.ceil(visibleFeedback.length / itemsPerPage);
+    const feedbackStartIndex = (currentFeedbackPage - 1) * itemsPerPage;
+    const paginatedFeedback = visibleFeedback.slice(feedbackStartIndex, feedbackStartIndex + itemsPerPage);
+
+    const handleBookingPageChange = (page) => {
+        if (page >= 1 && page <= totalBookingPages) {
+            setCurrentBookingPage(page);
+        }
+    };
+
+    const handleGuestPageChange = (page) => {
+        if (page >= 1 && page <= totalGuestPages) {
+            setCurrentGuestPage(page);
+        }
+    };
+
+    const handleFeedbackPageChange = (page) => {
+        if (page >= 1 && page <= totalFeedbackPages) {
+            setCurrentFeedbackPage(page);
+        }
+    };
+
     const handleDeleteBooking = async (id) => {
         if (!isAdmin) {
             await Swal.fire({
@@ -274,6 +311,35 @@ function AdminGuest() {
         }
     };
 
+    useEffect(() => {
+        setCurrentBookingPage(1);
+    }, [searchTerm, selectedMonth]);
+
+    useEffect(() => {
+        setCurrentGuestPage(1);
+    }, [selectedMonthGuest]);
+
+    useEffect(() => {
+        setCurrentFeedbackPage(1);
+    }, [selectedMonthFeedback]);
+
+    useEffect(() => {
+        if (totalBookingPages > 0 && currentBookingPage > totalBookingPages) {
+            setCurrentBookingPage(totalBookingPages);
+        }
+    }, [currentBookingPage, totalBookingPages]);
+
+    useEffect(() => {
+        if (totalGuestPages > 0 && currentGuestPage > totalGuestPages) {
+            setCurrentGuestPage(totalGuestPages);
+        }
+    }, [currentGuestPage, totalGuestPages]);
+
+    useEffect(() => {
+        if (totalFeedbackPages > 0 && currentFeedbackPage > totalFeedbackPages) {
+            setCurrentFeedbackPage(totalFeedbackPages);
+        }
+    }, [currentFeedbackPage, totalFeedbackPages]);
 
     useEffect(() => {
     const handleScroll = () => {
@@ -426,7 +492,7 @@ function AdminGuest() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        filteredBookings.map((booking) => (
+                                        paginatedBookings.map((booking) => (
                                             <tr key={booking.id}>
                                                 <td>{booking.room_number}</td>
                                                 <td>{booking.first_name} {booking.last_name}</td>
@@ -451,6 +517,49 @@ function AdminGuest() {
                                 </tbody>
                                 </table>
                             </div>
+                            {filteredBookings.length > 0 && (
+                                <div className="pagination-container">
+                                    <button 
+                                        className="pagination-btn prev-btn" 
+                                        onClick={() => handleBookingPageChange(currentBookingPage - 1)}
+                                        disabled={currentBookingPage === 1}
+                                        aria-label="Previous page"
+                                    >
+                                        &lt;
+                                    </button>
+                                    <div className="pagination-numbers">
+                                        {Array.from({ length: Math.min(totalBookingPages, 5) }, (_, i) => {
+                                            let pageNum;
+                                            if (totalBookingPages <= 5) {
+                                                pageNum = i + 1;
+                                            } else if (currentBookingPage <= 3) {
+                                                pageNum = i + 1;
+                                            } else if (currentBookingPage >= totalBookingPages - 2) {
+                                                pageNum = totalBookingPages - 4 + i;
+                                            } else {
+                                                pageNum = currentBookingPage - 2 + i;
+                                            }
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    className={`pagination-number ${currentBookingPage === pageNum ? 'active' : ''}`}
+                                                    onClick={() => handleBookingPageChange(pageNum)}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <button 
+                                        className="pagination-btn next-btn" 
+                                        onClick={() => handleBookingPageChange(currentBookingPage + 1)}
+                                        disabled={currentBookingPage === totalBookingPages}
+                                        aria-label="Next page"
+                                    >
+                                        &gt;
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     
                         <p className="Guest-section-label" id="guest-list"> Guest list </p>
@@ -497,7 +606,7 @@ function AdminGuest() {
                                                 </td>
                                             </tr>
                                         ) : (
-                                            filteredGuestArrivals.map((guest) => (
+                                            paginatedGuestArrivals.map((guest) => (
                                                 <tr key={guest.id}>
                                                     <td>{guest.number_of_guests}</td>
                                                     <td>{guest.food_service}</td>
@@ -511,8 +620,52 @@ function AdminGuest() {
                                         )}
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
+                            </div> 
+                        </div>                           
+                            {filteredGuestArrivals.length > 0 && (
+                                <div className="pagination-container">
+                                    <button 
+                                        className="pagination-btn prev-btn" 
+                                        onClick={() => handleGuestPageChange(currentGuestPage - 1)}
+                                        disabled={currentGuestPage === 1}
+                                        aria-label="Previous page"
+                                    >
+                                        &lt;
+                                    </button>
+                                    <div className="pagination-numbers">
+                                        {Array.from({ length: Math.min(totalGuestPages, 5) }, (_, i) => {
+                                            let pageNum;
+                                            if (totalGuestPages <= 5) {
+                                                pageNum = i + 1;
+                                            } else if (currentGuestPage <= 3) {
+                                                pageNum = i + 1;
+                                            } else if (currentGuestPage >= totalGuestPages - 2) {
+                                                pageNum = totalGuestPages - 4 + i;
+                                            } else {
+                                                pageNum = currentGuestPage - 2 + i;
+                                            }
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    className={`pagination-number ${currentGuestPage === pageNum ? 'active' : ''}`}
+                                                    onClick={() => handleGuestPageChange(pageNum)}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <button 
+                                        className="pagination-btn next-btn" 
+                                        onClick={() => handleGuestPageChange(currentGuestPage + 1)}
+                                        disabled={currentGuestPage === totalGuestPages}
+                                        aria-label="Next page"
+                                    >
+                                        &gt;
+                                    </button>
+                                </div>
+                            )}
+                       
                         
                         <p className="Guest-section-label" id="feedback-list"> Feedback list </p>
                         <div className="feedback-booking-headers">
@@ -557,7 +710,7 @@ function AdminGuest() {
                                                 </td>
                                             </tr>
                                         ) : (
-                                            visibleFeedback.map((feedback) => (
+                                            paginatedFeedback.map((feedback) => (
                                                 <tr key={feedback.id}>
                                                     <td>{feedback.name}</td>
                                                     <td>{feedback.email}</td>
@@ -573,6 +726,50 @@ function AdminGuest() {
                                 </table>
                             </div>
                         </div>
+                            {visibleFeedback.length > 0 && (
+                                <div className="pagination-container">
+                                    <button 
+                                        className="pagination-btn prev-btn" 
+                                        onClick={() => handleFeedbackPageChange(currentFeedbackPage - 1)}
+                                        disabled={currentFeedbackPage === 1}
+                                        aria-label="Previous page"
+                                    >
+                                        &lt;
+                                    </button>
+                                    <div className="pagination-numbers">
+                                        {Array.from({ length: Math.min(totalFeedbackPages, 5) }, (_, i) => {
+                                            let pageNum;
+                                            if (totalFeedbackPages <= 5) {
+                                                pageNum = i + 1;
+                                            } else if (currentFeedbackPage <= 3) {
+                                                pageNum = i + 1;
+                                            } else if (currentFeedbackPage >= totalFeedbackPages - 2) {
+                                                pageNum = totalFeedbackPages - 4 + i;
+                                            } else {
+                                                pageNum = currentFeedbackPage - 2 + i;
+                                            }
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    className={`pagination-number ${currentFeedbackPage === pageNum ? 'active' : ''}`}
+                                                    onClick={() => handleFeedbackPageChange(pageNum)}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <button 
+                                        className="pagination-btn next-btn" 
+                                        onClick={() => handleFeedbackPageChange(currentFeedbackPage + 1)}
+                                        disabled={currentFeedbackPage === totalFeedbackPages}
+                                        aria-label="Next page"
+                                    >
+                                        &gt;
+                                    </button>
+                                </div>
+                            )}
+                        
                 </div>
             </section>
             <EditBookingModal 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import apiClient from '../api';
 import Swal from "sweetalert2";
@@ -22,6 +22,19 @@ function AdminSales() {
     const now = new Date();
     const [selectedYear, setSelectedYear] = useState(now.getFullYear());
     const [selectedMonthIndex, setSelectedMonthIndex] = useState(now.getMonth()); 
+    // Pie-specific chart controls (so pie updates independently)
+    const [pieChartMode, setPieChartMode] = useState('month');
+    const [pieSelectedYear, setPieSelectedYear] = useState(now.getFullYear());
+    const [pieSelectedMonthIndex, setPieSelectedMonthIndex] = useState(now.getMonth());
+    const [pieSelectedDay, setPieSelectedDay] = useState(now.getDate());
+    // searchable year dropdown state (main chart)
+    const [yearSearchQuery, setYearSearchQuery] = useState('');
+    const [showYearDropdown, setShowYearDropdown] = useState(false);
+    const yearContainerRef = useRef(null);
+    // searchable year dropdown state (pie chart)
+    const [pieYearSearchQuery, setPieYearSearchQuery] = useState('');
+    const [showPieYearDropdown, setShowPieYearDropdown] = useState(false);
+    const pieYearContainerRef = useRef(null);
     const [adminData] = useState(() => {
         const storedUser = localStorage.getItem('adminUser');
         if (storedUser) {
@@ -65,7 +78,11 @@ function AdminSales() {
 
                     if (status === 'confirmed' || status === 'complete') {
                         confirmedTotal += reservationRevenue;
-                    } else if (status === 'cancelled' || status === 'canceled') {
+                    }
+
+                    // Count a reservation as a cancellation loss only when a cancellation request/note exists
+                    const hasCancelRequest = Object.prototype.hasOwnProperty.call(booking, 'cancel_notes_request') && String(booking.cancel_notes_request || '').trim() !== '';
+                    if (hasCancelRequest) {
                         canceledTotal += reservationRevenue;
                     }
                 });
@@ -88,41 +105,43 @@ function AdminSales() {
 
     const totalRevenue = guestSales + bookingConfirmedSales;
 
-    const pieChartData = {
-        labels: ['Guest Arrivals', 'Confirmed/Completed Reservations', 'Canceled Reservation Loss'],
-        datasets: [
-            {
-                label: 'Revenue',
-                data: [guestSales, bookingConfirmedSales, bookingCanceledLoss],
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 99, 132, 0.6)'
-                ],
-                borderColor: [
-                    'rgb(75, 192, 192)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 99, 132)'
-                ],
-                borderWidth: 1,
-                hoverBackgroundColor: [
-                    'rgba(75, 192, 192, 0.8)',
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(255, 99, 132, 0.8)'
-                ]
-            }
-        ]
-    };
 
     const yearLabels = useMemo(() => {
         return Array.from({ length: 5 }, (_, idx) => String(selectedYear - 2 + idx));
     }, [selectedYear]);
 
-    const parseDate = (value) => {
-        if (!value) return null;
-        const date = new Date(value);
+    const parseDate = useCallback((value) => {
+        if (value === undefined || value === null || value === '') return null;
+        // If it's already a Date
+        if (value instanceof Date) {
+            return Number.isNaN(value.getTime()) ? null : value;
+        }
+
+        // If it's a numeric timestamp or numeric string
+        const asNumber = Number(value);
+        if (!Number.isNaN(asNumber) && String(value).trim() !== '') {
+            const ndate = new Date(asNumber);
+            if (!Number.isNaN(ndate.getTime())) return ndate;
+        }
+
+        // Fallback: try parsing as ISO/string date
+        const date = new Date(String(value).trim());
         return Number.isNaN(date.getTime()) ? null : date;
-    };
+    }, []);
+
+    // close dropdowns when clicking outside
+    useEffect(() => {
+        const onDocClick = (e) => {
+            if (yearContainerRef.current && !yearContainerRef.current.contains(e.target)) {
+                setShowYearDropdown(false);
+            }
+            if (pieYearContainerRef.current && !pieYearContainerRef.current.contains(e.target)) {
+                setShowPieYearDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', onDocClick);
+        return () => document.removeEventListener('mousedown', onDocClick);
+    }, []);
 
     
 
@@ -157,7 +176,7 @@ function AdminSales() {
             }
         };
 
-        const addBookingRevenue = (date, status, value) => {
+        const addBookingRevenue = (date, status, value, hasCancelRequest) => {
             if (!date || Number.isNaN(value)) return;
             let idx = -1;
             if (chartMode === 'year') {
@@ -170,7 +189,9 @@ function AdminSales() {
             if (idx < 0 || idx >= stats.length) return;
             if (status === 'confirmed' || status === 'complete') {
                 stats[idx].confirmed += value;
-            } else if (status === 'cancelled' || status === 'canceled') {
+            }
+            // Only count cancellation loss when there is an actual cancel request
+            else if (hasCancelRequest) {
                 stats[idx].canceled += value;
             }
         };
@@ -189,7 +210,8 @@ function AdminSales() {
                 ? Math.max(1, Math.ceil((checkOut - checkIn) / 86400000))
                 : 1;
             const revenue = Number.isNaN(roomPrice) ? 0 : roomPrice * nights;
-            addBookingRevenue(date, (booking.res_status || '').toLowerCase(), revenue);
+            const hasCancelRequest = Object.prototype.hasOwnProperty.call(booking, 'cancel_notes_request') && String(booking.cancel_notes_request || '').trim() !== '';
+            addBookingRevenue(date, (booking.res_status || '').toLowerCase(), revenue, hasCancelRequest);
         });
 
         return {
@@ -225,7 +247,7 @@ function AdminSales() {
                 }
             ]
         };
-    }, [chartMode, selectedYear, selectedMonthIndex, guestArrivals, bookings, yearLabels]);
+    }, [chartMode, selectedYear, selectedMonthIndex, guestArrivals, bookings, parseDate, yearLabels]);
 
     const pieChartOptions = {
         responsive: true,
@@ -239,6 +261,92 @@ function AdminSales() {
             }
         }
     };
+
+    // Dedicated metrics and pie data for the "Revenue Sales Metrics" section
+    const salesMetrics = useMemo(() => {
+        const guestTotal = (guestArrivals || []).reduce((sum, g) => {
+            const date = parseDate(g.created_at);
+            let include = true;
+            if (pieChartMode === 'year') {
+                include = date && date.getFullYear() === pieSelectedYear;
+            } else if (pieChartMode === 'month') {
+                include = date && date.getFullYear() === pieSelectedYear && date.getMonth() === pieSelectedMonthIndex;
+            } else {
+                include = date && date.getFullYear() === pieSelectedYear && date.getMonth() === pieSelectedMonthIndex && date.getDate() === pieSelectedDay;
+            }
+            if (!include) return sum;
+            const v = Number(g.total_price || 0);
+            return sum + (Number.isNaN(v) ? 0 : v);
+        }, 0);
+
+        let confirmedTotal = 0;
+        let canceledTotal = 0;
+
+        // Filter by pie mode selection so the pie updates independently
+        (bookings || []).forEach((booking) => {
+            const checkIn = parseDate(booking.check_in_date);
+            const checkOut = parseDate(booking.check_out_date);
+            const nights = checkIn && checkOut && checkOut > checkIn
+                ? Math.max(1, Math.ceil((checkOut - checkIn) / 86400000))
+                : 1;
+            const roomPrice = Number(booking.room_price || 0);
+            const revenue = Number.isNaN(roomPrice) ? 0 : roomPrice * nights;
+
+            const status = (booking.res_status || '').toLowerCase();
+            const hasCancelRequest = Object.prototype.hasOwnProperty.call(booking, 'cancel_notes_request') && String(booking.cancel_notes_request || '').trim() !== '';
+
+            // determine whether this booking should be included based on pie selection
+            let include = true;
+            if (pieChartMode === 'year') {
+                include = checkIn && checkIn.getFullYear() === pieSelectedYear;
+            } else if (pieChartMode === 'month') {
+                include = checkIn && checkIn.getFullYear() === pieSelectedYear && checkIn.getMonth() === pieSelectedMonthIndex;
+            } else {
+                include = checkIn && checkIn.getFullYear() === pieSelectedYear && checkIn.getMonth() === pieSelectedMonthIndex && checkIn.getDate() === pieSelectedDay;
+            }
+
+            if (!include) return;
+
+            if (status === 'confirmed' || status === 'complete') {
+                confirmedTotal += revenue;
+            }
+
+            if (hasCancelRequest) {
+                canceledTotal += revenue;
+            }
+        });
+
+        const totalRevenue = guestTotal + confirmedTotal;
+
+        const metricsPieData = {
+            labels: ['Guest Arrivals', 'Confirmed Reservations', 'Cancellation Loss'],
+            datasets: [
+                {
+                    label: 'Metrics',
+                    data: [guestTotal, confirmedTotal, canceledTotal],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 99, 132, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgb(75, 192, 192)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 99, 132)'
+                    ],
+                    borderWidth: 1
+                }
+            ]
+        };
+
+        return {
+            totalRevenue,
+            guestTotal,
+            confirmedTotal,
+            canceledTotal,
+            pieData: metricsPieData
+        };
+    }, [pieChartMode, pieSelectedYear, pieSelectedMonthIndex, pieSelectedDay, guestArrivals, bookings, parseDate]);
 
     const barChartOptions = {
         responsive: true,
@@ -295,6 +403,47 @@ function AdminSales() {
             } else {
                 setSelectedMonthIndex((prev) => prev + 1);
             }
+        }
+    };
+
+    // Pie-specific navigation and mode setter
+    const handlePrevPie = () => {
+        if (pieChartMode === 'year' || pieChartMode === 'month') {
+            setPieSelectedYear((prev) => prev - 1);
+            return;
+        }
+        if (pieChartMode === 'day') {
+            // move selected pie date one day back
+            const cur = new Date(pieSelectedYear, pieSelectedMonthIndex, pieSelectedDay || 1);
+            cur.setDate(cur.getDate() - 1);
+            setPieSelectedYear(cur.getFullYear());
+            setPieSelectedMonthIndex(cur.getMonth());
+            setPieSelectedDay(cur.getDate());
+        }
+    };
+
+    const handleNextPie = () => {
+        if (pieChartMode === 'year' || pieChartMode === 'month') {
+            setPieSelectedYear((prev) => prev + 1);
+            return;
+        }
+        if (pieChartMode === 'day') {
+            // move selected pie date one day forward
+            const cur = new Date(pieSelectedYear, pieSelectedMonthIndex, pieSelectedDay || 1);
+            cur.setDate(cur.getDate() + 1);
+            setPieSelectedYear(cur.getFullYear());
+            setPieSelectedMonthIndex(cur.getMonth());
+            setPieSelectedDay(cur.getDate());
+        }
+    };
+
+    const handleSetChartModePie = (mode) => {
+        setPieChartMode(mode);
+        if (mode === 'day') {
+            const today = new Date();
+            setPieSelectedYear(today.getFullYear());
+            setPieSelectedMonthIndex(today.getMonth());
+            setPieSelectedDay(today.getDate());
         }
     };
 
@@ -465,18 +614,87 @@ function AdminSales() {
                                         </button>
                                     </div>
                                     <div className="admin-sales-chart-card-header-stats-btn-nav">
-                                        {chartMode !== 'year' && (
-                                            <h1>
-                                                {chartMode === 'month'
-                                                    ? selectedYear
-                                                    : `${MONTH_LABELS[selectedMonthIndex]} ${selectedYear}`}
-                                            </h1>
+                                        {/* Month: show month + year dropdowns */}
+                                        {chartMode === 'month' && (
+                                            <div className="admin-sales-chart-selects">
+                                                <select
+                                                    aria-label="Select month"
+                                                    value={selectedMonthIndex}
+                                                    onChange={(e) => setSelectedMonthIndex(Number(e.target.value))}
+                                                >
+                                                    {MONTH_LABELS.map((m, idx) => (
+                                                        <option key={m} value={idx}>{m}</option>
+                                                    ))}
+                                                </select>
+                                                        <div ref={yearContainerRef} className="year-search-dropdown">
+                                                            <input
+                                                                aria-label="Search year"
+                                                                className="year-search-input"
+                                                                value={yearSearchQuery || String(selectedYear)}
+                                                                onChange={(e) => { setYearSearchQuery(e.target.value); setShowYearDropdown(true); }}
+                                                                onFocus={() => { setShowYearDropdown(true); setYearSearchQuery(''); }}
+                                                            />
+                                                            {showYearDropdown && (
+                                                                <ul className="year-dropdown-list">
+                                                                    {yearLabels
+                                                                        .filter((y) => y.includes(yearSearchQuery))
+                                                                        .map((y) => (
+                                                                            <li key={y} onClick={() => { setSelectedYear(Number(y)); setShowYearDropdown(false); setYearSearchQuery(''); }}>
+                                                                                {y}
+                                                                            </li>
+                                                                        ))}
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                            </div>
                                         )}
+
+                                        {/* Year: show year dropdown */}
+                                        {chartMode === 'year' && (
+                                            <div className="admin-sales-chart-selects">
+                                                        <div ref={yearContainerRef} className="year-search-dropdown">
+                                                            <input
+                                                                aria-label="Search year"
+                                                                className="year-search-input"
+                                                                value={yearSearchQuery || String(selectedYear)}
+                                                                onChange={(e) => { setYearSearchQuery(e.target.value); setShowYearDropdown(true); }}
+                                                                onFocus={() => { setShowYearDropdown(true); setYearSearchQuery(''); }}
+                                                            />
+                                                            {showYearDropdown && (
+                                                                <ul className="year-dropdown-list">
+                                                                    {yearLabels
+                                                                        .filter((y) => y.includes(yearSearchQuery))
+                                                                        .map((y) => (
+                                                                            <li key={y} onClick={() => { setSelectedYear(Number(y)); setShowYearDropdown(false); setYearSearchQuery(''); }}>
+                                                                                {y}
+                                                                            </li>
+                                                                        ))}
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                            </div>
+                                        )}
+
+                                        {/* Day: show a date input (calendar) */}
+                                        {chartMode === 'day' && (
+                                            <div className="admin-sales-chart-selects">
+                                                <select
+                                                    aria-label="Select month"
+                                                    value={selectedMonthIndex}
+                                                    onChange={(e) => setSelectedMonthIndex(Number(e.target.value))}
+                                                >
+                                                    {MONTH_LABELS.map((m, idx) => (
+                                                        <option key={m} value={idx}>{m}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
                                         <div className="admin-sales-chart-card-header-stats-btn-nav-btns">
-                                            <button onClick={handlePrev}>
+                                            <button onClick={handlePrev} aria-label="Previous period">
                                                 <i className="fa-solid fa-arrow-left-long"></i>
                                             </button>
-                                            <button onClick={handleNext}>
+                                            <button onClick={handleNext} aria-label="Next period">
                                                 <i className="fa-solid fa-arrow-right-long"></i>
                                             </button>
                                         </div>
@@ -490,13 +708,138 @@ function AdminSales() {
                                     <Bar data={barChartData} options={barChartOptions} />
                                 </div>
                             </div>
-                            
-                            <div className="admin-sales-chart-card">
-                                <Pie data={pieChartData} options={pieChartOptions} />
-                            </div>
                         </div>
                     </div>
 
+                    <p className="section-label">Revenue Sales Metrics</p>
+                    
+                    <div className="admin-sales-table-container">
+                        <div className="admin-sales-chart-grid">
+                            <div className="admin-sales-chart-card-container">
+                                
+
+                                        <div className="admin-sales-chart-card-header-stats-btn">
+                                    <div>
+                                        <button className={pieChartMode === 'month' ? 'active' : ''} onClick={() => handleSetChartModePie('month')}>
+                                            Month
+                                        </button>
+                                        <button className={pieChartMode === 'year' ? 'active' : ''} onClick={() => handleSetChartModePie('year')}>
+                                            Year
+                                        </button>
+                                        <button className={pieChartMode === 'day' ? 'active' : ''} onClick={() => handleSetChartModePie('day')}>
+                                            Day
+                                        </button>
+                                    </div>
+                                    <div className="admin-sales-chart-card-header-stats-btn-nav">
+                                        {/* Pie: Month -> month+year selects, Year -> year select, Day -> date picker */}
+                                        {pieChartMode === 'month' && (
+                                            <div className="admin-sales-chart-selects">
+                                                <select
+                                                    aria-label="Select pie month"
+                                                    value={pieSelectedMonthIndex}
+                                                    onChange={(e) => setPieSelectedMonthIndex(Number(e.target.value))}
+                                                >
+                                                    {MONTH_LABELS.map((m, idx) => (
+                                                        <option key={m} value={idx}>{m}</option>
+                                                    ))}
+                                                </select>
+                                                <div ref={pieYearContainerRef} className="year-search-dropdown">
+                                                    <input
+                                                        aria-label="Search pie year"
+                                                        className="year-search-input"
+                                                        value={pieYearSearchQuery || String(pieSelectedYear)}
+                                                        onChange={(e) => { setPieYearSearchQuery(e.target.value); setShowPieYearDropdown(true); }}
+                                                        onFocus={() => { setShowPieYearDropdown(true); setPieYearSearchQuery(''); }}
+                                                    />
+                                                    {showPieYearDropdown && (
+                                                        <ul className="year-dropdown-list">
+                                                            {yearLabels
+                                                                .filter((y) => y.includes(pieYearSearchQuery))
+                                                                .map((y) => (
+                                                                    <li key={y} onClick={() => { setPieSelectedYear(Number(y)); setShowPieYearDropdown(false); setPieYearSearchQuery(''); }}>
+                                                                        {y}
+                                                                    </li>
+                                                                ))}
+                                                        </ul>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {pieChartMode === 'year' && (
+                                            <div className="admin-sales-chart-selects">
+                                                <select
+                                                    aria-label="Select pie year"
+                                                    value={pieSelectedYear}
+                                                    onChange={(e) => setPieSelectedYear(Number(e.target.value))}
+                                                >
+                                                    {yearLabels.map((y) => (
+                                                        <option key={y} value={Number(y)}>{y}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {pieChartMode === 'day' && (
+                                            <div className="admin-sales-chart-selects">
+                                                <input
+                                                    type="date"
+                                                    aria-label="Pick a pie day"
+                                                    value={`${pieSelectedYear.toString().padStart(4,'0')}-${String(pieSelectedMonthIndex+1).padStart(2,'0')}-${String(pieSelectedDay).padStart(2,'0')}`}
+                                                    onChange={(e) => {
+                                                        const v = e.target.value;
+                                                        if (!v) return;
+                                                        const d = new Date(v);
+                                                        if (!Number.isNaN(d.getTime())) {
+                                                            setPieSelectedYear(d.getFullYear());
+                                                            setPieSelectedMonthIndex(d.getMonth());
+                                                            setPieSelectedDay(d.getDate());
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="admin-sales-chart-card-header-stats-btn-nav-btns">
+                                            <button onClick={handlePrevPie} aria-label="Previous pie period">
+                                                <i className="fa-solid fa-arrow-left-long"></i>
+                                            </button>
+                                            <button onClick={handleNextPie} aria-label="Next pie period">
+                                                <i className="fa-solid fa-arrow-right-long"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div className="admin-sales-chart-card-header">
+                                    <h2>{chartMode === 'month' ? 'Monthly' : chartMode === 'year' ? 'Yearly' : 'Daily'} Revenue</h2>
+                                </div>
+                                <div className="admin-sales-chart-card-box">
+                                    <div className="admin-sales-chart-card-stats">
+                                        <div className="admin-sales-chart-card-labels">
+                                            <label>Total Revenue</label>
+                                            <h1>{loading ? "..." : formatCurrency(salesMetrics.totalRevenue)}</h1>
+                                        </div>
+                                        <div className="admin-sales-chart-card-labels">
+                                            <label>Guest Sales</label>
+                                            <h1>{loading ? "..." : formatCurrency(salesMetrics.guestTotal)}</h1>
+                                        </div>
+                                        <div className="admin-sales-chart-card-labels">
+                                            <label>Booking Sales</label>
+                                            <h1>{loading ? "..." : formatCurrency(salesMetrics.confirmedTotal)}</h1>
+                                        </div>
+                                        <div className="admin-sales-chart-card-labels">
+                                            <label>Sales loss</label>
+                                            <h1>{loading ? "..." : formatCurrency(salesMetrics.canceledTotal)}</h1>
+                                        </div>
+                                    </div>
+                                    <div className="admin-sales-chart-card admin-sales-pie">
+                                        <Pie data={salesMetrics.pieData} options={pieChartOptions} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>

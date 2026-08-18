@@ -336,6 +336,7 @@ function ResBook() {
           console.error("Error sa pagkuha sang data: ", err);
           setLoading(false);
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const computedFiltered = useMemo(() => {

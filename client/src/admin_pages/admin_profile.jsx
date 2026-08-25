@@ -6,6 +6,7 @@ import "../admincss/admin_profile.css";
 
 function AdminProfile() {
     const navigate = useNavigate();
+    const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
     const [adminData, setAdminData] = useState(() => {
         const storedUser = localStorage.getItem('adminUser');
         if (storedUser) {
@@ -101,6 +102,19 @@ function AdminProfile() {
         setEditMode((prev) => !prev);
     };
 
+    const handleToggleModes = () => {
+        setIsLightMode((prev) => {
+            const nextModeIsLight = !prev;
+            localStorage.setItem('adminTheme', nextModeIsLight ? 'light' : 'dark');
+            document.documentElement.dataset.theme = nextModeIsLight ? 'light' : 'dark';
+            return nextModeIsLight;
+        });
+    };
+
+    useEffect(() => {
+        document.documentElement.dataset.theme = isLightMode ? 'light' : 'dark';
+    }, [isLightMode]);
+
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setAdminData((prevData) => ({ ...prevData, [name]: value }));
@@ -134,7 +148,7 @@ function AdminProfile() {
     };
 
     return (
-        <div>
+        <div className={`admin-profile-page ${isLightMode ? 'admin-profile-page--light' : ''}`}>
             <div className="mobile-topbar">
                 <Link to="/Dashboard">
                 <h1 className="mobile-logo">Messiah</h1>
@@ -204,6 +218,9 @@ function AdminProfile() {
                     <div className="admin-profile-topbar">
                         <h1>Profile</h1>
                         <div>
+                            <button className="dashboard-topbar-btn1" onClick={handleToggleModes}>
+                                {isLightMode ? "Dark mode" : "Light mode"}
+                            </button>
                             <button className="dashboard-topbar-btn1" onClick={handleToggleEdit}>
                                 {editMode ? "Cancel" : "Edit Profile"}
                             </button>

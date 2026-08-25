@@ -810,3 +810,141 @@ body {
   border-color: #c8a96e;
   font-weight: 600;
 }
+
+.admin-guest-page--light {
+  color: #253238;
+}
+
+.admin-guest-page--light .dashboard-navbar,
+.admin-guest-page--light .drawer-panel,
+.admin-guest-page--light .mobile-topbar {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 1px 0 28px rgba(37, 50, 56, 0.1);
+}
+
+.admin-guest-page--light .dashboard-logo h1,
+.admin-guest-page--light .mobile-logo,
+.admin-guest-page--light .dasboard-admin-status h1,
+.admin-guest-page--light .guests-topbar h1,
+.admin-guest-page--light .guests-table-container h1,
+.admin-guest-page--light .guests-table-container-cancel-request h1 {
+  color: #253238;
+}
+
+.admin-guest-page--light .dashboard-nav-links li a,
+.admin-guest-page--light .dashboard-nav-links li span,
+.admin-guest-page--light .dashboard-nav-links p,
+.admin-guest-page--light .guests-section-label,
+.admin-guest-page--light .Guest-section-label,
+.admin-guest-page--light .guests-table td,
+.admin-guest-page--light .guests-table-cancel-request td,
+.admin-guest-page--light .guests-tables td,
+.admin-guest-page--light .feedback-tables td {
+  color: #687477;
+}
+
+.admin-guest-page--light .dashboard-nav-links li:hover a,
+.admin-guest-page--light .dashboard-nav-links li:hover span,
+.admin-guest-page--light .dashboard-nav-links li.active a {
+  background: rgba(183, 139, 57, 0.12);
+  color: #8b651e;
+}
+
+.admin-guest-page--light .dasboard-admin-status {
+  background: #efebe2;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-guest-page--light .guests-main {
+  background: #eeece7;
+}
+
+.admin-guest-page--light .guests-topbar {
+  border-color: rgba(37, 50, 56, 0.14);
+}
+
+.admin-guest-page--light .admin-guest-stats-bar-content,
+.admin-guest-page--light .guests-booking-headers,
+.admin-guest-page--light .feedback-booking-headers,
+.admin-guest-page--light .guests-booking-table,
+.admin-guest-page--light .guests-table-containers,
+.admin-guest-page--light .feedback-table-containers,
+.admin-guest-page--light .guests-headers-content {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 0 12px 28px rgba(37, 50, 56, 0.06);
+}
+
+.admin-guest-page--light .admin-guest-filter-btns a,
+.admin-guest-page--light .guests-headers-links a {
+  color: #526064;
+  border-color: rgba(37, 50, 56, 0.18);
+}
+
+.admin-guest-page--light .admin-guest-filter-btns a:hover,
+.admin-guest-page--light .guests-headers-links a:hover {
+  background: rgba(183, 139, 57, 0.12);
+  border-color: #b78b39;
+  color: #6d4e16;
+}
+
+.admin-guest-page--light .search-input,
+.admin-guest-page--light .search-options {
+  background: #fffdf8;
+  border-color: rgba(37, 50, 56, 0.18);
+  color: #253238;
+}
+
+.admin-guest-page--light .booking-table thead th,
+.admin-guest-page--light .guests-tables thead th,
+.admin-guest-page--light .feedback-tables thead th {
+  color: #687477;
+  background: #e5e1d8;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-guest-page--light .booking-table td:first-child,
+.admin-guest-page--light .guests-tables td:first-child,
+.admin-guest-page--light .feedback-tables td:first-child {
+  color: #253238;
+}
+
+.admin-guest-page--light .booking-table tbody tr,
+.admin-guest-page--light .guests-tables tbody tr,
+.admin-guest-page--light .feedback-tables tbody tr {
+  border-color: rgba(37, 50, 56, 0.1);
+}
+
+.admin-guest-page--light .booking-table tbody tr:hover,
+.admin-guest-page--light .guests-tables tbody tr:hover,
+.admin-guest-page--light .feedback-tables tbody tr:hover {
+  background: rgba(37, 50, 56, 0.04);
+}
+
+.admin-guest-page--light .pagination-btn {
+  background: #fffdf8;
+  color: #8b651e;
+}
+
+.admin-guest-page--light .pagination-number {
+  border-color: rgba(37, 50, 56, 0.18);
+  color: #526064;
+}
+
+.admin-guest-page--light .pagination-number:hover {
+  background: rgba(183, 139, 57, 0.12);
+  border-color: #b78b39;
+  color: #6d4e16;
+}
+
+.admin-guest-page--light .pagination-number.active {
+  background: #c8a96e;
+  color: #253238;
+}
+
+.admin-guest-page--light .guests-up-btn {
+  background: rgba(183, 139, 57, 0.14);
+  border-color: rgba(139, 101, 30, 0.3);
+  color: #8b651e;
+}

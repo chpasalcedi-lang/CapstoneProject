@@ -11,6 +11,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tool
 const MONTH_LABELS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function AdminSales() {
+    const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
     const [guestSales, setGuestSales] = useState(0);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [bookingConfirmedSales, setBookingConfirmedSales] = useState(0);
@@ -101,6 +102,15 @@ function AdminSales() {
         };
 
         fetchSales();
+    }, []);
+
+    useEffect(() => {
+        const handleThemeChange = () => {
+            setIsLightMode(localStorage.getItem('adminTheme') === 'light');
+        };
+
+        window.addEventListener('storage', handleThemeChange);
+        return () => window.removeEventListener('storage', handleThemeChange);
     }, []);
 
     const totalRevenue = guestSales + bookingConfirmedSales;
@@ -256,7 +266,7 @@ function AdminSales() {
             legend: {
                 position: 'bottom',
                 labels: {
-                    color: '#f0ede8'
+                    color: isLightMode ? '#253238' : '#f0ede8'
                 }
             }
         }
@@ -354,18 +364,18 @@ function AdminSales() {
         scales: {
             x: {
                 grid: { display: false },
-                ticks: { color: '#aaa' }
+                ticks: { color: isLightMode ? '#687477' : '#aaa' }
             },
             y: {
                 beginAtZero: true,
                 grid: { color: 'rgba(255,255,255,0.08)' },
-                ticks: { color: '#aaa' }
+                ticks: { color: isLightMode ? '#687477' : '#aaa' }
             }
         },
         plugins: {
             legend: {
                 labels: {
-                    color: '#f0ede8'
+                    color: isLightMode ? '#253238' : '#f0ede8'
                 }
             }
         }
@@ -460,7 +470,7 @@ function AdminSales() {
 
 
     return (
-        <div>
+        <div className={`admin-sales-page ${isLightMode ? 'admin-sales-page--light' : ''}`}>
             <div className="mobile-topbar">
                 <Link to="/Dashboard">
                 <h1 className="mobile-logo">Messiah</h1>

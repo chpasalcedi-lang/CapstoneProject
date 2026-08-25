@@ -561,3 +561,111 @@
 	background: rgba(255,255,255,0.03);
 }
 
+.admin-sales-page--light {
+	color: #253238;
+}
+
+.admin-sales-page--light .dashboard-navbar,
+.admin-sales-page--light .drawer-panel {
+	background: #f7f4ed;
+	border-color: rgba(37, 50, 56, 0.12);
+	box-shadow: 1px 0 28px rgba(37, 50, 56, 0.1);
+}
+
+.admin-sales-page--light .dashboard-logo h1,
+.admin-sales-page--light .dasboard-admin-status h1,
+.admin-sales-page--light .admin-sales-topbar h1,
+.admin-sales-page--light .sales-stat-title,
+.admin-sales-page--light .admin-sales-chart-card-header h2,
+.admin-sales-page--light .admin-sales-chart-card-labels h1 {
+	color: #253238;
+}
+
+.admin-sales-page--light .dashboard-nav-links li a,
+.admin-sales-page--light .dashboard-nav-links li span,
+.admin-sales-page--light .section-label,
+.admin-sales-page--light .sales-stat-eyebrow,
+.admin-sales-page--light .admin-sales-chart-card-labels label,
+.admin-sales-page--light .admin-sales-chart-card-stats label {
+	color: #687477;
+}
+
+.admin-sales-page--light .dashboard-nav-links p {
+	color: #687477;
+}
+
+.admin-sales-page--light .dashboard-nav-links li:hover a,
+.admin-sales-page--light .dashboard-nav-links li:hover span,
+.admin-sales-page--light .dashboard-nav-links li.active a {
+	background: rgba(183, 139, 57, 0.12);
+	color: #8b651e;
+}
+
+.admin-sales-page--light .dasboard-admin-status {
+	background: #efebe2;
+	border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-sales-page--light .admin-sales-main {
+	background: #eeece7;
+}
+
+.admin-sales-page--light .admin-sales-topbar {
+	border-color: rgba(37, 50, 56, 0.14);
+}
+
+.admin-sales-page--light .admin-sales-topbar .dashboard-topbar-btn1 {
+	color: #8b651e;
+	border-color: rgba(139, 101, 30, 0.3);
+}
+
+.admin-sales-page--light .sales-stat-card,
+.admin-sales-page--light .admin-sales-table-container,
+.admin-sales-page--light .admin-sales-chart-card,
+.admin-sales-page--light .admin-sales-chart-card-stats {
+	background: #f7f4ed;
+	border-color: rgba(37, 50, 56, 0.12);
+	box-shadow: 0 12px 28px rgba(37, 50, 56, 0.06);
+}
+
+.admin-sales-page--light .admin-sales-chart-card-header-stats-btn button {
+	background: #e5e1d8;
+	border-color: rgba(37, 50, 56, 0.12);
+	color: #526064;
+}
+
+.admin-sales-page--light .admin-sales-chart-card-header-stats-btn button:hover,
+.admin-sales-page--light .admin-sales-chart-card-header-stats-btn button.active {
+	background: #c8a96e;
+	border-color: #c8a96e;
+	color: #253238;
+}
+
+.admin-sales-page--light .admin-sales-chart-selects select,
+.admin-sales-page--light .admin-sales-chart-selects input[type="date"],
+.admin-sales-page--light .admin-sales-chart-selects .year-search-input,
+.admin-sales-page--light .year-search-input {
+	background: #fffdf8;
+	border-color: rgba(37, 50, 56, 0.18);
+	color: #253238;
+}
+
+.admin-sales-page--light .admin-sales-chart-card-header-stats-btn-nav-btns button {
+	background: #fffdf8;
+	border-color: rgba(37, 50, 56, 0.18);
+	color: #687477;
+}
+
+.admin-sales-page--light .year-dropdown-list {
+	background: #fffdf8;
+	border-color: rgba(37, 50, 56, 0.14);
+}
+
+.admin-sales-page--light .year-dropdown-list li {
+	color: #253238;
+}
+
+.admin-sales-page--light .year-dropdown-list li:hover {
+	background: #e5e1d8;
+}
+

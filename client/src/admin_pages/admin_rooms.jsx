@@ -7,6 +7,7 @@ import EditRoomModal from "../Modals/update_room-modal";
 import "../admincss/admin_rooms.css";
 
 function AdminRooms() {
+    const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
     const [showAddModal, setShowAddModal] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -96,6 +97,15 @@ function AdminRooms() {
 
     useEffect(() => {
         fetchData();
+    }, []);
+
+    useEffect(() => {
+        const handleThemeChange = () => {
+            setIsLightMode(localStorage.getItem('adminTheme') === 'light');
+        };
+
+        window.addEventListener('storage', handleThemeChange);
+        return () => window.removeEventListener('storage', handleThemeChange);
     }, []);
 
     const parseIsoDate = (value) => {
@@ -213,7 +223,7 @@ function AdminRooms() {
     };
 
     return (
-        <div>
+        <div className={`admin-rooms-page ${isLightMode ? 'admin-rooms-page--light' : ''}`}>
             <div className="mobile-topbar">
                 <Link to="/Dashboard">
                 <h1 className="mobile-logo">Messiah</h1>

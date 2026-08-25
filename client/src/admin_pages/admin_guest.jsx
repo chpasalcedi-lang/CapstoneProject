@@ -9,6 +9,7 @@ import FeedbackModal from '../Modals/feedback._modal';
 
 
 function AdminGuest() {
+    const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
     const [bookings, setBookings] = useState([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [guestArrivals, setGuestArrivals] = useState([]);
@@ -357,8 +358,17 @@ function AdminGuest() {
     };
 }, []);
 
+    useEffect(() => {
+        const handleThemeChange = () => {
+            setIsLightMode(localStorage.getItem('adminTheme') === 'light');
+        };
+
+        window.addEventListener('storage', handleThemeChange);
+        return () => window.removeEventListener('storage', handleThemeChange);
+    }, []);
+
     return (
-        <div>
+        <div className={`admin-guest-page ${isLightMode ? 'admin-guest-page--light' : ''}`}>
             <div className="mobile-topbar">
                 <Link to="/Dashboard">
                 <h1 className="mobile-logo">Messiah</h1>

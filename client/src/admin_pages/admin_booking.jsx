@@ -10,6 +10,7 @@ import ViewBookingModal from "../Modals/view_booking_modal.jsx";
 emailjs.init("VuQPGuRo7jAh72RA6");
 
 function AdminBooking() {
+    const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewModal, setViewModal] = useState(false);
@@ -63,6 +64,15 @@ function AdminBooking() {
             window.removeEventListener('reservation-updated', handleReservationUpdate);
             window.removeEventListener('storage', handleStorageRefresh);
         };
+    }, []);
+
+    useEffect(() => {
+        const handleThemeChange = () => {
+            setIsLightMode(localStorage.getItem('adminTheme') === 'light');
+        };
+
+        window.addEventListener('storage', handleThemeChange);
+        return () => window.removeEventListener('storage', handleThemeChange);
     }, []);
 
     const checkInsToday = bookings.filter((b) => {
@@ -289,7 +299,7 @@ function AdminBooking() {
     }, [currentCancelPage, totalCancelPages]);
 
     return (
-        <div>
+        <div className={`admin-booking-page ${isLightMode ? 'admin-booking-page--light' : ''}`}>
             <div className="mobile-topbar">
                 <Link to="/Dashboard">
                 <h1 className="mobile-logo">

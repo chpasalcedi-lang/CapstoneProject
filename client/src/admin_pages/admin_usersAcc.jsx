@@ -7,6 +7,7 @@ import AddAccountModal from '../Modals/add_acc_modal';
 import UpdateAccountModal from '../Modals/update_userAcc.modal';
 
 function AdminUsersAcc() {
+  const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
   const [users, setUsers] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showAddAccModal, setShowAddAccModal] = useState(false);
@@ -46,6 +47,15 @@ function AdminUsersAcc() {
 
   useEffect(() => {
     fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setIsLightMode(localStorage.getItem('adminTheme') === 'light');
+    };
+
+    window.addEventListener('storage', handleThemeChange);
+    return () => window.removeEventListener('storage', handleThemeChange);
   }, []);
 
   const handleSearchChange = (event) => {
@@ -197,7 +207,7 @@ function AdminUsersAcc() {
   };
 
   return (
-    <div>
+    <div className={`admin-users-page ${isLightMode ? 'admin-users-page--light' : ''}`}>
       <div className="mobile-topbar">
           <Link to="/Dashboard">
           <h1 className="mobile-logo">Messiah</h1>

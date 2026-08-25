@@ -11,7 +11,6 @@ import AdminUsersAcc from './admin_pages/admin_usersAcc';
 import AdminProfile from './admin_pages/admin_profile';
 import AdminLoginForm from './admin_pages/admin_loginform';
 import AdminSales from './admin_pages/admin_sales';
-import AdminTheme from './AdminTheme';
 
 
 
@@ -30,8 +29,7 @@ function RequireAuth({ children }) {
 function App() {
   return (
     <BrowserRouter>
-      <AdminTheme>
-        <Routes>
+      <Routes>
         <Route path="/" element={<Navigate to="/Home" replace />} />
         <Route path="/Home" element={<Home />} />
         <Route path="/Reservation" element={<Reservation />} />
@@ -53,8 +51,7 @@ function App() {
       
 
     
-        </Routes>
-      </AdminTheme>
+      </Routes>
     </BrowserRouter>
   );
 }

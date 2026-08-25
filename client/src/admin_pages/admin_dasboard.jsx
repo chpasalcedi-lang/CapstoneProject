@@ -6,6 +6,7 @@ import "../admincss/admin_dashboard.css";
 import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
 
 function AdminDashboard() {
+  const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
   const [stats, setStats] = useState({
     total_revenue: 0,
     todays_sales: 0,
@@ -148,13 +149,22 @@ function AdminDashboard() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setIsLightMode(localStorage.getItem('adminTheme') === 'light');
+    };
+
+    window.addEventListener('storage', handleThemeChange);
+    return () => window.removeEventListener('storage', handleThemeChange);
+  }, []);
+
   const formatCurrency = (amount = 0) => {
     const value = Number(amount || 0);
     return `₱${value.toLocaleString()}`;
   };
 
   return (
-    <div className="wrap">
+    <div className={`wrap admin-dashboard-page ${isLightMode ? 'admin-dashboard-page--light' : ''}`}>
       <div className="mobile-topbar">
         <Link to="/Dashboard">
           <h1 className="mobile-logo">

@@ -530,6 +530,124 @@ body {
   box-shadow: 0 4px 12px rgba(224,85,85,0.12);
 }
 
+.admin-rooms-page--light {
+  color: #253238;
+}
+
+.admin-rooms-page--light .dashboard-navbar,
+.admin-rooms-page--light .drawer-panel {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 1px 0 28px rgba(37, 50, 56, 0.1);
+}
+
+.admin-rooms-page--light .dashboard-logo h1,
+.admin-rooms-page--light .dasboard-admin-status h1,
+.admin-rooms-page--light .rooms-topbar h1,
+.admin-rooms-page--light .rooms-stats-header h2,
+.admin-rooms-page--light .rooms-stats-search h3,
+.admin-rooms-page--light .rooms-stats-item strong,
+.admin-rooms-page--light .rooms-room-card-body h3 {
+  color: #253238;
+}
+
+.admin-rooms-page--light .dashboard-nav-links li a,
+.admin-rooms-page--light .dashboard-nav-links li span,
+.admin-rooms-page--light .rooms-stats-controls span,
+.admin-rooms-page--light .rooms-stats-card span,
+.admin-rooms-page--light .rooms-stats-searchbar span,
+.admin-rooms-page--light .rooms-stats-item p,
+.admin-rooms-page--light .rooms-room-price-night,
+.admin-rooms-page--light .rooms-room-card-body p {
+  color: #687477;
+}
+
+.admin-rooms-page--light .dashboard-nav-links p {
+  color: #687477;
+}
+
+.admin-rooms-page--light .dashboard-nav-links li:hover a,
+.admin-rooms-page--light .dashboard-nav-links li:hover span,
+.admin-rooms-page--light .dashboard-nav-links li.active a {
+  background: rgba(183, 139, 57, 0.12);
+  color: #8b651e;
+}
+
+.admin-rooms-page--light .dasboard-admin-status {
+  background: #efebe2;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-rooms-page--light .rooms-main {
+  background: #eeece7;
+}
+
+.admin-rooms-page--light .rooms-topbar {
+  border-color: rgba(37, 50, 56, 0.14);
+}
+
+.admin-rooms-page--light .rooms-topbar-btn {
+  color: #8b651e;
+  border-color: rgba(139, 101, 30, 0.3);
+}
+
+.admin-rooms-page--light .rooms-topbar-btn:hover {
+  background: rgba(183, 139, 57, 0.12);
+  border-color: #b78b39;
+  color: #6d4e16;
+}
+
+.admin-rooms-page--light .rooms-stats-checker {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 0 12px 28px rgba(37, 50, 56, 0.06);
+}
+
+.admin-rooms-page--light .rooms-stats-controls input,
+.admin-rooms-page--light .rooms-stats-search-input {
+  background: #fffdf8;
+  border-color: rgba(37, 50, 56, 0.18);
+  color: #253238;
+}
+
+.admin-rooms-page--light .rooms-stats-card,
+.admin-rooms-page--light .rooms-stats-searchbar,
+.admin-rooms-page--light .rooms-stats-item,
+.admin-rooms-page--light .rooms-stat-card {
+  background: #fffdf8;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-rooms-page--light .rooms-stats-badge.available {
+  color: #18733b;
+}
+
+.admin-rooms-page--light .rooms-stats-badge.occupied {
+  color: #a4540a;
+}
+
+.admin-rooms-page--light .rooms-stats-badge.maintenance {
+  color: #a52e2e;
+}
+
+.admin-rooms-page--light .rooms-room-card-img {
+  background: #d9d6ce;
+}
+
+.admin-rooms-page--light .rooms-room-rating {
+  background: rgba(255, 253, 248, 0.88);
+  color: #526064;
+  border-color: rgba(37, 50, 56, 0.14);
+}
+
+.admin-rooms-page--light .rooms-room-price-amount {
+  color: #9b711f;
+}
+
+.admin-rooms-page--light .rooms-room-card-footer {
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
 @media (max-width: 1400px) {
   .rooms-main-content { 
     padding: 48px 40px 80px; 

@@ -12,6 +12,7 @@ const PRICE_PER_ADULT = 175;
 const FOOD_CHARGE = 500;
 
 function AdminAddGuest() {
+  const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
   const formatCurrency = (value) => {
     const n = Number(value) || 0;
     const hasDecimals = Math.abs(n % 1) > 0;
@@ -35,6 +36,15 @@ function AdminAddGuest() {
     }
     return { name: "?", role: "?" };
   });
+
+  React.useEffect(() => {
+    const handleThemeChange = () => {
+      setIsLightMode(localStorage.getItem('adminTheme') === 'light');
+    };
+
+    window.addEventListener('storage', handleThemeChange);
+    return () => window.removeEventListener('storage', handleThemeChange);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -97,7 +107,7 @@ function AdminAddGuest() {
   };
 
   return (
-    <div className="wrap">
+    <div className={`wrap admin-add-guest-page ${isLightMode ? 'admin-add-guest-page--light' : ''}`}>
       <div className="mobile-topbar">
         <Link to="/Dashboard">
           <h1 className="mobile-logo">

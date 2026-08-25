@@ -623,6 +623,116 @@
   color: #f6ad55;
 }
 
+.admin-profile-page--light {
+  color: #253238;
+}
+
+.admin-profile-page--light .dashboard-navbar,
+.admin-profile-page--light .drawer-panel {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 1px 0 28px rgba(37, 50, 56, 0.1);
+}
+
+.admin-profile-page--light .dashboard-logo h1,
+.admin-profile-page--light .dasboard-admin-status h1,
+.admin-profile-page--light .admin-profile-topbar h1,
+.admin-profile-page--light .admin-profile-card-body h2,
+.admin-profile-page--light .sales-metric-card h3,
+.admin-profile-page--light .admin-sales-title h2,
+.admin-profile-page--light .sales-card h3 {
+  color: #253238;
+}
+
+.admin-profile-page--light .dashboard-nav-links li a,
+.admin-profile-page--light .dashboard-nav-links li span {
+  color: #667174;
+}
+
+.admin-profile-page--light .dashboard-nav-links li:hover a,
+.admin-profile-page--light .dashboard-nav-links li:hover span,
+.admin-profile-page--light .dashboard-nav-links li.active a {
+  background: rgba(183, 139, 57, 0.12);
+  color: #8b651e;
+}
+
+.admin-profile-page--light .dashboard-nav-links p,
+.admin-profile-page--light .admin-profile-info p,
+.admin-profile-page--light .admin-sales-title,
+.admin-profile-page--light .sales-metric-card span,
+.admin-profile-page--light .sales-card p,
+.admin-profile-page--light .admin-sales-badge {
+  color: #687477;
+}
+
+.admin-profile-page--light .dasboard-admin-status {
+  background: #efebe2;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-profile-page--light .admin-profile-main {
+  background: #eeece7;
+}
+
+.admin-profile-page--light .admin-profile-topbar {
+  border-color: rgba(37, 50, 56, 0.14);
+}
+
+.admin-profile-page--light .dashboard-topbar-btn1,
+.admin-profile-page--light .admin-profile-topbar-btn {
+  color: #8b651e;
+  border-color: rgba(139, 101, 30, 0.3);
+}
+
+.admin-profile-page--light .dashboard-topbar-btn1:hover,
+.admin-profile-page--light .admin-profile-topbar-btn:hover {
+  background: rgba(183, 139, 57, 0.12);
+  border-color: #b78b39;
+  color: #6d4e16;
+}
+
+.admin-profile-page--light .admin-profile-card,
+.admin-profile-page--light .admin-profile-settings {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 0 12px 28px rgba(37, 50, 56, 0.06);
+}
+
+.admin-profile-page--light .admin-profile-role,
+.admin-profile-page--light .profile-stat-box h3 {
+  color: #9b711f;
+}
+
+.admin-profile-page--light .admin-profile-info span {
+  color: #253238;
+}
+
+.admin-profile-page--light .admin-profile-edit-form {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(139, 101, 30, 0.24);
+}
+
+.admin-profile-page--light .admin-profile-edit-form label {
+  color: #48575a;
+}
+
+.admin-profile-page--light .admin-profile-edit-form input {
+  background: #fffdf8;
+  border-color: rgba(37, 50, 56, 0.18);
+  color: #253238;
+}
+
+.admin-profile-page--light .profile-stat-box,
+.admin-profile-page--light .sales-metric-card,
+.admin-profile-page--light .sales-card {
+  background: #fffdf8;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-profile-page--light .admin-sales-badge {
+  background: #e5e1d8;
+}
+
 
 @media (max-width: 980px) {
 

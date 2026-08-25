@@ -272,7 +272,7 @@ body {
 }
 
 .guests-table-wrapper {
-  max-height: 500px;
+  max-height: 575px;
   overflow-y: auto;
   overflow-x: auto;
 }
@@ -298,7 +298,7 @@ body {
 }
 
 .guests-table-wrapper-cancel-request {
-  max-height: 450px;
+  max-height: 575px;
   overflow-y: auto;
   overflow-x: auto;
 }
@@ -606,4 +606,114 @@ body {
   color: #080808;
   border-color: #c8a96e;
   font-weight: 600;
+}
+
+.admin-booking-page--light {
+  color: #253238;
+}
+
+.admin-booking-page--light .dashboard-navbar,
+.admin-booking-page--light .drawer-panel {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 1px 0 28px rgba(37, 50, 56, 0.1);
+}
+
+.admin-booking-page--light .dashboard-logo h1,
+.admin-booking-page--light .dasboard-admin-status h1,
+.admin-booking-page--light .guests-topbar h1,
+.admin-booking-page--light .booking-stat-value,
+.admin-booking-page--light .guests-table-container h1,
+.admin-booking-page--light .guests-table-container-cancel-request h1 {
+  color: #253238;
+}
+
+.admin-booking-page--light .dashboard-nav-links li a,
+.admin-booking-page--light .dashboard-nav-links li span,
+.admin-booking-page--light .dashboard-nav-links p,
+.admin-booking-page--light .booking-stat-label,
+.admin-booking-page--light .guests-table td,
+.admin-booking-page--light .guests-table-cancel-request td {
+  color: #687477;
+}
+
+.admin-booking-page--light .dashboard-nav-links li:hover a,
+.admin-booking-page--light .dashboard-nav-links li:hover span,
+.admin-booking-page--light .dashboard-nav-links li.active a {
+  background: rgba(183, 139, 57, 0.12);
+  color: #8b651e;
+}
+
+.admin-booking-page--light .dasboard-admin-status {
+  background: #efebe2;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-booking-page--light .guests-main {
+  background: #eeece7;
+}
+
+.admin-booking-page--light .guests-topbar {
+  border-color: rgba(37, 50, 56, 0.14);
+}
+
+.admin-booking-page--light .booking-stat-card,
+.admin-booking-page--light .admin-booking-stats-bar-content,
+.admin-booking-page--light .guests-table-container,
+.admin-booking-page--light .guests-table-container-cancel-request {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 0 12px 28px rgba(37, 50, 56, 0.06);
+}
+
+.admin-booking-page--light .admin-booking-stats-card input {
+  background: #fffdf8;
+  border-color: rgba(37, 50, 56, 0.18);
+  color: #253238;
+}
+
+.admin-booking-page--light .admin-booking-stats-card button,
+.admin-booking-page--light .pagination-number {
+  border-color: rgba(37, 50, 56, 0.18);
+  color: #526064;
+}
+
+.admin-booking-page--light .admin-booking-stats-card button:hover,
+.admin-booking-page--light .admin-booking-stats-card button.active,
+.admin-booking-page--light .pagination-number:hover {
+  background: rgba(183, 139, 57, 0.12);
+  border-color: #b78b39;
+  color: #6d4e16;
+}
+
+.admin-booking-page--light .guests-table-cancel-request thead th,
+.admin-booking-page--light .guests-table thead th {
+  color: #687477;
+  background: #e5e1d8;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-booking-page--light .guests-table td:first-child,
+.admin-booking-page--light .guests-table-cancel-request td:first-child {
+  color: #253238;
+}
+
+.admin-booking-page--light .guests-table tbody tr,
+.admin-booking-page--light .guests-table-cancel-request tbody tr {
+  border-color: rgba(37, 50, 56, 0.1);
+}
+
+.admin-booking-page--light .guests-table tbody tr:hover,
+.admin-booking-page--light .guests-table-cancel-request tbody tr:hover {
+  background: rgba(37, 50, 56, 0.04);
+}
+
+.admin-booking-page--light .pagination-btn {
+  background: #fffdf8;
+  color: #8b651e;
+}
+
+.admin-booking-page--light .pagination-number.active {
+  background: #c8a96e;
+  color: #253238;
 }

@@ -833,3 +833,98 @@ body {
 }
 
 .calendar-button:hover { background: #bbad90; }
+
+.admin-dashboard-page--light {
+  color: #253238;
+}
+
+.admin-dashboard-page--light .dashboard-navbar,
+.admin-dashboard-page--light .drawer-panel,
+.admin-dashboard-page--light .mobile-topbar {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 1px 0 28px rgba(37, 50, 56, 0.1);
+}
+
+.admin-dashboard-page--light .dashboard-logo h1,
+.admin-dashboard-page--light .mobile-logo,
+.admin-dashboard-page--light .dasboard-admin-status h1,
+.admin-dashboard-page--light .dashboard-topbar-section h1,
+.admin-dashboard-page--light .dashboard-stat-title,
+.admin-dashboard-page--light .calendar-side-header h3,
+.admin-dashboard-page--light .calendar-side-title h1 {
+  color: #253238;
+}
+
+.admin-dashboard-page--light .dashboard-nav-links li a,
+.admin-dashboard-page--light .dashboard-nav-links li span,
+.admin-dashboard-page--light .dashboard-nav-links p,
+.admin-dashboard-page--light .section-label,
+.admin-dashboard-page--light .dashboard-stat-eyebrow,
+.admin-dashboard-page--light .calendar-side-title p,
+.admin-dashboard-page--light .calendar-day p {
+  color: #687477;
+}
+
+.admin-dashboard-page--light .dashboard-nav-links li:hover a,
+.admin-dashboard-page--light .dashboard-nav-links li:hover span,
+.admin-dashboard-page--light .dashboard-nav-links li.active a {
+  background: rgba(183, 139, 57, 0.12);
+  color: #8b651e;
+}
+
+.admin-dashboard-page--light .dasboard-admin-status,
+.admin-dashboard-page--light .drawer-panel .dasboard-admin-status {
+  background: #efebe2;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-dashboard-page--light .dashboard-main-section {
+  background: #eeece7;
+}
+
+.admin-dashboard-page--light .dashboard-topbar-section {
+  border-color: rgba(37, 50, 56, 0.14);
+}
+
+.admin-dashboard-page--light .dashboard-topbar-btn1 {
+  color: #8b651e;
+  border-color: rgba(139, 101, 30, 0.3);
+}
+
+.admin-dashboard-page--light .dashboard-topbar-btn1:hover {
+  background: rgba(183, 139, 57, 0.12);
+  border-color: #b78b39;
+  color: #6d4e16;
+}
+
+.admin-dashboard-page--light .dashboard-stat-card,
+.admin-dashboard-page--light .calendar-box,
+.admin-dashboard-page--light .calendar-side-info-container {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 0 12px 28px rgba(37, 50, 56, 0.06);
+}
+
+.admin-dashboard-page--light .calendar-select {
+  background: #fffdf8;
+  border-color: rgba(37, 50, 56, 0.18);
+  color: #253238;
+}
+
+.admin-dashboard-page--light .calendar-container,
+.admin-dashboard-page--light .calendar-legend-box,
+.admin-dashboard-page--light .calendar-legend-box-bottom {
+  background: #fffdf8;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-dashboard-page--light .calendar-side-header,
+.admin-dashboard-page--light .calendar-day,
+.admin-dashboard-page--light .sperate-calendar-table td {
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-dashboard-page--light .calendar-side-info p {
+  color: #253238;
+}

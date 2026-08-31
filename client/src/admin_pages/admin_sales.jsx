@@ -16,6 +16,8 @@ function AdminSales() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [bookingConfirmedSales, setBookingConfirmedSales] = useState(0);
     const [bookingCanceledLoss, setBookingCanceledLoss] = useState(0);
+    const [totalonlineBooking, setTotalOnlineBooking] = useState(0);
+    const [totalWalkInBooking, setTotalWalkInBooking] = useState(0);
     const [guestArrivals, setGuestArrivals] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -66,6 +68,8 @@ function AdminSales() {
 
                 let confirmedTotal = 0;
                 let canceledTotal = 0;
+                let onlineBookingTotal = 0;
+                let walkInBookingTotal = 0;
 
                 bookingData.forEach((booking) => {
                     const status = (booking.res_status || '').toLowerCase();
@@ -79,6 +83,11 @@ function AdminSales() {
 
                     if (status === 'confirmed' || status === 'complete') {
                         confirmedTotal += reservationRevenue;
+                        if (String(booking.booking_source || 'online').toLowerCase() === 'walkin') {
+                            walkInBookingTotal += reservationRevenue;
+                        } else {
+                            onlineBookingTotal += reservationRevenue;
+                        }
                     }
 
                     // Count a reservation as a cancellation loss only when a cancellation request/note exists
@@ -93,6 +102,8 @@ function AdminSales() {
                 setGuestSales(guestTotal);
                 setBookingConfirmedSales(confirmedTotal);
                 setBookingCanceledLoss(canceledTotal);
+                setTotalOnlineBooking(onlineBookingTotal);
+                setTotalWalkInBooking(walkInBookingTotal);
             } catch (err) {
                 console.error("Error fetching sales stats:", err);
                 Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to fetch sales statistics.' });
@@ -599,6 +610,34 @@ function AdminSales() {
                         </div>
                         </div>
 
+                        <div className="sales-stat-card soft-green">
+                        <div className="sales-stat-icon-row">
+                            <span className="sales-stat-icon soft-green">
+                            <i className="fa-solid fa-calendar-check"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <h2 className="sales-stat-title">
+                            {loading ? "..." : formatCurrency(totalonlineBooking)}
+                            </h2>
+                            <p className="sales-stat-eyebrow">online revenue</p>
+                        </div>
+                        </div>
+
+                        <div className="sales-stat-card soft-green">
+                        <div className="sales-stat-icon-row">
+                            <span className="sales-stat-icon soft-green">
+                            <i className="fa-solid fa-walking"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <h2 className="sales-stat-title">
+                            {loading ? "..." : formatCurrency(totalWalkInBooking)}
+                            </h2>
+                            <p className="sales-stat-eyebrow">walk-in revenue</p>
+                        </div>
+                        </div>
+
                     </div>  
 
                     
@@ -714,11 +753,11 @@ function AdminSales() {
                                 <div className="admin-sales-chart-card-header">
                                     <h2>{chartMode === 'month' ? 'Monthly' : chartMode === 'year' ? 'Yearly' : 'Daily'} Revenue</h2>
                                 </div>
-                                <div className="admin-sales-chart-card">
-                                    <Bar data={barChartData} options={barChartOptions} />
+                                    <div className="admin-sales-chart-card">
+                                        <Bar data={barChartData} options={barChartOptions} />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                     </div>
 
                     <p className="section-label">Revenue Sales Metrics</p>

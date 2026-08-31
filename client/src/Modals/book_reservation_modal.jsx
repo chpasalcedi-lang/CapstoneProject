@@ -207,7 +207,8 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                 ...values,
                 room_id: roomId,
                 room_price: normalizedPrice,
-                total_price: totalPrice
+                total_price: totalPrice,
+                source: 'online'
             });
 
             console.log('Success:', response.data);
@@ -274,19 +275,26 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                   <div className="book-reservation-form-row">
                     <div className="book-reservation-form-group">
                        <label>Check-in Date</label>
-                      <input type="date" value={values.check_in_date} min={getTodayISO()} onChange={handleCheckInDateChange} className="book-input" />
+                      <div className="book-date-input-wrap">
+                        <input type="date" value={values.check_in_date} min={getTodayISO()} onChange={handleCheckInDateChange} className="book-input" onClick={(event) => event.currentTarget.showPicker?.()} />
+                        <i className="fa-regular fa-calendar-days book-date-icon" aria-hidden="true"></i>
+                      </div>
                     </div>
                     <div className="book-reservation-form-group">
                         <label>Check-out Date</label>
-                        <input
-                          type="date"
-                          name="check_out_date"
-                          required
-                          min={values.check_in_date ? getTomorrowISO(values.check_in_date) : getTomorrowISO()}
-                          value={values.check_out_date}
-                          onChange={handleCheckOutDateChange}
-                          className="book-input"
-                        />
+                        <div className="book-date-input-wrap">
+                          <input
+                            type="date"
+                            name="check_out_date"
+                            required
+                            min={values.check_in_date ? getTomorrowISO(values.check_in_date) : getTomorrowISO()}
+                            value={values.check_out_date}
+                            onChange={handleCheckOutDateChange}
+                            className="book-input"
+                            onClick={(event) => event.currentTarget.showPicker?.()}
+                          />
+                          <i className="fa-regular fa-calendar-days book-date-icon" aria-hidden="true"></i>
+                        </div>
                       </div>
                   </div>
                   

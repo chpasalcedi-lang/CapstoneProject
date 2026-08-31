@@ -816,11 +816,16 @@ body {
 }
 
 .admin-guest-page--light .dashboard-navbar,
-.admin-guest-page--light .drawer-panel,
-.admin-guest-page--light .mobile-topbar {
+.admin-guest-page--light .drawer-panel {
   background: #f7f4ed;
   border-color: rgba(37, 50, 56, 0.12);
   box-shadow: 1px 0 28px rgba(37, 50, 56, 0.1);
+}
+
+.admin-guest-page--light .mobile-topbar {
+  background: #0c0c0c;
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: none;
 }
 
 .admin-guest-page--light .dashboard-logo h1,
@@ -830,6 +835,10 @@ body {
 .admin-guest-page--light .guests-table-container h1,
 .admin-guest-page--light .guests-table-container-cancel-request h1 {
   color: #253238;
+}
+
+.admin-guest-page--light .mobile-logo {
+  color: #f0ede8;
 }
 
 .admin-guest-page--light .dashboard-nav-links li a,

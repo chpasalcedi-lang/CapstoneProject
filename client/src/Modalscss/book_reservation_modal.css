@@ -192,6 +192,29 @@
   appearance: none;
 }
 
+.book-date-input-wrap {
+  position: relative;
+}
+
+.book-date-input-wrap .book-input {
+  padding-right: 42px;
+  cursor: pointer;
+}
+
+.book-date-input-wrap .book-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}
+
+.book-date-icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #000;
+  pointer-events: none;
+}
+
 .book-reservation-form-group input::placeholder,
 .book-reservation-form-group textarea::placeholder {
   color: #c4c9d4;

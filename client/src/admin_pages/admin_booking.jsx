@@ -256,13 +256,13 @@ function AdminBooking() {
         const search = searchTerm.toLowerCase();
         const fullName = `${booking.first_name || ''} ${booking.last_name || ''}`.toLowerCase();
         const roomNumber = (booking.room_number || '').toString().toLowerCase();
-        const bookingStatus = status;
+        const isRoomNumberSearch = /^\d+$/.test(search.trim());
 
-        return (
-            fullName.includes(search) ||
-            roomNumber.includes(search) ||
-            bookingStatus.includes(search)
-        );
+        if (isRoomNumberSearch) {
+            return roomNumber === search.trim();
+        }
+
+        return fullName.includes(search);
     });
 
     // Cancel requests list should show all bookings that submitted a cancel request
@@ -271,6 +271,14 @@ function AdminBooking() {
         const note = String(booking.cancel_notes_request || '').trim();
         return note.length > 0;
     });
+
+    const confirmedCount = bookings.filter((booking) => {
+        return (booking.res_status || '').toLowerCase() === 'confirmed';
+    }).length;
+    const cancelledCount = cancelRequestBookings.length;
+    const totalCancelledCount = bookings.filter((booking) => {
+        return (booking.res_status || '').toLowerCase() === 'cancelled';
+    }).length;
 
     // Pagination for bookings
     const totalBookingPages = Math.ceil(filteredBookings.length / itemsPerPage);
@@ -369,6 +377,20 @@ function AdminBooking() {
 
                     <div className="guests-topbar">
                         <h1>Booking Management</h1>
+                    </div>
+                    <div className="guests-stats-grid">
+                        <div className="booking-stat-card">
+                            <p className="booking-stat-label">Confirmed Bookings</p>
+                            <p className="booking-stat-value">{confirmedCount}</p>
+                        </div>
+                        <div className="booking-stat-card">
+                            <p className="booking-stat-label">Cancelled Requests</p>
+                            <p className="booking-stat-value">{cancelledCount}</p>
+                        </div>
+                        <div className="booking-stat-card">
+                            <p className="booking-stat-label">Total Cancelled</p>
+                            <p className="booking-stat-value">{totalCancelledCount}</p>
+                        </div>
                     </div>
 
                     <div className="guests-stats-grid">

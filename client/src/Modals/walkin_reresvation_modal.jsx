@@ -163,12 +163,15 @@ function AdminWalkinModal({ show, onClose }) {
             discount: discountValue,
             sub_total: totalPrice,
             status: 'confirmed',
+            source: 'walkin',
         })
         .then((res) => {
             console.log("Success:", res.data);
             setValues(initialValues);
             setDiscountEnabled(false);
             onClose();
+            localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
+            window.dispatchEvent(new Event('dashboardRefresh'));
             Swal.fire({ icon: 'success', title: 'Saved', text: 'Walk-in reservation saved successfully!' });
         })
         .catch((err) => {
@@ -227,11 +230,17 @@ function AdminWalkinModal({ show, onClose }) {
                             <div className="walkin-reservation-form-row">
                                 <div className="walkin-reservation-form-group">
                                 <label>Check-in Date</label>
-                                <input type="date" name="check_in_date" required value={values.check_in_date} onChange={handleChange} className="walkin-input" />
+                                <div className="walkin-date-input-wrap">
+                                    <input type="date" name="check_in_date" required value={values.check_in_date} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} className="walkin-input" />
+                                    <i className="fa-regular fa-calendar-days walkin-date-icon" aria-hidden="true"></i>
+                                </div>
                                 </div>
                                 <div className="walkin-reservation-form-group">
                                     <label>Check-out Date</label>
-                                    <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} className="walkin-input" />
+                                    <div className="walkin-date-input-wrap">
+                                        <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} className="walkin-input" />
+                                        <i className="fa-regular fa-calendar-days walkin-date-icon" aria-hidden="true"></i>
+                                    </div>
                                 </div>
                             </div>
                             <div className="walkin-reservation-form-group">

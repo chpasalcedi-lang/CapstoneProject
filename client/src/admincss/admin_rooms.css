@@ -698,6 +698,51 @@ body {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
+
+  .rooms-stats-checker {
+    padding: 18px 16px 16px;
+  }
+
+  .rooms-stats-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rooms-stats-controls {
+    width: 100%;
+    max-width: none;
+  }
+
+  .rooms-stats-controls input {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .rooms-stats-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rooms-stats-searchbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rooms-stats-search-input {
+    flex: 0 0 42px;
+    width: 100%;
+    height: 42px;
+    max-width: none;
+    min-width: 0;
+    margin-left: 0;
+    box-sizing: border-box;
+  }
+
+  .rooms-stats-item {
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 540px) {

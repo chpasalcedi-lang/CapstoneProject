@@ -120,7 +120,18 @@ class Server {
 
         this.setupMiddleware();
         this.setupRoutes();
+        this.reservationSourceReady = this.ensureReservationSourceColumn();
         this.db.verifyConnection();
+    }
+
+    async ensureReservationSourceColumn() {
+        try {
+            await this.db.query("ALTER TABLE reservations ADD COLUMN booking_source VARCHAR(20) NOT NULL DEFAULT 'online'");
+        } catch (error) {
+            if (!String(error.message || '').includes('Duplicate column')) {
+                console.error('Unable to prepare reservation source column:', error.message);
+            }
+        }
     }
 
     setupMiddleware() {
@@ -435,11 +446,13 @@ class ReservationController {
 
     async addReservation(req, res) {
         try {
+            await this.reservationSourceReady;
             const roomId = req.body.room_id;
             const checkIn = req.body.check_in_date;
             const checkOut = req.body.check_out_date;
             const roomPrice = this.parsePrice(req.body.room_price);
             const totalPrice = this.parsePrice(req.body.total_price);
+            const bookingSource = req.body.source === 'walkin' ? 'walkin' : 'online';
             const values = [
                 this.crypto.encrypt(req.body.last_name || ''),
                 this.crypto.encrypt(req.body.first_name || ''),
@@ -465,8 +478,8 @@ class ReservationController {
                 }
             }
 
-            const insertSql = 'INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price, total_price, discount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-            const result = await this.db.query(insertSql, values);
+            const insertSql = 'INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price, total_price, discount, booking_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const result = await this.db.query(insertSql, [...values, bookingSource]);
             return res.status(200).json({ message: 'Reservation saved successfully!', reservationId: result.insertId });
         } catch (error) {
             console.error('Error adding reservation:', error);

@@ -136,6 +136,29 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
+.booking-date-input-wrap {
+  position: relative;
+}
+
+.booking-date-input-wrap .booking-input {
+  padding-right: 42px;
+  cursor: pointer;
+}
+
+.booking-date-input-wrap .booking-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}
+
+.booking-date-icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #000;
+  pointer-events: none;
+}
+
 .booking-btn {
   width: 100%;
   padding: 16px 24px;

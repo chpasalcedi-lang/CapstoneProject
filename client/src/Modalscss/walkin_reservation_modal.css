@@ -124,6 +124,29 @@
   color: #d3d3d3;
 }
 
+.walkin-date-input-wrap {
+  position: relative;
+}
+
+.walkin-date-input-wrap .walkin-input {
+  padding-right: 42px;
+  cursor: pointer;
+}
+
+.walkin-date-input-wrap .walkin-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}
+
+.walkin-date-icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #f5f3ee;
+  pointer-events: none;
+}
+
 .walkin-reservation-form-group input,
 .walkin-reservation-form-group select,
 .walkin-reservation-form-group textarea {

@@ -185,7 +185,7 @@ function ResBook() {
       Swal.fire({
         icon: 'warning',
         title: 'Room unavailable',
-        text: 'Sorry, this room is not available. Please choose other dates using the check availability form above.',
+        text: 'Sorry, this room is not available this day. Please choose other dates using the check availability form above.',
       });
       return;
     }
@@ -527,10 +527,14 @@ function ResBook() {
             <div className="booking-search-bar">
               <div className="booking-field">
                 <label className="booking-field-label">check-dates</label>
-                <input type="date" className="booking-input" value={checkIn} 
-                min={new Date().toISOString().slice(0,10)} 
-                onChange={handleCheckInChange} 
-                placeholder="Select check-in date"/>
+                <div className="booking-date-input-wrap">
+                  <input type="date" className="booking-input" value={checkIn}
+                  min={new Date().toISOString().slice(0,10)}
+                  onChange={handleCheckInChange}
+                  onClick={(event) => event.currentTarget.showPicker?.()}
+                  aria-label="Select check-in date" />
+                  <i className="fa-regular fa-calendar-days booking-date-icon" aria-hidden="true"></i>
+                </div>
               </div>
 
               <div className="booking-field">

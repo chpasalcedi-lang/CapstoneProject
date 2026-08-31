@@ -242,6 +242,8 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .admin-profile-topbar-btn {
@@ -257,7 +259,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
-  white-space: nowrap;    
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .admin-profile-topbar-btn:hover {
@@ -768,6 +771,18 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 18px;
+  }
+
+  .admin-profile-topbar > div {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .admin-profile-topbar-btn {
+    flex: 1 1 30%;
+    min-width: 110px;
+    text-align: center;
+    padding: 10px 12px;
   }
 
   .admin-sales-metrics,

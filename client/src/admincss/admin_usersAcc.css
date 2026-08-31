@@ -544,11 +544,16 @@
 }
 
 .admin-users-page--light .dashboard-navbar,
-.admin-users-page--light .drawer-panel,
-.admin-users-page--light .mobile-topbar {
+.admin-users-page--light .drawer-panel {
   background: #f7f4ed;
   border-color: rgba(37, 50, 56, 0.12);
   box-shadow: 1px 0 28px rgba(37, 50, 56, 0.1);
+}
+
+.admin-users-page--light .mobile-topbar {
+  background: #0c0c0c;
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: none;
 }
 
 .admin-users-page--light .dashboard-logo h1,
@@ -558,6 +563,10 @@
 .admin-users-page--light .admin-users-table-title,
 .admin-users-page--light .admin-users-table td:first-child {
   color: #253238;
+}
+
+.admin-users-page--light .mobile-logo {
+  color: #f0ede8;
 }
 
 .admin-users-page--light .dashboard-nav-links li a,

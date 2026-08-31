@@ -106,14 +106,9 @@ function AdminProfile() {
         setIsLightMode((prev) => {
             const nextModeIsLight = !prev;
             localStorage.setItem('adminTheme', nextModeIsLight ? 'light' : 'dark');
-            document.documentElement.dataset.theme = nextModeIsLight ? 'light' : 'dark';
             return nextModeIsLight;
         });
     };
-
-    useEffect(() => {
-        document.documentElement.dataset.theme = isLightMode ? 'light' : 'dark';
-    }, [isLightMode]);
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;

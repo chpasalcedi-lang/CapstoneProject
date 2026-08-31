@@ -861,7 +861,7 @@ function AdminSales() {
                                     
                                 </div>
                                 <div className="admin-sales-chart-card-header">
-                                    <h2>{chartMode === 'month' ? 'Monthly' : chartMode === 'year' ? 'Yearly' : 'Daily'} Revenue</h2>
+                                    <h2>{pieChartMode === 'month' ? 'Monthly' : pieChartMode === 'year' ? 'Yearly' : 'Daily'} Revenue</h2>
                                 </div>
                                 <div className="admin-sales-chart-card-box">
                                     <div className="admin-sales-chart-card-stats">

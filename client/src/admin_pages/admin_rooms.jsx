@@ -305,7 +305,18 @@ function AdminRooms() {
                             </div>
                             <div className="rooms-stats-controls">
                                 <span>Date</span>
-                                <input type="date" value={checkerDate} onChange={(e) => setCheckerDate(e.target.value)}/>
+                                <div className="rooms-date-input-wrap">
+                                    <input
+                                        type="date"
+                                        value={checkerDate}
+                                        onChange={(e) => setCheckerDate(e.target.value)}
+                                        onClick={(event) => event.currentTarget.showPicker?.()}
+                                        className={checkerDate ? 'has-value' : ''}
+                                        aria-label="Select room checker date"
+                                    />
+                                    {!checkerDate && <span className="rooms-date-placeholder">dd/mm/yyyy</span>}
+                                    <i className="fa-regular fa-calendar-days rooms-date-icon" aria-hidden="true"></i>
+                                </div>
                             </div>
                         </div>
 

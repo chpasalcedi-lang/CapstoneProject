@@ -297,6 +297,36 @@
 	align-items: center;
 }
 
+.pie-day-input-wrap {
+	position: relative;
+	min-width: 140px;
+}
+
+.pie-day-input-wrap input {
+	width: 100%;
+	color: transparent;
+	padding-right: 42px;
+}
+
+.pie-day-input-wrap span {
+	position: absolute;
+	top: 50%;
+	left: 12px;
+	transform: translateY(-50%);
+	color: #f0ede8;
+	font-size: 0.95rem;
+	pointer-events: none;
+}
+
+.pie-day-icon {
+	position: absolute;
+	top: 50%;
+	right: 12px;
+	transform: translateY(-50%);
+	color: #f0ede8;
+	pointer-events: none;
+}
+
 /* Styled select and date input inside the chart controls */
 .admin-sales-chart-selects select,
 .admin-sales-chart-selects input[type="date"],
@@ -456,6 +486,25 @@
 	width: 100%;
 }
 
+.admin-sales-revenue-chart-scroll {
+	width: 100%;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.admin-sales-revenue-chart-scroll::-webkit-scrollbar {
+	height: 8px;
+}
+
+.admin-sales-revenue-chart-scroll::-webkit-scrollbar-thumb {
+	background: rgba(200,169,110,0.65);
+	border-radius: 8px;
+}
+
+.admin-sales-revenue-chart-scroll::-webkit-scrollbar-track {
+	background: rgba(255,255,255,0.06);
+}
+
 @media (max-width: 1100px) {
 	.sales-stats-grid { 
 		grid-template-columns: repeat(2,1fr); 
@@ -494,7 +543,6 @@
 
   .dashboard-nav-content {
     flex-direction: row;
-    align-items: center;
     gap: 20px;
     height: auto;
   }
@@ -525,6 +573,122 @@
   .admin-sales-topbar h1 { 
 	font-size: 30px; 
   }
+}
+
+@media (max-width: 450px) {
+	.admin-sales-revenue-chart-scroll .admin-sales-chart-card {
+		min-width: 520px;
+	}
+
+	.admin-sales-revenue-controls {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.admin-sales-revenue-controls > div:first-child {
+		width: 100%;
+		gap: 6px;
+	}
+
+	.admin-sales-revenue-controls > div:first-child button {
+		flex: 1 1 0;
+		min-width: 0;
+		padding: 9px 10px;
+		font-size: 0.82rem;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-card-header-stats-btn-nav {
+		width: 100%;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: nowrap;
+		gap: 8px;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-selects {
+		flex: 1 1 auto;
+		width: 100%;
+		min-width: 0;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-selects select,
+	.admin-sales-revenue-controls .admin-sales-chart-selects .year-search-dropdown,
+	.admin-sales-revenue-controls .admin-sales-chart-selects .year-search-input {
+		min-width: 0;
+		width: 100%;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-card-header-stats-btn-nav-btns {
+		flex: 0 0 auto;
+	}
+
+	.admin-sales-pie-controls {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.admin-sales-pie-controls > div:first-child {
+		width: 100%;
+		gap: 6px;
+	}
+
+	.admin-sales-pie-controls > div:first-child button {
+		flex: 1 1 0;
+		min-width: 0;
+		padding: 9px 10px;
+		font-size: 0.82rem;
+	}
+
+	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav {
+		width: 100%;
+		justify-content: space-between;
+		flex-wrap: nowrap;
+		gap: 8px;
+	}
+
+	.admin-sales-pie-controls .admin-sales-chart-selects {
+		flex: 1 1 auto;
+		min-width: 0;
+		width: 100%;
+	}
+
+	.admin-sales-pie-controls .pie-day-input-wrap {
+		flex: 1 1 0;
+		min-width: 0;
+		width: 100%;
+	}
+
+	.admin-sales-pie-controls .pie-month-dropdown {
+		flex: 1 1 0;
+		min-width: 0;
+		width: 100%;
+	}
+
+	.admin-sales-pie-controls .pie-period-dropdown {
+		flex: 1 1 0;
+		min-width: 0;
+		width: 100%;
+	}
+
+	.admin-sales-pie-controls .admin-sales-chart-selects select,
+	.admin-sales-pie-controls .admin-sales-chart-selects input[type="date"],
+	.admin-sales-pie-controls .admin-sales-chart-selects .year-search-dropdown,
+	.admin-sales-pie-controls .admin-sales-chart-selects .year-search-input {
+		min-width: 0;
+		width: 100%;
+	}
+
+	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav-btns {
+		flex: 0 0 auto;
+	}
+
+	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav-btns button {
+		width: 36px;
+		height: 36px;
+	}
 }
 
 /* Searchable year dropdown styles */
@@ -647,6 +811,14 @@
 .admin-sales-page--light .year-search-input {
 	background: #fffdf8;
 	border-color: rgba(37, 50, 56, 0.18);
+	color: #253238;
+}
+
+.admin-sales-page--light .pie-day-input-wrap span {
+	color: #253238;
+}
+
+.admin-sales-page--light .pie-day-icon {
 	color: #253238;
 }
 

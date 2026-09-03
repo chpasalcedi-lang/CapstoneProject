@@ -199,6 +199,21 @@
 .book-date-input-wrap .book-input {
   padding-right: 42px;
   cursor: pointer;
+  color: transparent;
+}
+
+.book-date-input-wrap .book-input.has-value {
+  color: #111827;
+}
+
+.book-date-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: #111827;
+  font-size: 0.95rem;
+  pointer-events: none;
 }
 
 .book-date-input-wrap .book-input::-webkit-calendar-picker-indicator {

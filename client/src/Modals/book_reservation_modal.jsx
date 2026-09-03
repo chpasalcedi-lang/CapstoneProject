@@ -276,7 +276,8 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                     <div className="book-reservation-form-group">
                        <label>Check-in Date</label>
                       <div className="book-date-input-wrap">
-                        <input type="date" value={values.check_in_date} min={getTodayISO()} onChange={handleCheckInDateChange} className="book-input" onClick={(event) => event.currentTarget.showPicker?.()} />
+                        <input type="date" value={values.check_in_date} min={getTodayISO()} onChange={handleCheckInDateChange} className={`book-input ${values.check_in_date ? 'has-value' : ''}`} onClick={(event) => event.currentTarget.showPicker?.()} />
+                        {!values.check_in_date && <span className="book-date-placeholder">dd/mm/yyyy</span>}
                         <i className="fa-regular fa-calendar-days book-date-icon" aria-hidden="true"></i>
                       </div>
                     </div>
@@ -290,9 +291,10 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                             min={values.check_in_date ? getTomorrowISO(values.check_in_date) : getTomorrowISO()}
                             value={values.check_out_date}
                             onChange={handleCheckOutDateChange}
-                            className="book-input"
+                            className={`book-input ${values.check_out_date ? 'has-value' : ''}`}
                             onClick={(event) => event.currentTarget.showPicker?.()}
                           />
+                          {!values.check_out_date && <span className="book-date-placeholder">dd/mm/yyyy</span>}
                           <i className="fa-regular fa-calendar-days book-date-icon" aria-hidden="true"></i>
                         </div>
                       </div>

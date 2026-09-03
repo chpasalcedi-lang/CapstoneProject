@@ -650,7 +650,7 @@ function AdminSales() {
                             <div className="admin-sales-chart-card-container">
                                 
 
-                                <div className="admin-sales-chart-card-header-stats-btn">
+                                <div className="admin-sales-chart-card-header-stats-btn admin-sales-revenue-controls">
                                     <div>
                                         <button className={chartMode === 'month' ? 'active' : ''} onClick={() => handleSetChartMode('month')}>
                                             Month
@@ -767,7 +767,7 @@ function AdminSales() {
                             <div className="admin-sales-chart-card-container">
                                 
 
-                                        <div className="admin-sales-chart-card-header-stats-btn">
+                                        <div className="admin-sales-chart-card-header-stats-btn admin-sales-pie-controls">
                                     <div>
                                         <button className={pieChartMode === 'month' ? 'active' : ''} onClick={() => handleSetChartModePie('month')}>
                                             Month
@@ -817,35 +817,53 @@ function AdminSales() {
 
                                         {pieChartMode === 'year' && (
                                             <div className="admin-sales-chart-selects">
-                                                <select
-                                                    aria-label="Select pie year"
-                                                    value={pieSelectedYear}
-                                                    onChange={(e) => setPieSelectedYear(Number(e.target.value))}
-                                                >
-                                                    {yearLabels.map((y) => (
-                                                        <option key={y} value={Number(y)}>{y}</option>
-                                                    ))}
-                                                </select>
+                                                <div ref={pieYearContainerRef} className="year-search-dropdown">
+                                                    <input
+                                                        aria-label="Select pie year"
+                                                        className="year-search-input"
+                                                        value={pieYearSearchQuery || String(pieSelectedYear)}
+                                                        onChange={(e) => { setPieYearSearchQuery(e.target.value); setShowPieYearDropdown(true); }}
+                                                        onFocus={() => { setShowPieYearDropdown(true); setPieYearSearchQuery(''); }}
+                                                    />
+                                                    {showPieYearDropdown && (
+                                                        <ul className="year-dropdown-list">
+                                                            {yearLabels
+                                                                .filter((year) => year.includes(pieYearSearchQuery))
+                                                                .map((year) => (
+                                                                    <li key={year} className={Number(year) === pieSelectedYear ? 'active' : ''} onClick={() => { setPieSelectedYear(Number(year)); setShowPieYearDropdown(false); setPieYearSearchQuery(''); }}>
+                                                                        {year}
+                                                                    </li>
+                                                                ))}
+                                                        </ul>
+                                                    )}
+                                                </div>
                                             </div>
                                         )}
 
                                         {pieChartMode === 'day' && (
                                             <div className="admin-sales-chart-selects">
-                                                <input
-                                                    type="date"
-                                                    aria-label="Pick a pie day"
-                                                    value={`${pieSelectedYear.toString().padStart(4,'0')}-${String(pieSelectedMonthIndex+1).padStart(2,'0')}-${String(pieSelectedDay).padStart(2,'0')}`}
-                                                    onChange={(e) => {
-                                                        const v = e.target.value;
-                                                        if (!v) return;
-                                                        const d = new Date(v);
-                                                        if (!Number.isNaN(d.getTime())) {
-                                                            setPieSelectedYear(d.getFullYear());
-                                                            setPieSelectedMonthIndex(d.getMonth());
-                                                            setPieSelectedDay(d.getDate());
-                                                        }
-                                                    }}
-                                                />
+                                                <div className="pie-day-input-wrap">
+                                                    <input
+                                                        type="date"
+                                                        aria-label="Pick a pie day"
+                                                        value={`${pieSelectedYear.toString().padStart(4,'0')}-${String(pieSelectedMonthIndex+1).padStart(2,'0')}-${String(pieSelectedDay).padStart(2,'0')}`}
+                                                        onClick={(event) => event.currentTarget.showPicker?.()}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value;
+                                                            if (!v) return;
+                                                            const d = new Date(v);
+                                                            if (!Number.isNaN(d.getTime())) {
+                                                                setPieSelectedYear(d.getFullYear());
+                                                                setPieSelectedMonthIndex(d.getMonth());
+                                                                setPieSelectedDay(d.getDate());
+                                                            }
+                                                        }}
+                                                    />
+                                                    <span>
+                                                        {String(pieSelectedDay).padStart(2, '0')}/{String(pieSelectedMonthIndex + 1).padStart(2, '0')}/{pieSelectedYear}
+                                                    </span>
+                                                    <i className="fa-regular fa-calendar-days pie-day-icon" aria-hidden="true"></i>
+                                                </div>
                                             </div>
                                         )}
 

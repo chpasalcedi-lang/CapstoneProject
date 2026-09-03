@@ -131,6 +131,21 @@
 .walkin-date-input-wrap .walkin-input {
   padding-right: 42px;
   cursor: pointer;
+  color: transparent;
+}
+
+.walkin-date-input-wrap .walkin-input.has-value {
+  color: #f5f3ee;
+}
+
+.walkin-date-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #f5f3ee;
+  font-size: 0.9rem;
+  pointer-events: none;
 }
 
 .walkin-date-input-wrap .walkin-input::-webkit-calendar-picker-indicator {

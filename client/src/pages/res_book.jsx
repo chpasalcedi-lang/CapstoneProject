@@ -528,11 +528,12 @@ function ResBook() {
               <div className="booking-field">
                 <label className="booking-field-label">check-dates</label>
                 <div className="booking-date-input-wrap">
-                  <input type="date" className="booking-input" value={checkIn}
+                  <input type="date" className={`booking-input ${checkIn ? 'has-value' : ''}`} value={checkIn}
                   min={new Date().toISOString().slice(0,10)}
                   onChange={handleCheckInChange}
                   onClick={(event) => event.currentTarget.showPicker?.()}
                   aria-label="Select check-in date" />
+                  {!checkIn && <span className="booking-date-placeholder">dd/mm/yyyy</span>}
                   <i className="fa-regular fa-calendar-days booking-date-icon" aria-hidden="true"></i>
                 </div>
               </div>

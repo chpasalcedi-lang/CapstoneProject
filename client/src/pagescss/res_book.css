@@ -143,6 +143,21 @@ body {
 .booking-date-input-wrap .booking-input {
   padding-right: 42px;
   cursor: pointer;
+  color: transparent;
+}
+
+.booking-date-input-wrap .booking-input.has-value {
+  color: #333;
+}
+
+.booking-date-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: #333;
+  font-size: 0.95rem;
+  pointer-events: none;
 }
 
 .booking-date-input-wrap .booking-input::-webkit-calendar-picker-indicator {
@@ -554,6 +569,11 @@ body {
     min-height: calc(100vh - 420px);
   }
 
+  .booking-results-content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .booking-results-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
@@ -626,7 +646,7 @@ body {
   }
 
   .booking-results-area {
-    padding: 92px 32px 80px;
+    padding: 92px 16px 80px;
     margin-top: 0;
     width: 100%;
     min-height: calc(100vh - 420px);

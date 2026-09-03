@@ -231,14 +231,16 @@ function AdminWalkinModal({ show, onClose }) {
                                 <div className="walkin-reservation-form-group">
                                 <label>Check-in Date</label>
                                 <div className="walkin-date-input-wrap">
-                                    <input type="date" name="check_in_date" required value={values.check_in_date} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} className="walkin-input" />
+                                    <input type="date" name="check_in_date" required value={values.check_in_date} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} className={`walkin-input ${values.check_in_date ? 'has-value' : ''}`} />
+                                    {!values.check_in_date && <span className="walkin-date-placeholder">dd/mm/yyyy</span>}
                                     <i className="fa-regular fa-calendar-days walkin-date-icon" aria-hidden="true"></i>
                                 </div>
                                 </div>
                                 <div className="walkin-reservation-form-group">
                                     <label>Check-out Date</label>
                                     <div className="walkin-date-input-wrap">
-                                        <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} className="walkin-input" />
+                                        <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} className={`walkin-input ${values.check_out_date ? 'has-value' : ''}`} />
+                                        {!values.check_out_date && <span className="walkin-date-placeholder">dd/mm/yyyy</span>}
                                         <i className="fa-regular fa-calendar-days walkin-date-icon" aria-hidden="true"></i>
                                     </div>
                                 </div>

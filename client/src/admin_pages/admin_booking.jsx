@@ -445,64 +445,63 @@ function AdminBooking() {
 
                     <div className="guests-table-container">
                         <h1>Recent Bookings</h1>
-                        {loading ? (
-                            <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>Loading bookings...</p>
-                        ) : filteredBookings.length === 0 ? (
-                            <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>No bookings found.</p>
-                        ) : (
-                            <>
-                                <div className="guests-table-wrapper">
-                                    <table className="guests-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Guest</th>
-                                                <th>Room</th>
-                                                <th>Check-in</th>
-                                                <th>Check-out</th>
-                                                <th>Discount</th>
-                                                <th>Total Price</th>
-                                                <th>Status</th>
-                                                <th className="actions-header">Actions</th>
+                        <div className="guests-table-wrapper">
+                            <table className="guests-table">
+                                <thead>
+                                    <tr>
+                                        <th>Guest</th>
+                                        <th>Room</th>
+                                        <th>Check-in</th>
+                                        <th>Check-out</th>
+                                        <th>Discount</th>
+                                        <th>Total Price</th>
+                                        <th>Status</th>
+                                        <th className="actions-header">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                                Loading bookings...
+                                            </td>
+                                        </tr>
+                                    ) : filteredBookings.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                                No bookings found.
+                                            </td>
+                                        </tr>
+                                    ) : paginatedBookings.map((booking) => {
+                                        const status = (booking.res_status || 'pending').toLowerCase();
+                                        return (
+                                            <tr key={booking.id}>
+                                                <td>{booking.first_name} {booking.last_name}</td>
+                                                <td>{booking.room_number}</td>
+                                                <td>{formatBookingDate(booking.check_in_date)}</td>
+                                                <td>{formatBookingDate(booking.check_out_date)}</td>
+                                                <td>{booking.discount !== undefined && booking.discount !== null ? `${booking.discount}%` : '0%'}</td>
+                                                <td>₱{formatCurrency(booking.total_price)}</td>
+                                                <td>
+                                                    <span className={`status-${status}`}>
+                                                        {booking.res_status || 'pending'}
+                                                    </span>
+                                                </td>
+                                                <td className="actions-cell">
+                                                    <button className="btn guest btn-primary" onClick={() => handleView(booking)}>view</button>
+                                                    <button className="btn guest btn-primary" onClick={() => handleConfirm(booking)}
+                                                        disabled={['cancelled', 'complete'].includes(status)}>
+                                                        {status === 'pending' ? 'Confirm' : 'Done'}
+                                                    </button>
+                                                    <button className="btn guest btn-danger" onClick={() => handleCancel(booking)}
+                                                        disabled={['cancelled', 'complete'].includes(status)}>cancel</button>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {paginatedBookings.map((booking) => {
-                                                const status = (booking.res_status || 'pending').toLowerCase();
-                                                return (
-                                                    <tr key={booking.id}>
-                                                        <td>{booking.first_name} {booking.last_name}</td>
-                                                        <td>{booking.room_number}</td>
-                                                        <td>{formatBookingDate(booking.check_in_date)}</td>
-                                                        <td>{formatBookingDate(booking.check_out_date)}</td>
-                                                        <td>{booking.discount !== undefined && booking.discount !== null ? `${booking.discount}%` : '0%'}</td>
-                                                        <td>₱{formatCurrency(booking.total_price)}</td>
-                                                        <td>
-                                                            <span className={`status-${status}`}>
-                                                                {booking.res_status || 'pending'}
-                                                            </span>
-                                                        </td>
-                                                        <td className="actions-cell">
-                                                            <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
-                                                                view
-                                                            </button>
-                                                            <button className="btn guest btn-primary"onClick={() => handleConfirm(booking)} 
-                                                                disabled={['cancelled', 'complete'].includes(status)} >
-                                                                {status === 'pending' ? 'Confirm' : 'Done'}
-                                                            </button>
-                                                            <button className="btn guest btn-danger"onClick={() => handleCancel(booking)}
-                                                                 disabled={['cancelled', 'complete'].includes(status)} >
-                                                                cancel
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                            </>
-                        )}
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     {filteredBookings.length > 0 && (
                                     <div className="pagination-container">
@@ -542,14 +541,8 @@ function AdminBooking() {
                                 )}
                     <div className="guests-table-container-cancel-request">
                         <h1>Recent Cancel Requests</h1>
-                        {loading ? (
-                            <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>Loading cancel requests...</p>
-                        ) : cancelRequestBookings.length === 0 ? (
-                            <p style={{ padding: '20px', color: '#f0ede8' , textAlign: 'center' }}>No cancel requests found.</p>
-                        ) : (
-                            <>
-                                <div className="guests-table-wrapper-cancel-request">
-                                    <table className="guests-table-cancel-request">
+                        <div className="guests-table-wrapper-cancel-request">
+                            <table className="guests-table-cancel-request">
                                         <thead>
                                             <tr>
                                                 <th>Guest</th>
@@ -562,7 +555,19 @@ function AdminBooking() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {paginatedCancelRequests.map((booking) => {
+                                            {loading ? (
+                                                <tr>
+                                                    <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                                        Loading cancel requests...
+                                                    </td>
+                                                </tr>
+                                            ) : cancelRequestBookings.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                                        No cancel requests found.
+                                                    </td>
+                                                </tr>
+                                            ) : paginatedCancelRequests.map((booking) => {
                                                 const status = (booking.res_status || 'pending').toLowerCase();
                                                 return (
                                                     <tr key={booking.id}>
@@ -589,10 +594,8 @@ function AdminBooking() {
                                                 );
                                             })}
                                         </tbody>
-                                    </table>
-                                </div>
-                            </>
-                        )}
+                            </table>
+                        </div>
                     </div>
 
                     {cancelRequestBookings.length > 0 && (

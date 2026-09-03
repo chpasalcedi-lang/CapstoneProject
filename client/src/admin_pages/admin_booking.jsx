@@ -7,7 +7,7 @@ import "../admincss/admin_boking.css";
 import ViewBookingModal from "../Modals/view_booking_modal.jsx";
 
 // EmailJS API key
-emailjs.init("VuQPGuRo7jAh72RA6");
+emailjs.init("-Vq78NrvG691mgYQ3");
 
 function AdminBooking() {
     const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
@@ -124,8 +124,11 @@ function AdminBooking() {
             await apiClient.post(`/update_reservation/${booking.id}`, { status: targetStatus });
 
             if (currentStatus === 'pending') {
+                const recipientEmail = String(booking.email || '').trim();
                 const templateParams = {
-                    email: booking.email,
+                    email: recipientEmail,
+                    to_email: recipientEmail,
+                    reply_to: recipientEmail,
                     guest_name: `${booking.first_name} ${booking.last_name}`,
                     room_number: booking.room_number,
                     check_in_date: new Date(booking.check_in_date).toLocaleDateString(),
@@ -135,15 +138,20 @@ function AdminBooking() {
                 };
 
                 try {
+                    if (!/^\S+@\S+\.\S+$/.test(recipientEmail)) {
+                        throw new Error(`Invalid guest email address: ${recipientEmail || 'missing'}`);
+                    }
                     await emailjs.send(
                         "service_9fw39gp",
                         "template_wba3f1m",
-                        templateParams
+                        templateParams,
+                        "-Vq78NrvG691mgYQ3"
                     );
                     Swal.fire({ icon: 'success', title: 'Confirmed', text: 'Reservation confirmed and email sent to guest.' });
                 } catch (emailErr) {
-                    console.error('Email send error:', emailErr);
-                    Swal.fire({ icon: 'warning', title: 'Confirmed', text: 'Reservation confirmed but email failed to send.' });
+                    const errorText = emailErr?.text || emailErr?.message || 'Unknown EmailJS error';
+                    console.error('Email send error:', emailErr?.status, errorText, emailErr);
+                    Swal.fire({ icon: 'warning', title: 'Confirmed', text: `Reservation confirmed, but email failed: ${errorText}` });
                 }
             } else if (targetStatus === 'complete') {
                 Swal.fire({ icon: 'success', title: 'Complete', text: 'Reservation marked complete.' });

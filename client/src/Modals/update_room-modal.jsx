@@ -35,6 +35,7 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
         room_status: "",
         room_label: ""
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const normalizeRoomPriceValue = (value) => {
         const raw = String(value || '');
@@ -79,8 +80,9 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
         const updateData = {
             room_name: values.room_name,
             room_number: values.room_number,
@@ -90,17 +92,19 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
             room_status: values.room_status,
             room_label: values.room_label
         };
-        apiClient.post(`/update_rooms/${values.id}`, updateData)
-            .then((res) => {
+        setIsSubmitting(true);
+        try {
+            const res = await apiClient.post(`/update_rooms/${values.id}`, updateData);
                 console.log("Updated:", res.data);
                 Swal.fire({ icon: 'success', title: 'Saved', text: 'Room updated successfully!' });
                 setShowModal(false);
                 if (typeof refreshData === 'function') refreshData();
-            })
-            .catch((err) => {
-                console.error("Error sa pag-update:", err.response?.data || err.message);
-                Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.error || err.message });
-            });
+        } catch (err) {
+            console.error("Error sa pag-update:", err.response?.data || err.message);
+            Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.error || err.message });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const closeModal = () => setShowModal(false);
@@ -111,7 +115,7 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
                 <div className="edit-room-form-card">
                     <div className="edit-room-modal-header">
                         <h2 className="edit-room-modal-title">Update Room</h2>
-                        <button className="edit-room-modal-close" type="button" onClick={closeModal}>
+                        <button className="edit-room-modal-close modal-submit-close" type="button" onClick={closeModal} disabled={isSubmitting}>
                             <i className="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -190,8 +194,10 @@ function EditRoomModal({ showModal, setShowModal, refreshData, roomData }) {
                         </form>
                     </div>
                     <div className="edit-room-modal-footer">
-                        <button type="button" className="edit-room-btn-cancel" onClick={closeModal}>Cancel</button>
-                        <button type="submit" form="edit-room-form" className="edit-room-btn-save">Update Room</button>
+                        <button type="button" className="edit-room-btn-cancel modal-submit-cancel" onClick={closeModal} disabled={isSubmitting}>Cancel</button>
+                        <button type="submit" form="edit-room-form" className="edit-room-btn-save modal-submit-button" disabled={isSubmitting}>
+                            {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Updating...</> : 'Update Room'}
+                        </button>
                     </div>
 
                 </div>

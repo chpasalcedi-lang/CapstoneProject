@@ -55,6 +55,7 @@
   text-transform: uppercase;
   white-space: nowrap;
   text-decoration: none;
+  display: inline-block;
 }
 
 .add-guest-topbar-btn1:hover {
@@ -117,18 +118,22 @@
 
 .total-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
+  gap: 6px;
   padding: 0;
   background: transparent;
   border: none;
 }
 
 .total-row .total-count {
-  font-size: 16px;
+  width: 100%;
+  text-align: center;
+  font-size: 2.4rem;
   font-weight: 700;
   color: #d5d5d5;
+  line-height: 1;
 }
 
 .add-form-group label {
@@ -428,6 +433,18 @@
   .total-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-guest-topbar-btns {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .add-guest-topbar-btn1 {
+    flex: 1;
+    text-align: center;
   }
 }
 

@@ -4,6 +4,7 @@ import "../Modalscss/update_userAcc_modal.css";
 
 function UpdateAccountModal({ show, onClose, onSave, initialData }) {
     const [formData, setFormData] = React.useState({ name: '', email: '', password: '', confirmPassword: '', role: '' });
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     React.useEffect(() => {
         if (show && initialData) {
@@ -24,18 +25,24 @@ function UpdateAccountModal({ show, onClose, onSave, initialData }) {
 
     const handleSubmit = async (e) => {
         if (e && e.preventDefault) e.preventDefault();
+        if (isSubmitting) return;
         if (!formData.name || !formData.email || !formData.role) {
             return;
         }
         if (formData.password && formData.password !== formData.confirmPassword) {
             return;
         }
-        await onSave({
-            name: formData.name,
-            email: formData.email,
-            role: formData.role,
-            password: formData.password || undefined
-        });
+        setIsSubmitting(true);
+        try {
+            await onSave({
+                name: formData.name,
+                email: formData.email,
+                role: formData.role,
+                password: formData.password || undefined
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -44,7 +51,7 @@ function UpdateAccountModal({ show, onClose, onSave, initialData }) {
                 <div className="update-acc-form-card">
                     <div className="update-acc-modal-header">
                         <h2 className="update-acc-modal-title">Update Account</h2>
-                        <button className="update-acc-modal-close" type="button" onClick={onClose}><i className="fa-solid fa-xmark"></i></button>
+                        <button className="update-acc-modal-close modal-submit-close" type="button" onClick={onClose} disabled={isSubmitting}><i className="fa-solid fa-xmark"></i></button>
                     </div>
                     <div className="update-acc-modal-body">
                         <form onSubmit={handleSubmit}>
@@ -75,8 +82,10 @@ function UpdateAccountModal({ show, onClose, onSave, initialData }) {
                         </form>
                     </div>
                     <div className="update-acc-modal-footer">
-                        <button type="button" className="update-acc-btn-cancel" onClick={onClose}>Cancel</button>
-                        <button type="button" className="update-acc-btn-save" onClick={handleSubmit}>Update Account</button>
+                        <button type="button" className="update-acc-btn-cancel modal-submit-cancel" onClick={onClose} disabled={isSubmitting}>Cancel</button>
+                        <button type="button" className="update-acc-btn-save modal-submit-button" onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Updating...</> : 'Update Account'}
+                        </button>
                     </div>
             </div>
             </div>

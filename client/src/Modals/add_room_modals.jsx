@@ -13,6 +13,7 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
         room_status: "",
         room_label: ""
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -60,14 +61,16 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
         const normalizedValues = {
             ...values,
             room_price: normalizeRoomPriceValue(values.room_price),
         };
-        apiClient.post('/add_rooms', normalizedValues)
-            .then((res) => {
+        setIsSubmitting(true);
+        try {
+            const res = await apiClient.post('/add_rooms', normalizedValues);
                 console.log("Success: ", res.data);
                 setShowModal(false);
                 setValues({
@@ -80,11 +83,12 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
                     room_label: ""
                 });
                 refreshData();
-            })
-            .catch((err) => {
-                console.error("Error sa pag-save: ", err);
-                Swal.fire({ icon: 'error', title: 'Error', text: 'May sala sa pag-save sang data!' });
-            });
+        } catch (err) {
+            console.error("Error sa pag-save: ", err);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'May sala sa pag-save sang data!' });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const closeModal = () => setShowModal(false);
@@ -95,7 +99,7 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
                 <div className="add-room-form-card">
                     <div className="add-room-modal-header">
                         <h2 className="add-room-modal-title">Add Room</h2>
-                        <button className="add-room-modal-close" type="button" onClick={closeModal}>
+                        <button className="add-room-modal-close modal-submit-close" type="button" onClick={closeModal} disabled={isSubmitting}>
                             <i className="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -166,8 +170,10 @@ function AddRoomModal({ showModal, setShowModal, refreshData }) {
                         </form>
                     </div>
                     <div className="add-room-modal-footer">
-                        <button type="button" className="add-room-btn-cancel" onClick={closeModal}>Cancel</button>
-                        <button type="submit" form="add-room-form" className="add-room-btn-save">Save Room</button>
+                        <button type="button" className="add-room-btn-cancel modal-submit-cancel" onClick={closeModal} disabled={isSubmitting}>Cancel</button>
+                        <button type="submit" form="add-room-form" className="add-room-btn-save modal-submit-button" disabled={isSubmitting}>
+                            {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Saving...</> : 'Save Room'}
+                        </button>
                     </div>
 
                 </div>

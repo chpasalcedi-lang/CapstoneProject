@@ -1,3 +1,25 @@
+.modal-submit-spinner {
+  width: 14px;
+  height: 14px;
+  margin-right: 7px;
+  display: inline-block;
+  vertical-align: -2px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: modal-submit-spin 0.7s linear infinite;
+}
+
+.modal-submit-button:disabled,
+.modal-submit-cancel:disabled,
+.modal-submit-close:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes modal-submit-spin {
+  to { transform: rotate(360deg); }
+}
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

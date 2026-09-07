@@ -27,21 +27,8 @@ function LandingPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const menuButtonRef = useRef(null);
   const [userEmail, setUserEmail] = useState(() => {
-    // Read auth info synchronously to avoid a flash of the "sign in" button
-    const stored = localStorage.getItem("userEmail");
-    if (stored) return stored;
-    const adminStr = localStorage.getItem("adminUser");
-    if (adminStr) {
-      try {
-        const parsed = JSON.parse(adminStr);
-        // prefer an email if available, otherwise use name
-        return parsed.email || parsed.name || null;
-      } catch (e) {
-        console.error("Error parsing adminUser from localStorage:", e);
-        return null;
-      }
-    }
-    return null;
+    // The public profile belongs only to customer sessions.
+    return localStorage.getItem("userEmail");
   });
 
   const toggleMenu = () => {

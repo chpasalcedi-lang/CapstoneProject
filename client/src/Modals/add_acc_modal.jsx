@@ -9,6 +9,7 @@ function AddAccountModal({ show, onClose, onSave }) {
     const isAdmin = adminData.role?.toString().toLowerCase() === 'admin';
 
     const [formData, setFormData] = React.useState({ name: '', email: '', password: '', role: '' });
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     React.useEffect(() => {
         if (show) {
@@ -28,6 +29,7 @@ function AddAccountModal({ show, onClose, onSave }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
         if (!isAdmin) {
             await Swal.fire({
                 icon: 'warning',
@@ -39,7 +41,12 @@ function AddAccountModal({ show, onClose, onSave }) {
         if (!formData.name || !formData.email || !formData.password || !formData.role) {
             return;
         }
-        await onSave(formData);
+        setIsSubmitting(true);
+        try {
+            await onSave(formData);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -48,7 +55,7 @@ function AddAccountModal({ show, onClose, onSave }) {
                 <div className="add-acc-form-card">
                     <div className="add-acc-modal-header">
                         <h2 className="add-acc-modal-title">Add Account</h2>
-                        <button className="add-acc-modal-close" type="button" onClick={onClose}><i className="fa-solid fa-xmark"></i></button>
+                        <button className="add-acc-modal-close modal-submit-close" type="button" onClick={onClose} disabled={isSubmitting}><i className="fa-solid fa-xmark"></i></button>
                     </div>
                     <div className="add-acc-modal-body">
                         <form onSubmit={handleSubmit}>
@@ -75,8 +82,10 @@ function AddAccountModal({ show, onClose, onSave }) {
                         </form>
                     </div>
                     <div className="add-acc-modal-footer">
-                        <button type="button" className="add-acc-btn-cancel" onClick={onClose}>Cancel</button>
-                        <button type="button" className="add-acc-btn-save" onClick={handleSubmit}>Save Account</button>
+                        <button type="button" className="add-acc-btn-cancel modal-submit-cancel" onClick={onClose} disabled={isSubmitting}>Cancel</button>
+                        <button type="button" className="add-acc-btn-save modal-submit-button" onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Saving...</> : 'Save Account'}
+                        </button>
                     </div>
                 </div>
             </div>

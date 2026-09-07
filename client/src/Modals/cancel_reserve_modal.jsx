@@ -3,6 +3,7 @@ import "../Modalscss/cancel_reserve_modal.css";
 
 function CancelReserveModal({ show, onClose, booking, onConfirm }) {
   const [reason, setReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const MAX_REASON = 300;
 
   useEffect(() => {
@@ -17,6 +18,7 @@ function CancelReserveModal({ show, onClose, booking, onConfirm }) {
   }
 
   const handleOverlayClick = () => {
+    if (isSubmitting) return;
     if (onClose) onClose();
   };
 
@@ -24,9 +26,15 @@ function CancelReserveModal({ show, onClose, booking, onConfirm }) {
     e.stopPropagation();
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!booking?.id) return;
-    if (onConfirm) onConfirm(booking, reason.trim());
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      if (onConfirm) await onConfirm(booking, reason.trim());
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -37,7 +45,7 @@ function CancelReserveModal({ show, onClose, booking, onConfirm }) {
           <div>
             <h3 className="cancel-reservation-modal-title">Cancel Reservation</h3>
           </div>
-          <button className="cancel-reservation-modal-close" type="button" onClick={onClose} aria-label="Close">
+          <button className="cancel-reservation-modal-close modal-submit-close" type="button" onClick={onClose} disabled={isSubmitting} aria-label="Close">
             <i className="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -77,13 +85,14 @@ function CancelReserveModal({ show, onClose, booking, onConfirm }) {
         </div>
 
         <div className="cancel-reservation-modal-footer">
-          <button className="cancel-reservation-btn-secondary" type="button" onClick={onClose}>Close</button>
+          <button className="cancel-reservation-btn-secondary modal-submit-cancel" type="button" onClick={onClose} disabled={isSubmitting}>Close</button>
           <button
             className="cancel-reservation-btn-confirm"
             type="button"
             onClick={handleConfirm}
+            disabled={isSubmitting}
           >
-            Confirm Cancel
+            {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Submitting...</> : 'Confirm Cancel'}
           </button>
         </div>
       </div>

@@ -105,7 +105,7 @@ body {
   align-items: center;
   gap: 10px;
   width: auto;
-  max-width: 240px;
+  max-width: 300px;
 }
 
 .rooms-stats-controls span {
@@ -128,7 +128,9 @@ body {
 
 .rooms-date-input-wrap {
   position: relative;
-  min-width: 170px;
+  width: 234px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .rooms-date-input-wrap input {
@@ -166,7 +168,7 @@ body {
 
 .rooms-stats-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(100px, 1fr));
+  grid-template-columns: repeat(5, minmax(100px, 1fr));
   gap: 10px;
   margin-bottom: 18px;
 }
@@ -203,6 +205,10 @@ body {
 
 .rooms-stats-card.maintenance {
   border-color: rgba(239,68,68,0.22);
+}
+
+.rooms-stats-card.reserved {
+  border-color: rgba(200,169,110,0.35);
 }
 
 .rooms-stats-search {
@@ -340,6 +346,10 @@ body {
 
 .rooms-stats-badge.maintenance {
   color: #ffc4c4;
+}
+
+.rooms-stats-badge.reserved {
+  color: #f2d28a;
 }
 .rooms-stats-grid {
   display: grid;
@@ -756,6 +766,11 @@ body {
     flex: 1;
     min-width: 0;
     width: 100%;
+  }
+
+  .rooms-date-input-wrap {
+    flex: 1;
+    width: auto;
   }
 
   .rooms-stats-summary {

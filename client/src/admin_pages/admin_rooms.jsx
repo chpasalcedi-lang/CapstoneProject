@@ -116,18 +116,29 @@ function AdminRooms() {
 
     const getRoomStatusOnDate = (room, date) => {
         if (room._isMaintenance) return 'Maintenance';
-        if (!date || !reservations.length) return room.room_status || 'Available';
+        if (!date) return 'Available';
 
-        const isOccupied = reservations.some((r) => {
+        const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        let isOccupied = false;
+        let isReserved = false;
+
+        reservations.forEach((r) => {
             if (Number(r.room_id) !== Number(room.id)) return false;
             const status = (r.res_status || '').toLowerCase();
-            if (status !== 'confirmed' && status !== 'pending') return false;
-            const start = new Date(r.check_in_date);
-            const end = new Date(r.check_out_date);
-            return date >= start && date < end;
+            const startKey = String(r.check_in_date || '').slice(0, 10);
+            const endKey = String(r.check_out_date || '').slice(0, 10);
+            if (!startKey || !endKey || dateKey < startKey || dateKey >= endKey) return;
+
+            if (['confirmed', 'complete', 'occupied'].includes(status)) {
+                isOccupied = true;
+            } else if (status === 'pending') {
+                isReserved = true;
+            }
         });
 
-        return isOccupied ? 'Occupied' : 'Available';
+        if (isOccupied) return 'Occupied';
+        if (isReserved) return 'Reserved';
+        return 'Available';
     };
 
     const formatRoomPrice = (price) => {
@@ -164,6 +175,7 @@ function AdminRooms() {
         total: checkerRooms.length,
         available: checkerRooms.filter((room) => room.checkerStatus === 'Available').length,
         occupied: checkerRooms.filter((room) => room.checkerStatus === 'Occupied').length,
+        reserved: checkerRooms.filter((room) => room.checkerStatus === 'Reserved').length,
         maintenance: checkerRooms.filter((room) => room.checkerStatus === 'Maintenance').length,
     };
 
@@ -332,6 +344,10 @@ function AdminRooms() {
                             <div className="rooms-stats-card occupied">
                                 <span>Occupied</span>
                                 <h1>{checkerCounts.occupied}</h1>
+                            </div>
+                            <div className="rooms-stats-card reserved">
+                                <span>Reserved</span>
+                                <h1>{checkerCounts.reserved}</h1>
                             </div>
                             <div className="rooms-stats-card maintenance">
                                 <span>Maintenance</span>

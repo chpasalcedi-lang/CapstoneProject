@@ -25,6 +25,7 @@ function AdminAddGuest() {
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [adminData] = useState(() => {
     const storedUser = localStorage.getItem('adminUser');
     if (storedUser) {
@@ -66,6 +67,7 @@ function AdminAddGuest() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     const adults = parseInt(values.number_of_guests) || 0;
     const children = parseInt(values.number_of_children) || 0;
@@ -87,6 +89,7 @@ function AdminAddGuest() {
       total_price: parseFloat(totalPrice)
     };
 
+    setIsSubmitting(true);
     try {
       await apiClient.post('/add_guest_arrival', payload);
       Swal.fire({
@@ -103,6 +106,8 @@ function AdminAddGuest() {
         title: 'Add failed',
         text: `${errorMsg}. Make sure the backend is available and the API URL is configured correctly`,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -222,7 +227,9 @@ function AdminAddGuest() {
                           <p className="summary-price-total">₱{formatCurrency(calculateTotalPrice())}</p> 
                         </div>
                       </div>
-                      <button type="submit"> Confirm </button>
+                      <button type="submit" className="modal-submit-button" disabled={isSubmitting}>
+                        {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Saving...</> : 'Confirm'}
+                      </button>
                     </form>
                 </div>
             </div>

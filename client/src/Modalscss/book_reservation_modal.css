@@ -202,6 +202,18 @@
   color: transparent;
 }
 
+.book-date-input-wrap .book-input[type="date"]::-webkit-datetime-edit,
+.book-date-input-wrap .book-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  color: transparent;
+}
+
+.book-date-input-wrap .book-input:not(.has-value)::-webkit-datetime-edit-day-field,
+.book-date-input-wrap .book-input:not(.has-value)::-webkit-datetime-edit-month-field,
+.book-date-input-wrap .book-input:not(.has-value)::-webkit-datetime-edit-year-field,
+.book-date-input-wrap .book-input:not(.has-value)::-webkit-datetime-edit-text {
+  color: transparent;
+}
+
 .book-date-input-wrap .book-input.has-value {
   color: #111827;
 }
@@ -297,6 +309,34 @@
   background: #2d2d2e;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
+
+.book-reservation-btn-save:disabled,
+.book-reservation-btn-cancel:disabled,
+.book-reservation-modal-close:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.book-reservation-btn-save:disabled:hover {
+  background: #1d1d1e;
+  box-shadow: none;
+}
+
+.book-reservation-spinner {
+  width: 14px;
+  height: 14px;
+  margin-right: 7px;
+  display: inline-block;
+  vertical-align: -2px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: book-reservation-spin 0.7s linear infinite;
+}
+
+@keyframes book-reservation-spin {
+  to { transform: rotate(360deg); }
+}
 .book-reservation-form-price {
   display: flex;
   align-items: center;
@@ -313,6 +353,11 @@
   align-items: center;
   gap: 10px;
   flex: 1;
+  min-width: 0;
+}
+
+.book-reservation-price-item > div:last-child {
+  min-width: 0;
 }
 
 .book-reservation-price-icon {
@@ -340,6 +385,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #9ca3af;
+  overflow-wrap: anywhere;
 }
 
 .book-reservation-price-value {
@@ -399,6 +445,38 @@
     text-align: center;
     padding: 10px;
     font-size: 0.88rem;
+  }
+
+  .book-reservation-form-price {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .book-reservation-price-item {
+    gap: 7px;
+  }
+
+  .book-reservation-price-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .book-reservation-price-label {
+    font-size: 9px;
+    line-height: 1.25;
+  }
+
+  .book-reservation-price-value {
+    font-size: 17px;
+  }
+
+  .book-reservation-price-divider {
+    width: 1px;
+    height: 100%;
+    min-height: 32px;
   }
 }
 

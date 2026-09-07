@@ -134,6 +134,18 @@
   color: transparent;
 }
 
+.walkin-date-input-wrap .walkin-input[type="date"]::-webkit-datetime-edit,
+.walkin-date-input-wrap .walkin-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  color: transparent;
+}
+
+.walkin-date-input-wrap .walkin-input:not(.has-value)::-webkit-datetime-edit-day-field,
+.walkin-date-input-wrap .walkin-input:not(.has-value)::-webkit-datetime-edit-month-field,
+.walkin-date-input-wrap .walkin-input:not(.has-value)::-webkit-datetime-edit-year-field,
+.walkin-date-input-wrap .walkin-input:not(.has-value)::-webkit-datetime-edit-text {
+  color: transparent;
+}
+
 .walkin-date-input-wrap .walkin-input.has-value {
   color: #f5f3ee;
 }
@@ -313,6 +325,10 @@
   min-height: 48px;
 }
 
+.walkin-reservation-price-item > div:last-child {
+  min-width: 0;
+}
+
 .walkin-reservation-price-icon {
   width: 40px;
   height: 40px;
@@ -338,6 +354,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #9ca3af;
+  overflow-wrap: anywhere;
 }
 
 .walkin-reservation-price-value {
@@ -402,6 +419,40 @@
     text-align: center;
     padding: 10px;
     font-size: 0.88rem;
+  }
+
+  .walkin-reservation-form-price:not(.discount-section) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .walkin-reservation-form-price:not(.discount-section) .walkin-reservation-price-item {
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .walkin-reservation-form-price:not(.discount-section) .walkin-reservation-price-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .walkin-reservation-form-price:not(.discount-section) .walkin-reservation-price-label {
+    font-size: 0.62rem;
+    line-height: 1.25;
+  }
+
+  .walkin-reservation-form-price:not(.discount-section) .walkin-reservation-price-value {
+    font-size: 0.95rem;
+  }
+
+  .walkin-reservation-form-price:not(.discount-section) .walkin-reservation-price-divider {
+    width: 1px;
+    height: 100%;
+    min-height: 32px;
   }
 }
 

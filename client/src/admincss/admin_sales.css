@@ -5,6 +5,7 @@
 	background: #080808;
 	overflow-y: auto;
 	overflow-x: hidden;
+	box-sizing: border-box;
 }
 
 .admin-sales-main-content {
@@ -12,6 +13,7 @@
 	max-width: 1280px;
 	padding: 56px 48px 96px;
 	margin: 0 auto;
+	box-sizing: border-box;
 }
 
 .admin-sales-topbar {
@@ -299,13 +301,21 @@
 
 .pie-day-input-wrap {
 	position: relative;
-	min-width: 140px;
+	width: 190px;
+	min-width: 190px;
+	max-width: 100%;
 }
 
 .pie-day-input-wrap input {
 	width: 100%;
+	box-sizing: border-box;
+	color: transparent !important;
+	padding: 8px 42px 8px 12px;
+}
+
+.pie-day-input-wrap input[type="date"]::-webkit-datetime-edit,
+.pie-day-input-wrap input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 	color: transparent;
-	padding-right: 42px;
 }
 
 .pie-day-input-wrap span {
@@ -314,7 +324,11 @@
 	left: 12px;
 	transform: translateY(-50%);
 	color: #f0ede8;
-	font-size: 0.95rem;
+	font-size: 0.88rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	right: 38px;
 	pointer-events: none;
 }
 
@@ -557,6 +571,15 @@
 }
 
 @media (max-width: 450px) {
+	.admin-sales-table-container,
+	.admin-sales-chart-card,
+	.admin-sales-chart-card-container {
+		box-sizing: border-box;
+		width: 100%;
+		min-width: 0;
+		max-width: 100%;
+	}
+
 	.admin-sales-chart-card-box {
 		width: 100%;
 		min-width: 0;
@@ -619,9 +642,11 @@
 	}
 
 	.admin-sales-revenue-controls .admin-sales-chart-selects {
-		flex: 1 1 auto;
-		width: 100%;
+		display: grid;
+		flex: 1 1 0;
+		width: auto;
 		min-width: 0;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	}
 
 	.admin-sales-revenue-controls .admin-sales-chart-selects select,
@@ -632,7 +657,9 @@
 	}
 
 	.admin-sales-revenue-controls .admin-sales-chart-card-header-stats-btn-nav-btns {
+		width: auto;
 		flex: 0 0 auto;
+		justify-content: flex-end;
 	}
 
 	.admin-sales-pie-controls {
@@ -655,21 +682,25 @@
 
 	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav {
 		width: 100%;
+		flex-direction: row;
+		align-items: center;
 		justify-content: space-between;
 		flex-wrap: nowrap;
 		gap: 8px;
 	}
 
 	.admin-sales-pie-controls .admin-sales-chart-selects {
-		flex: 1 1 auto;
+		display: grid;
+		flex: 1 1 0;
 		min-width: 0;
-		width: 100%;
+		width: auto;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	}
 
 	.admin-sales-pie-controls .pie-day-input-wrap {
-		flex: 1 1 0;
-		min-width: 0;
-		width: 100%;
+		flex: 0 1 190px;
+		min-width: 180px;
+		width: 190px;
 	}
 
 	.admin-sales-pie-controls .pie-month-dropdown {
@@ -693,12 +724,71 @@
 	}
 
 	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav-btns {
+		width: auto;
 		flex: 0 0 auto;
+		justify-content: flex-end;
 	}
 
 	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav-btns button {
 		width: 36px;
 		height: 36px;
+	}
+}
+
+@media (max-width: 375px) {
+	.admin-sales-main-content {
+		padding: 20px 10px 40px;
+	}
+
+	.admin-sales-topbar h1 {
+		font-size: 26px;
+	}
+
+	.admin-sales-table-container {
+		padding: 12px;
+	}
+
+	.admin-sales-chart-card {
+		padding: 12px;
+	}
+
+	.admin-sales-revenue-controls > div:first-child button,
+	.admin-sales-pie-controls > div:first-child button {
+		padding: 8px 6px;
+		font-size: 0.75rem;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-card-header-stats-btn-nav,
+	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-selects,
+	.admin-sales-pie-controls .admin-sales-chart-selects {
+		flex: none;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-card-header-stats-btn-nav-btns,
+	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav-btns {
+		justify-content: flex-end;
+	}
+
+	.admin-sales-chart-card-header-stats-btn-nav-btns button {
+		width: 34px;
+		height: 34px;
+	}
+
+	.admin-sales-chart-card-stats {
+		padding: 12px;
+	}
+
+	.admin-sales-chart-card-labels label {
+		font-size: 0.64rem;
+	}
+
+	.admin-sales-chart-card-labels h1 {
+		font-size: 1rem;
 	}
 }
 

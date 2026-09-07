@@ -7,6 +7,7 @@ import "../Modalscss/book_reservation_modal.css";
 function BookReservationModal({ showModal, setShowModal, refreshData, roomId, roomPrice, roomNumber }) {
     const userEmail = localStorage.getItem('userEmail') || "";
     const [reservations, setReservations] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getTodayISO = () => {
     const t = new Date();
@@ -42,7 +43,6 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
     });
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setValues((prev) => ({
             ...prev,
             room_id: roomId || null,
@@ -92,6 +92,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
     };
 
     const closeModal = () => {
+      if (isSubmitting) return;
         setShowModal(false);
     };
 
@@ -141,6 +142,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+      if (isSubmitting) return;
         const form = e.target.closest('form') || document.getElementById('bookReservationForm');
         if (form && !form.checkValidity()) {
             form.reportValidity();
@@ -183,6 +185,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
 
         const normalizedPrice = roomPrice ? parseFloat(String(roomPrice).replace(/,/g, '')) : null;
 
+        setIsSubmitting(true);
         try {
             const latestRes = await apiClient.get('/get_reservations');
             const latestReservations = (latestRes.data || []).filter((r) => {
@@ -232,6 +235,8 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
             console.error('Error saving reservation:', err);
             const message = err.response?.data?.error || err.message || 'Failed to save reservation.';
             Swal.fire({ icon: 'error', title: 'Error', text: message });
+        } finally {
+          setIsSubmitting(false);
         }
     };
     return (
@@ -244,7 +249,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                         <p className="book-reservation-room-number">Room number: {roomNumber}</p>
                     )}
                   </div>
-                  <button className="book-reservation-modal-close" onClick={closeModal}><i className="fa-solid fa-xmark"></i></button>
+                  <button type="button" className="book-reservation-modal-close" onClick={closeModal} disabled={isSubmitting} aria-label="Close reservation form"><i className="fa-solid fa-xmark"></i></button>
                 </div>
                 <form id="bookReservationForm" className="book-reservation-modal-body" onSubmit={handleSubmit}>
                   <div className="book-reservation-form-row">
@@ -340,8 +345,10 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                   </div>
                 </div>
                 <div className="book-reservation-modal-footer">
-                  <button type="button" className="book-reservation-btn-cancel" onClick={closeModal}>Cancel</button>
-                  <button type="submit" className="book-reservation-btn-save" form="bookReservationForm">Save Reservation</button>
+                  <button type="button" className="book-reservation-btn-cancel" onClick={closeModal} disabled={isSubmitting}>Cancel</button>
+                  <button type="submit" className="book-reservation-btn-save" form="bookReservationForm" disabled={isSubmitting}>
+                    {isSubmitting ? <><span className="book-reservation-spinner" aria-hidden="true"></span> Saving reservation...</> : 'Save Reservation'}
+                  </button>
                 </div>
               </div>
         </div>

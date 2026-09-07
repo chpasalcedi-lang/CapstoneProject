@@ -27,6 +27,7 @@ function LandingUpdate({ show, onClose, booking, onUpdate }) {
         room_number: '',
     });
     const [rooms, setRooms] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (booking) {
@@ -74,6 +75,7 @@ function LandingUpdate({ show, onClose, booking, onUpdate }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
 
         if (isConfirmed) {
             return;
@@ -109,6 +111,7 @@ function LandingUpdate({ show, onClose, booking, onUpdate }) {
             return;
         }
 
+        setIsSubmitting(true);
         try {
             const res = await apiClient.post(`/update_reservation/${booking.id}`, updateData);
             console.log("Success:", res.data);
@@ -118,6 +121,8 @@ function LandingUpdate({ show, onClose, booking, onUpdate }) {
             }, 2000);
         } catch (err) {
             console.error("Error updating:", err);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -127,7 +132,7 @@ function LandingUpdate({ show, onClose, booking, onUpdate }) {
                 <div className="landing-edit-booking-form-card">
                     <div className="landing-edit-booking-modal-header">
                         <h2 className="landing-edit-booking-modal-title">Edit Booking</h2>
-                        <button className="landing-edit-booking-modal-close" onClick={handleCancel}><i className="fa-solid fa-xmark"></i></button>
+                        <button type="button" className="landing-edit-booking-modal-close modal-submit-close" onClick={handleCancel} disabled={isSubmitting}><i className="fa-solid fa-xmark"></i></button>
                     </div>
                     <div className="landing-edit-booking-modal-body">
                         {isConfirmed ? (
@@ -191,8 +196,10 @@ function LandingUpdate({ show, onClose, booking, onUpdate }) {
                         )}
                     </div>
                             <div className="landing-edit-booking-modal-footer">
-                        <button type="button" className="landing-edit-booking-btn-cancel" onClick={handleCancel}>Cancel</button>
-                        <button type="submit" form="landing-edit-form" className="landing-edit-booking-btn-save" disabled={isConfirmed}>Update Reservation</button>
+                        <button type="button" className="landing-edit-booking-btn-cancel modal-submit-cancel" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
+                        <button type="submit" form="landing-edit-form" className="landing-edit-booking-btn-save modal-submit-button" disabled={isConfirmed || isSubmitting}>
+                            {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Updating...</> : 'Update Reservation'}
+                        </button>
                     </div>
                 </div>
             </div>

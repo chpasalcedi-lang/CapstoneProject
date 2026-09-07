@@ -21,6 +21,7 @@ function AdminWalkinModal({ show, onClose }) {
     const [values, setValues] = useState(initialValues);
     const [rooms, setRooms] = useState([]);
     const [discountEnabled, setDiscountEnabled] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const selectedRoom = useMemo(
         () => rooms.find(room => String(room.room_number) === String(values.room_number)),
@@ -75,6 +76,7 @@ function AdminWalkinModal({ show, onClose }) {
     }, []);
 
     const handleCancel = () => {
+        if (isSubmitting) return;
         setValues(initialValues);
         setDiscountEnabled(false);
         onClose();
@@ -105,8 +107,9 @@ function AdminWalkinModal({ show, onClose }) {
         setValues((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
         const form = e.target.closest('form');
         if (form && !form.checkValidity()) {
             form.reportValidity();
@@ -154,8 +157,9 @@ function AdminWalkinModal({ show, onClose }) {
 
         const discountValue = discountEnabled && discountPercent > 0 ? Number(discountPercent.toFixed(2)) : 0;
 
-        apiClient
-        .post('/add_reservation', {
+        setIsSubmitting(true);
+        try {
+            await apiClient.post('/add_reservation', {
             ...values,
             room_id: selectedRoom.id,
             room_price: roomPrice,
@@ -164,21 +168,21 @@ function AdminWalkinModal({ show, onClose }) {
             sub_total: totalPrice,
             status: 'confirmed',
             source: 'walkin',
-        })
-        .then((res) => {
-            console.log("Success:", res.data);
+            });
+            console.log("Success: walk-in reservation");
             setValues(initialValues);
             setDiscountEnabled(false);
             onClose();
             localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
             window.dispatchEvent(new Event('dashboardRefresh'));
             Swal.fire({ icon: 'success', title: 'Saved', text: 'Walk-in reservation saved successfully!' });
-        })
-        .catch((err) => {
+        } catch (err) {
             console.error("Error sa pag-save:", err);
             const message = err.response?.data?.error || err.message || 'Failed to save reservation.';
             Swal.fire({ icon: 'error', title: 'Error', text: message });
-        });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
     
 
@@ -188,7 +192,7 @@ function AdminWalkinModal({ show, onClose }) {
                 <div className="walkin-form-card">
                     <div className="walkin-reservation-modal-header">
                         <h2 className="walkin-reservation-modal-title">Walk-in Reservation</h2>
-                        <button className="walkin-reservation-modal-close" onClick={onClose}><i className="fa-solid fa-xmark"></i></button>
+                        <button type="button" className="walkin-reservation-modal-close modal-submit-close" onClick={handleCancel} disabled={isSubmitting}><i className="fa-solid fa-xmark"></i></button>
                     </div>
                     <div className="walkin-reservation-modal-body">
                         <form onSubmit={handleSubmit}>
@@ -332,8 +336,10 @@ function AdminWalkinModal({ show, onClose }) {
                     </div>
 
                     <div className="walkin-reservation-modal-footer">
-                        <button type="button" className="walkin-reservation-btn-cancel" onClick={handleCancel}>Cancel</button>
-                        <button type="submit" className="walkin-reservation-btn-save" onClick={handleSubmit}>Save Reservation</button>
+                        <button type="button" className="walkin-reservation-btn-cancel modal-submit-cancel" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
+                        <button type="submit" className="walkin-reservation-btn-save modal-submit-button" onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Saving...</> : 'Save Reservation'}
+                        </button>
                     </div>
                 </div>
             </div>

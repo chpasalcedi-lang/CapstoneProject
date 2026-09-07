@@ -204,6 +204,7 @@ function AdminLoginForm() {
                 password,
             });
             const user = response.data.user;
+            localStorage.removeItem("userEmail");
             localStorage.setItem("adminUser", JSON.stringify(user));
             Swal.fire({ icon: "success", title: "Welcome", text: "Login successful." });
             navigate("/Dashboard", { replace: true });

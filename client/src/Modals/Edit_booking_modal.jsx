@@ -60,6 +60,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     });
     const [rooms, setRooms] = useState([]);
     const [allReservations, setAllReservations] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (booking) {
@@ -190,6 +191,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
 
         const form = e.target.closest('form') || document.getElementById('editReservationForm');
         if (form && !form.checkValidity()) {
@@ -249,6 +251,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
             return;
         }
 
+        setIsSubmitting(true);
         try {
             await apiClient.post(`/update_reservation/${booking.id}`, updateData);
             Swal.fire({ icon: 'success', title: 'Updated', text: 'Reservation updated successfully.' });
@@ -257,6 +260,8 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         } catch (err) {
             console.error('Error updating:', err);
             Swal.fire({ icon: 'error', title: 'Error', text: err.response?.data?.error || err.message || 'Failed to update reservation.' });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -270,7 +275,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                             <p className="book-reservation-room-number">Room number: {booking.room_number}</p>
                         )}
                     </div>
-                    <button className="book-reservation-modal-close" onClick={handleCancel}><i className="fa-solid fa-xmark"></i></button>
+                    <button type="button" className="book-reservation-modal-close modal-submit-close" onClick={handleCancel} disabled={isSubmitting}><i className="fa-solid fa-xmark"></i></button>
                 </div>
 
                 <form id="editReservationForm" className="book-reservation-modal-body" onSubmit={handleSubmit}>
@@ -362,8 +367,10 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                 </div>
 
                 <div className="book-reservation-modal-footer">
-                    <button type="button" className="book-reservation-btn-cancel" onClick={handleCancel}>Cancel</button>
-                    <button type="submit" className="book-reservation-btn-save" form="editReservationForm">Update Reservation</button>
+                    <button type="button" className="book-reservation-btn-cancel modal-submit-cancel" onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
+                    <button type="submit" className="book-reservation-btn-save modal-submit-button" form="editReservationForm" disabled={isSubmitting}>
+                        {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Updating...</> : 'Update Reservation'}
+                    </button>
                 </div>
             </div>
         </div>

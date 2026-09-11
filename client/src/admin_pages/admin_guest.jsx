@@ -6,6 +6,8 @@ import "../admincss/admin_guest.css";
 import EditBookingModal from '../Modals/Edit_booking_modal';
 import ViewBookingModal from '../Modals/view_booking_modal';
 import FeedbackModal from '../Modals/feedback._modal';
+import ViewGuestModal from '../Modals/view_guest_modal';
+import EditGuestModal from '../Modals/edit_guest_modal';
 
 
 function AdminGuest() {
@@ -27,6 +29,9 @@ function AdminGuest() {
     const [selectedEditBooking, setSelectedEditBooking] = useState(null);
     const [feedbackModal, setFeedbackModal] = useState(false);
     const [selectedFeedback, setSelectedFeedback] = useState(null);
+    const [viewGuestModal, setViewGuestModal] = useState(false);
+    const [editGuestModal, setEditGuestModal] = useState(false);
+    const [selectedGuest, setSelectedGuest] = useState(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [currentBookingPage, setCurrentBookingPage] = useState(1);
     const [currentGuestPage, setCurrentGuestPage] = useState(1);
@@ -70,6 +75,29 @@ function AdminGuest() {
     const handleViewFeedback = (feedback) => {
         setSelectedFeedback(feedback);
         setFeedbackModal(true);
+    };
+
+    const handleViewGuest = (guest) => {
+        setSelectedGuest(guest);
+        setViewGuestModal(true);
+    };
+
+    const handleEditGuest = (guest) => {
+        setSelectedGuest(guest);
+        setEditGuestModal(true);
+    };
+
+    const handleUpdateGuest = async (id, payload) => {
+        try {
+            await apiClient.put(`/update_guest_arrival/${id}`, payload);
+            const res = await apiClient.get('/get_guest_arrivals');
+            setGuestArrivals(res.data);
+            setEditGuestModal(false);
+            Swal.fire({ icon: 'success', title: 'Updated', text: 'Guest arrival updated successfully.' });
+        } catch (err) {
+            console.error('Error updating guest arrival:', err);
+            Swal.fire({ icon: 'error', title: 'Update failed', text: err.response?.data?.details || err.response?.data?.error || 'Failed to update guest arrival.' });
+        }
     };
 
     const formatBookingDate = (dateString) => {
@@ -595,8 +623,9 @@ function AdminGuest() {
                                 <table className="guests-tables">
                                     <thead>
                                         <tr>
+                                            <th>Group Name</th>
                                             <th>Number of Guests</th>
-                                            <th>Food Service</th>
+                                            <th>Corkage</th>
                                             <th>Total Price</th>
                                             <th>Time & Date</th>
                                             <th className="actions-header">Actions</th>
@@ -605,24 +634,27 @@ function AdminGuest() {
                                     <tbody>
                                         {loadingGuests ? (
                                             <tr>
-                                                <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                                                <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
                                                     Loading guest arrivals...
                                                 </td>
                                             </tr>
                                         ) : guestArrivals.length === 0 ? (
                                             <tr>
-                                                <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                                                <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
                                                     No guest records found.
                                                 </td>
                                             </tr>
                                         ) : (
                                             paginatedGuestArrivals.map((guest) => (
                                                 <tr key={guest.id}>
+                                                    <td>{guest.group_name || '-'}</td>
                                                     <td>{guest.number_of_guests}</td>
-                                                    <td>{guest.food_service}</td>
+                                                    <td>{guest.corkage || 'No Corkage'}</td>
                                                     <td>₱{formatCurrency(guest.total_price)}</td>
                                                     <td>{formatGuestDateTime(guest.created_at)}</td>
                                                     <td className="actions-cell">
+                                                        <button className="btn guest btn-primary" onClick={() => handleViewGuest(guest)}>View</button>
+                                                        <button className="btn guest btn-primary" onClick={() => handleEditGuest(guest)}>Edit</button>
                                                         <button className="btn guest btn-danger" onClick={() => handleDeleteGuest(guest.id)}>Delete</button>
                                                     </td>
                                                 </tr>
@@ -790,6 +822,8 @@ function AdminGuest() {
             <ViewBookingModal 
                 show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking} onEdit={handleEdit}/>
             <FeedbackModal show={feedbackModal} onClose={() => setFeedbackModal(false)} feedback={selectedFeedback} />
+            <ViewGuestModal show={viewGuestModal} onClose={() => setViewGuestModal(false)} guest={selectedGuest} />
+            <EditGuestModal show={editGuestModal} onClose={() => setEditGuestModal(false)} guest={selectedGuest} onUpdate={handleUpdateGuest} />
         </div>
     );
 }

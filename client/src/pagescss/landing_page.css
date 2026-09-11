@@ -565,6 +565,55 @@ body {
   line-height: 1.8;
 }
 
+.pool-information-section {
+  background: #f5f4f0;
+  padding: 0 56px 80px;
+}
+
+.pool-information {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 34px 0 0;
+  color: #0f1e2e;
+  border-top: 1px solid rgba(15, 30, 46, 0.16);
+}
+
+.pool-information-block {
+  display: grid;
+  gap: 18px;
+}
+
+.pool-information-block h2 {
+  margin: 0 0 2px;
+  color: #b07d13;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pool-information-block p {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0;
+  color: #60656b;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.pool-information-block p strong {
+  color: #0f1e2e;
+  font-weight: 600;
+}
+
+.pool-information-block p span {
+  text-align: right;
+}
+
 .about-btn-pool {
   background: #C89A2A;
   color: #0f1e2e;
@@ -596,6 +645,34 @@ body {
 
   .about-pool-text {
     text-align: center;
+  }
+
+  .pool-information-block p {
+    text-align: left;
+  }
+
+  .pool-information-section {
+    padding: 0 32px 72px;
+  }
+
+  .pool-information {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 520px) {
+  .pool-information-section {
+    padding: 0 22px 56px;
+  }
+
+  .pool-information-block p {
+    display: grid;
+    gap: 2px;
+  }
+
+  .pool-information-block p span {
+    text-align: left;
   }
 }
 

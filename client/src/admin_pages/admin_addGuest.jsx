@@ -9,7 +9,11 @@ import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
 const PRICE_PER_CHILD = 150;
 const PRICE_PER_ADULT = 175;
 
-const FOOD_CHARGE = 500;
+const CORKAGE_OPTIONS = {
+  Food: { rate: 500, unit: "group" },
+  Beer: { rate: 300, unit: "case" },
+  Whiskey: { rate: 300, unit: "bottle" },
+};
 
 function AdminAddGuest() {
   const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
@@ -19,9 +23,14 @@ function AdminAddGuest() {
     return n.toLocaleString('en-PH', { minimumFractionDigits: hasDecimals ? 2 : 0, maximumFractionDigits: hasDecimals ? 2 : 0 });
   };
   const [values, setValues] = useState({
+    group_name: "",
     number_of_children: "",
     number_of_guests: "",
-    foods: "No",
+    corkage: {
+      Food: 0,
+      Beer: 0,
+      Whiskey: 0,
+    },
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
@@ -52,17 +61,27 @@ function AdminAddGuest() {
     setValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFoodsToggle = (e) => {
-    const foods = e.target.checked ? "Yes" : "No";
-    setValues((prev) => ({ ...prev, foods }));
-  };
-
   const calculateTotalPrice = () => {
     const adults = parseInt(values.number_of_guests) || 0;
     const children = parseInt(values.number_of_children) || 0;
     const guestTotal = adults * PRICE_PER_ADULT + children * PRICE_PER_CHILD;
-    const foodTotal = values.foods === "Yes" ? FOOD_CHARGE : 0;
-    return (guestTotal + foodTotal).toFixed(2);
+    const corkageTotal = Object.entries(values.corkage).reduce((total, [option, qty]) => {
+      const quantity = Math.max(0, parseInt(qty, 10) || 0);
+      if (quantity <= 0) return total;
+      return total + (CORKAGE_OPTIONS[option].rate * quantity);
+    }, 0);
+    return (guestTotal + corkageTotal).toFixed(2);
+  };
+
+  const handleCorkageChange = (option, nextValue) => {
+    const safeValue = Math.max(0, parseInt(nextValue, 10) || 0);
+    setValues((prev) => ({
+      ...prev,
+      corkage: {
+        ...prev.corkage,
+        [option]: safeValue,
+      },
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -82,10 +101,17 @@ function AdminAddGuest() {
     }
 
     const totalPrice = calculateTotalPrice();
+    const corkageSummary = Object.entries(values.corkage)
+      .filter(([, qty]) => Number(qty) > 0)
+      .map(([option, qty]) => `${option}${qty > 1 ? ` x${qty}` : ""}`)
+      .join(", ") || "No Corkage";
+
     const payload = {
+      group_name: values.group_name.trim(),
       number_of_children: children,
+      number_of_adults: adults,
       number_of_guests: totalGuests,
-      food_service: values.foods,
+      corkage: corkageSummary,
       total_price: parseFloat(totalPrice)
     };
 
@@ -97,14 +123,26 @@ function AdminAddGuest() {
         title: 'Guest added',
         text: 'Guest arrival recorded successfully!',
       });
-      setValues({ number_of_children: "", number_of_guests: "", foods: "No" });
+      setValues({
+        group_name: "",
+        number_of_children: "",
+        number_of_guests: "",
+        corkage: {
+          Food: 0,
+          Beer: 0,
+          Whiskey: 0,
+        },
+      });
     } catch (err) {
       console.error("Error: ", err);
-      const errorMsg = err.response?.data?.error || err.message || "Network error";
+      const errorMsg = err.response?.data?.details
+        || err.response?.data?.error
+        || err.message
+        || "Network error";
       Swal.fire({
         icon: 'error',
         title: 'Add failed',
-        text: `${errorMsg}. Make sure the backend is available and the API URL is configured correctly`,
+        text: errorMsg,
       });
     } finally {
       setIsSubmitting(false);
@@ -190,8 +228,14 @@ function AdminAddGuest() {
                 <div className="add-guest-form">
                     <h2>Add New Guest Arrival</h2>
                     <form onSubmit={handleSubmit}>
-                      <p className="price-display">Guest Rate: ₱{formatCurrency(PRICE_PER_CHILD)}/child | ₱{formatCurrency(PRICE_PER_ADULT)}/adult | Food Service: ₱{formatCurrency(FOOD_CHARGE)}</p>
-                      <div className="add-form-row">
+                      <p className="price-display">Guest Rate: ₱{formatCurrency(PRICE_PER_CHILD)}/child | ₱{formatCurrency(PRICE_PER_ADULT)}/adult | Corkage: Food ₱500/group, Beer ₱300/case, Whiskey ₱300/bottle</p>
+
+                      <div className="add-form-group">
+                        <label htmlFor="group-name">Group name</label>
+                        <input id="group-name" type="text" name="group_name" value={values.group_name} onChange={handleChange} placeholder="e.g. Santos Family" />
+                      </div>
+
+                      <div className="add-form-row compact-row">
                         <div className="add-form-group half-width">
                           <label>children / senior / pwd</label>
                           <input type="number" name="number_of_children" value={values.number_of_children} onChange={handleChange} placeholder="e.g. 2" min="0"/>
@@ -201,14 +245,32 @@ function AdminAddGuest() {
                           <input type="number" name="number_of_guests" value={values.number_of_guests} onChange={handleChange} placeholder="e.g. 2" min="0"/>
                         </div>
                       </div>
-                      <div className="add-form-group total-row">
+
+                      <div className="add-form-group total-row compact-total">
                         <label>Total guests</label>
                         <div className="total-count">{(parseInt(values.number_of_children) || 0) + (parseInt(values.number_of_guests) || 0)}</div>
                       </div>
 
-                      <div className="add-form-group add-form-checkbox">
-                        <label>Include Food Service (₱{FOOD_CHARGE})</label>
-                        <input type="checkbox" name="foods" checked={values.foods === "Yes"} onChange={handleFoodsToggle}/>
+                      <div className="add-form-group">
+                        <label>Corkage</label>
+                        <div className="corkage-grid">
+                          {Object.entries(CORKAGE_OPTIONS).map(([option, { rate, unit }]) => (
+                            <div className="corkage-card" key={option}>
+                              <div className="corkage-card-header">
+                                <span>{option}</span>
+                                <strong>₱{formatCurrency(rate)}</strong>
+                              </div>
+                              <small>{unit}</small>
+                              <input
+                                type="number"
+                                min="0"
+                                value={values.corkage[option] || 0}
+                                onChange={(e) => handleCorkageChange(option, e.target.value)}
+                                placeholder="0"
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
                       <div className="add-form-summary">
@@ -216,17 +278,20 @@ function AdminAddGuest() {
                           <p className="summary-label">Guest Total:</p>
                           <p className="summary-price">₱{formatCurrency((parseInt(values.number_of_children) || 0) * PRICE_PER_CHILD + (parseInt(values.number_of_guests) || 0) * PRICE_PER_ADULT)}</p>
                         </div>
-                        {values.foods === "Yes" && (
-                          <div>
-                            <p className="summary-label">Food Charge:</p>
-                            <p className="summary-price">₱{formatCurrency(FOOD_CHARGE)}</p>
-                          </div>
-                        )}
                         <div>
-                          <p className="summary-label">Total Price:</p> 
-                          <p className="summary-price-total">₱{formatCurrency(calculateTotalPrice())}</p> 
+                          <p className="summary-label">Corkage:</p>
+                          <p className="summary-price">₱{formatCurrency(Object.entries(values.corkage).reduce((total, [option, qty]) => {
+                            const quantity = Math.max(0, parseInt(qty, 10) || 0);
+                            if (quantity <= 0) return total;
+                            return total + (CORKAGE_OPTIONS[option].rate * quantity);
+                          }, 0))}</p>
+                        </div>
+                        <div>
+                          <p className="summary-label">Total Price:</p>
+                          <p className="summary-price-total">₱{formatCurrency(calculateTotalPrice())}</p>
                         </div>
                       </div>
+
                       <button type="submit" className="modal-submit-button" disabled={isSubmitting}>
                         {isSubmitting ? <><span className="modal-submit-spinner" aria-hidden="true"></span>Saving...</> : 'Confirm'}
                       </button>

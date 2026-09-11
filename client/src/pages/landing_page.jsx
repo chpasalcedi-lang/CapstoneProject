@@ -348,6 +348,30 @@ function LandingPage() {
       </section>
 
 
+     <section className="pool-information-section" aria-label="Pool schedule and rates">
+              <div className="pool-information">
+                <div className="pool-information-block">
+                  <h2>Pool schedule</h2>
+                  <p><strong>Monday - Sunday</strong><span>8:00 AM - 4:00 PM</span></p>
+                  <p><strong>Gate closed</strong><span>5:00 PM</span></p>
+                </div>
+                <div className="pool-information-block">
+                  <h2>Rates</h2>
+                  <p><strong>Swimming / non-swimming</strong><span>Below 7 years: ₱150 / head</span></p>
+                  <p><strong>Swimming / non-swimming</strong><span>7 years and above: ₱175 / head</span></p>
+                </div>
+                <div className="pool-information-block">
+                  <h2>Corkage fee</h2>
+                  <p><strong>Outside foods</strong><span>Minimum ₱500 per group</span></p>
+                  <p><strong>Beer</strong><span>₱300 / case</span></p>
+                  <p><strong>Whiskey</strong><span>₱300 / bottle</span></p>
+                </div>
+              </div>
+            </section>
+
+
+
+
       <section className="about-pool" id="about-pool">
           <div className="about-pool-content">
               <div id="carouselExampleDark" className="carousel carousel-dark slide" data-bs-ride="carousel">
@@ -389,6 +413,7 @@ function LandingPage() {
               </div>
           </div>
       </section>
+
       
 
       <section className="landing-map">

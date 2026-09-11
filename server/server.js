@@ -121,6 +121,7 @@ class Server {
         this.setupMiddleware();
         this.setupRoutes();
         this.reservationSourceReady = this.ensureReservationSourceColumn();
+        this.guestColumnsReady = this.ensureGuestColumns();
         this.db.verifyConnection();
     }
 
@@ -130,6 +131,23 @@ class Server {
         } catch (error) {
             if (!String(error.message || '').includes('Duplicate column')) {
                 console.error('Unable to prepare reservation source column:', error.message);
+            }
+        }
+    }
+
+    async ensureGuestColumns() {
+        const columns = [
+            "ALTER TABLE guest ADD COLUMN number_of_children INT NOT NULL DEFAULT 0",
+            "ALTER TABLE guest ADD COLUMN number_of_adults INT NOT NULL DEFAULT 0",
+        ];
+
+        for (const sql of columns) {
+            try {
+                await this.db.query(sql);
+            } catch (error) {
+                if (!String(error.message || '').includes('Duplicate column')) {
+                    console.error('Unable to prepare guest columns:', error.message);
+                }
             }
         }
     }
@@ -670,22 +688,62 @@ class GuestArrivalController {
         this.db = db;
         app.post('/add_guest_arrival', this.addGuestArrival.bind(this));
         app.get('/get_guest_arrivals', this.getGuestArrivals.bind(this));
+        app.put('/update_guest_arrival/:id', this.updateGuestArrival.bind(this));
         app.delete('/delete_guest_arrival/:id', this.deleteGuestArrival.bind(this));
     }
 
     async addGuestArrival(req, res) {
         try {
-            const sql = 'INSERT INTO guest (number_of_guests, food_service, total_price, created_at) VALUES (?, ?, ?, ?)';
+            const groupName = typeof req.body.group_name === 'string' ? req.body.group_name.trim() : null;
+            const numberOfChildren = Number(req.body.number_of_children) || 0;
+            const numberOfAdults = Number(req.body.number_of_adults) || 0;
+            const numberOfGuests = numberOfChildren + numberOfAdults;
+            const corkage = typeof req.body.corkage === 'string' && req.body.corkage.trim()
+                ? req.body.corkage.trim()
+                : 'No Corkage';
+            const totalPrice = Number(req.body.total_price);
+
+            if (!Number.isFinite(numberOfGuests) || numberOfGuests <= 0 || !Number.isFinite(totalPrice)) {
+                return res.status(400).json({ error: 'Invalid guest arrival values.' });
+            }
+
+            const sql = 'INSERT INTO guest (group_name, number_of_children, number_of_adults, number_of_guests, corkage, total_price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)';
             const values = [
-                req.body.number_of_guests,
-                req.body.food_service,
-                req.body.total_price,
+                groupName || null,
+                numberOfChildren,
+                numberOfAdults,
+                numberOfGuests,
+                corkage,
+                totalPrice,
                 req.body.created_at || new Date()
             ];
             const result = await this.db.query(sql, values);
             return res.status(200).json({ message: 'Guest arrival recorded successfully!', guestId: result.insertId });
         } catch (error) {
             console.error('Error adding guest arrival:', error);
+            return res.status(500).json({ error: 'Database query error!', details: error.message });
+        }
+    }
+
+    async updateGuestArrival(req, res) {
+        try {
+            const guestId = Number(req.params.id);
+            const numberOfChildren = Number(req.body.number_of_children) || 0;
+            const numberOfAdults = Number(req.body.number_of_adults) || 0;
+            const numberOfGuests = numberOfChildren + numberOfAdults;
+            const totalPrice = Number(req.body.total_price);
+            if (!Number.isInteger(guestId) || guestId <= 0 || numberOfGuests <= 0 || !Number.isFinite(totalPrice)) {
+                return res.status(400).json({ error: 'Invalid guest arrival values.' });
+            }
+
+            const result = await this.db.query(
+                'UPDATE guest SET group_name = ?, number_of_children = ?, number_of_adults = ?, number_of_guests = ?, corkage = ?, total_price = ? WHERE id = ?',
+                [req.body.group_name?.trim() || null, numberOfChildren, numberOfAdults, numberOfGuests, req.body.corkage || 'No Corkage', totalPrice, guestId]
+            );
+            if (result.affectedRows === 0) return res.status(404).json({ error: 'Guest arrival not found' });
+            return res.status(200).json({ message: 'Guest arrival updated successfully' });
+        } catch (error) {
+            console.error('Error updating guest arrival:', error);
             return res.status(500).json({ error: 'Database query error!', details: error.message });
         }
     }

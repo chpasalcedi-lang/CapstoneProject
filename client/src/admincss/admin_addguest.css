@@ -78,11 +78,11 @@
 
 .add-guest-form {
   width: 100%;
-  max-width: 560px;
+  max-width: 620px;
   background: #111111;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
-  padding: 32px;
+  padding: 28px 30px 24px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
@@ -102,13 +102,17 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .add-form-row {
   display: flex;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
+}
+
+.compact-row {
+  margin-top: 2px;
 }
 
 .add-form-row .half-width {
@@ -125,6 +129,10 @@
   padding: 0;
   background: transparent;
   border: none;
+}
+
+.compact-total {
+  margin-bottom: 18px;
 }
 
 .total-row .total-count {
@@ -159,7 +167,8 @@
 .add-form-group input[type="number"],
 .add-form-group input[type="text"],
 .add-form-group input[type="email"],
-.add-form-group input[type="tel"] {
+.add-form-group input[type="tel"],
+.add-form-group select {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   background: #121212;
@@ -178,6 +187,48 @@
 .add-form-group.add-form-checkbox input[type="checkbox"] {
   margin: 0;
 }
+
+.corkage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.corkage-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 12px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: #121212;
+}
+
+.corkage-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #f5f3ee;
+  font-size: 14px;
+}
+
+.corkage-card small {
+  color: #b8b8b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.corkage-card input {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: #1b1b1b;
+  color: #f5f3ee;
+  padding: 10px 12px;
+  font-size: 14px;
+  width: 100%;
+}
+
 .add-guest-form button[type="submit"] {
   width: 100%;
   padding: 14px 18px;
@@ -242,7 +293,7 @@
   justify-content: space-between;
   align-items: flex-end;
   gap: 16px;
-  margin-bottom: 20px !important;
+  margin: 8px 0 18px !important;
 }
 
 .add-form-summary > div {
@@ -422,6 +473,9 @@
 @media (max-width: 600px) {
   .add-guest-form {
     padding: 20px;
+  }
+  .corkage-grid {
+    grid-template-columns: 1fr;
   }
   .add-form-summary {
     flex-direction: column;

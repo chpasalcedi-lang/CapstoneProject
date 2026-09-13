@@ -13,7 +13,10 @@
           "background-color: color-mix(in srgb, var(--swal2-deny-button-background-color), var(--swal2-action-button-hover))",
           "background-color: color-mix(in srgb, var(--swal2-deny-button-background-color), var(--swal2-action-button-active))",
           "background-color: color-mix(in srgb, var(--swal2-cancel-button-background-color), var(--swal2-action-button-hover))",
-          "min-height: auto"
+          "min-height: auto",
+          "scrollbar-width",
+          "scrollbar-color",
+          "scrollbar-width: thin"
         ]
       }
     ]

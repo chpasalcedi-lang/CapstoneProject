@@ -146,8 +146,8 @@ body {
   color: transparent;
 }
 
-.booking-date-input-wrap .booking-input[type="date"]::-webkit-datetime-edit,
-.booking-date-input-wrap .booking-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+.booking-date-input-wrap .booking-input[type="date"]:not(.has-value)::-webkit-datetime-edit,
+.booking-date-input-wrap .booking-input[type="date"]:not(.has-value)::-webkit-datetime-edit-fields-wrapper {
   color: transparent;
 }
 
@@ -330,7 +330,7 @@ body {
 }
 
 .booking-room-card-body h3 {
-  font-size: 1.25rem;
+    font-size: 1.25rem;
   margin-bottom: 12px;
   color: #111827;
   font-weight: 600;
@@ -341,11 +341,30 @@ body {
   max-height: 100px;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
   font-size: 14px;
   flex: 1;
   font-size: 0.82rem;
   line-height: 1.55;
   color: #1d1d1d;
+}
+
+.booking-room-card-body p::-webkit-scrollbar {
+  width: 5px;
+}
+
+.booking-room-card-body p::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.booking-room-card-body p::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.booking-room-card-body p::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .booking-room-card-footer {

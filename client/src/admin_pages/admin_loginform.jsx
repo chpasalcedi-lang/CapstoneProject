@@ -14,6 +14,7 @@ emailjs.init(EMAILJS_PUBLIC_KEY);
 function AdminLoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [forgotMode, setForgotMode] = useState(false);
@@ -291,9 +292,14 @@ function AdminLoginForm() {
                             )}
                         </form>
                         <div className="admin-form-group">
-                            <button type="button" className="login-btn" onClick={switchToLogin}>
-                                Back to Login
-                            </button>
+                            <a
+                                href="#"
+                                className="login-a"
+                                role="button"
+                                onClick={(e) => { e.preventDefault(); switchToLogin(); }}
+                            >
+                                <i className="fa-solid fa-arrow-left"></i> Back to Login
+                            </a>
                         </div>
                     </div>
                 ) : (
@@ -311,13 +317,24 @@ function AdminLoginForm() {
                             </div>
                             <div className="admin-form-group">
                                 <label>Password</label>
-                                <input
-                                    type="password"
-                                    placeholder="Enter your password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
+                                <div className="admin-password-input-wrap">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Enter your password"
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="admin-password-toggle"
+                                        onClick={() => setShowPassword((visible) => !visible)}
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                        title={showPassword ? "Hide password" : "Show password"}
+                                    >
+                                        <i className={`fa-regular ${showPassword ? "fa-eye-slash" : "fa-eye"}`} aria-hidden="true"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <button type="submit" className="login-btn" disabled={loading}>

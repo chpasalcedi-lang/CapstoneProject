@@ -145,8 +145,9 @@
 }
 
 .book-reservation-form-row .book-reservation-form-group {
-  flex: 1;
+  flex: 1 1 0;
   margin-bottom: 0;
+  min-width: 0;
 }
 
 .book-reservation-form-group {
@@ -194,16 +195,19 @@
 
 .book-date-input-wrap {
   position: relative;
+  width: 100%;
+  min-width: 0;
 }
 
 .book-date-input-wrap .book-input {
   padding-right: 42px;
   cursor: pointer;
   color: transparent;
+  min-width: 0;
 }
 
-.book-date-input-wrap .book-input[type="date"]::-webkit-datetime-edit,
-.book-date-input-wrap .book-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+.book-date-input-wrap .book-input[type="date"]:not(.has-value)::-webkit-datetime-edit,
+.book-date-input-wrap .book-input[type="date"]:not(.has-value)::-webkit-datetime-edit-fields-wrapper {
   color: transparent;
 }
 
@@ -480,15 +484,3 @@
   }
 }
 
-/* ── Responsive: Stack columns on very small screens ── */
-@media (max-width: 400px) {
-  .book-reservation-form-row {
-    flex-direction: column;
-    gap: 0;
-    margin-bottom: 0;
-  }
-
-  .book-reservation-form-row .book-reservation-form-group {
-    margin-bottom: 14px;
-  }
-}

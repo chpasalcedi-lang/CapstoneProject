@@ -590,7 +590,6 @@ function ResBook() {
                         <div className="booking-room-card-footer">
                           <div className="booking-room-price">
                             <span className="booking-room-price-amount">₱{formatRoomPrice(room.room_price)}</span>
-                            <span className="booking-room-price-night">per night</span>
                           </div>
                           <button
                             className={`booking-room-book-btn ${isUnavailable ? 'booking-room-book-btn-unavailable' : ''}`}

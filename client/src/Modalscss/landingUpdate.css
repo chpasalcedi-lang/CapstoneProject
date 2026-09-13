@@ -112,8 +112,9 @@
 }
 
 .landing-edit-booking-form-row .landing-edit-booking-form-group {
-  flex: 1;
+  flex: 1 1 0;
   margin-bottom: 0;
+  min-width: 0;
 }
 
 .landing-edit-booking-form-group {
@@ -268,14 +269,3 @@
   }
 }
 
-@media (max-width: 400px) {
-  .landing-edit-booking-form-row {
-    flex-direction: column;
-    gap: 0;
-    margin-bottom: 0;
-  }
-
-  .landing-edit-booking-form-row .landing-edit-booking-form-group {
-    margin-bottom: 14px;
-  }
-}

@@ -766,12 +766,15 @@
 
 	.admin-sales-revenue-controls .admin-sales-chart-selects,
 	.admin-sales-pie-controls .admin-sales-chart-selects {
-		flex: none;
+		flex: 1 1 auto;
+		min-width: 0;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	}
 
 	.admin-sales-revenue-controls .admin-sales-chart-card-header-stats-btn-nav-btns,
 	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav-btns {
 		justify-content: flex-end;
+		flex: 0 0 auto;
 	}
 
 	.admin-sales-chart-card-header-stats-btn-nav-btns button {
@@ -789,6 +792,36 @@
 
 	.admin-sales-chart-card-labels h1 {
 		font-size: 1rem;
+	}
+}
+
+@media (max-width: 350px) {
+	.admin-sales-revenue-controls .admin-sales-chart-card-header-stats-btn-nav,
+	.admin-sales-pie-controls .admin-sales-chart-card-header-stats-btn-nav {
+		gap: 5px;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-selects,
+	.admin-sales-pie-controls .admin-sales-chart-selects {
+		gap: 5px;
+	}
+
+	.admin-sales-revenue-controls .admin-sales-chart-selects select,
+	.admin-sales-revenue-controls .admin-sales-chart-selects .year-search-input,
+	.admin-sales-pie-controls .admin-sales-chart-selects select,
+	.admin-sales-pie-controls .admin-sales-chart-selects .year-search-input {
+		padding-left: 8px;
+		padding-right: 8px;
+		font-size: 0.85rem;
+	}
+
+	.admin-sales-chart-card-header-stats-btn-nav-btns {
+		gap: 5px;
+	}
+
+	.admin-sales-chart-card-header-stats-btn-nav-btns button {
+		width: 32px;
+		height: 32px;
 	}
 }
 

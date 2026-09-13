@@ -16,7 +16,8 @@
           "min-height: auto",
           "scrollbar-width",
           "scrollbar-color",
-          "scrollbar-width: thin"
+          "scrollbar-width: thin",
+          "backdrop-filter"
         ]
       }
     ]

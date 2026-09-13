@@ -305,6 +305,12 @@ function AdminWalkinModal({ show, onClose }) {
                                         step="0.01"
                                     />
                                 </div>
+                                <div className="discount-result-box">
+                                    <span className="discount-result-label">Price</span>
+                                    <strong>
+                                        {`₱${formatRoomPrice(totalPrice)}`}
+                                    </strong>
+                                </div>
 
                                 <div className="discount-result-box">
                                     <span className="discount-result-label">Discount saved</span>

@@ -38,8 +38,12 @@ function ViewGuestModal({ show, onClose, guest }) {
         <h2>{guest.group_name || 'Unnamed group'}</h2>
         <div className="guest-receipt-divider" />
         <div className="guest-receipt-row"><span>Group name</span><strong>{guest.group_name || '-'}</strong></div>
-        <div className="guest-receipt-row"><span>Children / senior / PWD</span><strong>{breakdown.children}</strong></div>
-        <div className="guest-receipt-row"><span>Adults</span><strong>{breakdown.adults}</strong></div>
+        {Number(breakdown.children) > 0 && (
+          <div className="guest-receipt-row"><span>Children / senior / PWD</span><strong>{breakdown.children} / ₱{(Number(breakdown.children) * CHILD_RATE).toLocaleString('en-PH')}</strong></div>
+        )}
+        {Number(breakdown.adults) > 0 && (
+          <div className="guest-receipt-row"><span>Adults</span><strong>{breakdown.adults} / ₱{(Number(breakdown.adults) * ADULT_RATE).toLocaleString('en-PH')}</strong></div>
+        )}
         <div className="guest-receipt-section-title">Corkage</div>
         {corkageItems.length === 0 ? <div className="guest-receipt-row"><span>No corkage</span><strong>₱0</strong></div> : corkageItems.map((item) => (
           <div className="guest-receipt-row" key={item}><span>{item} {item === 'Food' ? '(per group)' : item === 'Beer' ? '(/case)' : '(/bottle)'}</span><strong>₱{CORKAGE_PRICES[item] || 0}</strong></div>

@@ -349,23 +349,62 @@ function LandingPage() {
 
 
      <section className="pool-information-section" aria-label="Pool schedule and rates">
+              <div className="pool-info-hero">
+                <div className="pool-kicker">
+                  <span className="pool-kicker-dot" />
+                  <span>Pool house · house rules</span>
+                </div>
+                <h1 className="pool-info-title">A quiet pool, beautifully simple, every day.</h1>
+                <p className="pool-info-subtitle">
+                  Messiah inland resort is open daily for swimming and day use. Rates, hours, and the corkage policy are listed below so there are no surprises at the gate.
+                </p>
+                <div className="pool-info-facts">
+                  <div className="pool-info-fact">
+                    <span className="pool-info-num">8am-4pm</span>
+                    <span className="pool-info-lbl">Daily, gate closes at 5pm</span>
+                  </div>
+                  <div className="pool-info-fact">
+                    <span className="pool-info-num">₱150+</span>
+                    <span className="pool-info-lbl">Entrance, by age</span>
+                  </div>
+                  <div className="pool-info-fact">
+                    <span className="pool-info-num">7 days</span>
+                    <span className="pool-info-lbl">Open Monday to Sunday</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="pool-information">
                 <div className="pool-information-block">
-                  <h2>Pool schedule</h2>
+                  <div className="pool-panel-head">
+                    <span className="pool-panel-mark">i.</span>
+                    <h2>Pool schedule</h2>
+                  </div>
                   <p><strong>Monday - Sunday</strong><span>8:00 AM - 4:00 PM</span></p>
                   <p><strong>Gate closed</strong><span>5:00 PM</span></p>
                 </div>
                 <div className="pool-information-block">
-                  <h2>Rates</h2>
+                  <div className="pool-panel-head">
+                    <span className="pool-panel-mark">ii.</span>
+                    <h2>Rates</h2>
+                  </div>
                   <p><strong>Swimming / non-swimming</strong><span>Below 7 years: ₱150 / head</span></p>
                   <p><strong>Swimming / non-swimming</strong><span>7 years and above: ₱175 / head</span></p>
                 </div>
                 <div className="pool-information-block">
-                  <h2>Corkage fee</h2>
+                  <div className="pool-panel-head">
+                    <span className="pool-panel-mark">iii.</span>
+                    <h2>Corkage fee</h2>
+                  </div>
                   <p><strong>Outside foods</strong><span>Minimum ₱500 per group</span></p>
                   <p><strong>Beer</strong><span>₱300 / case</span></p>
                   <p><strong>Whiskey</strong><span>₱300 / bottle</span></p>
                 </div>
+              </div>
+
+              <div className="pool-note-strip">
+                <span className="pool-note-dash">—</span>
+                <span>Rates are per head and cover pool access for the day. Corkage applies to food and drinks brought in from outside; bringing your own is welcome as long as the corkage fee is settled at the gate.</span>
               </div>
             </section>
 

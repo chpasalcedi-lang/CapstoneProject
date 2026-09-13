@@ -188,45 +188,84 @@
   margin: 0;
 }
 
-.corkage-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.corkage-card {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 12px 12px 10px;
+.corkage-dropdown {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   background: #121212;
+  overflow: hidden;
 }
 
-.corkage-card-header {
+.corkage-dropdown summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  color: #f5f3ee;
+  font-weight: 600;
+}
+
+.corkage-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.corkage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+
+.corkage-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  color: #f5f3ee;
-  font-size: 14px;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: #1a1a1a;
 }
 
-.corkage-card small {
+.corkage-option-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f5f3ee;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.corkage-option-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #c8a96e;
+  margin: 0;
+}
+
+.corkage-price-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.corkage-price-wrap small {
   color: #b8b8b8;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.corkage-card input {
+.corkage-price-wrap input {
+  width: 110px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   background: #1b1b1b;
   color: #f5f3ee;
-  padding: 10px 12px;
+  padding: 8px 10px;
   font-size: 14px;
-  width: 100%;
+}
+
+.corkage-price-wrap input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .add-guest-form button[type="submit"] {

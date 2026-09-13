@@ -1,0 +1,433 @@
+.edit-guest-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,.62);
+}
+
+.edit-guest-panel {
+  position: relative;
+  width: min(100%, 420px);
+  max-width: 100%;
+  height: 500px;
+  max-height: 90vh;
+  background: #f7f4ed;
+  color: #252525;
+  border-radius: 10px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.35);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  .edit-guest-panel {
+    width: min(100%, 360px);
+    height: auto;
+    max-height: 90vh;
+  }
+
+  .edit-guest-count-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .edit-guest-count-field {
+    display: block;
+    width: 100%;
+  }
+
+  .edit-guest-corkage-option {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .edit-guest-corkage-option-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px;
+  }
+
+  .edit-guest-corkage-price-wrap {
+    width: auto;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .edit-guest-corkage-price-wrap small {
+    font-size: 11px;
+  }
+
+  .edit-guest-corkage-price-wrap input {
+    width: 92px !important;
+    min-width: 92px;
+    max-width: 92px;
+    flex: 0 0 92px;
+    padding: 7px 8px;
+    font-size: 13px;
+  }
+
+  .edit-guest-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .edit-guest-total {
+    font-size: 16px;
+  }
+
+  .edit-guest-save {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
+
+.edit-guest-close {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: transparent;
+  color: #333333;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  padding: 0;
+}
+
+.edit-guest-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 16px;
+  background: #f3f1ed;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+  min-height: 62px;
+}
+
+.edit-guest-title {
+  margin: 0;
+  color: #3d3d3d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.edit-guest-form-body {
+  background: #f7f9fc;
+  padding: 20px 20px 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.edit-guest-form-body form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.edit-guest-count-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.edit-guest-count-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 4px;
+}
+
+.edit-guest-count-label {
+  display: block;
+  color: #716d65;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  line-height: 1.1;
+}
+
+.edit-guest-panel label,
+.edit-guest-panel legend {
+  color: #716d65;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.edit-guest-panel input[type="text"],
+.edit-guest-panel input[type="number"],
+.edit-guest-panel label > input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.edit-guest-panel fieldset {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+.edit-guest-corkage-fieldset {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.edit-guest-corkage-header {
+  color: #716d65;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+}
+
+.edit-guest-corkage-dropdown {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.edit-guest-corkage-dropdown summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  color: #252525;
+  font-weight: 600;
+}
+
+.edit-guest-corkage-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.edit-guest-corkage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.edit-guest-corkage-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.edit-guest-corkage-option-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #252525;
+  font-size: 14px;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 600;
+}
+
+.edit-guest-corkage-option-label input {
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.edit-guest-corkage-price-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-guest-corkage-price-wrap small {
+  color: #716d65;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 12px;
+}
+
+.edit-guest-corkage-price-wrap input {
+  width: 100px !important;
+  min-width: 100px;
+  max-width: 100px;
+  flex: 0 0 100px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.edit-guest-corkage-price-wrap input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.edit-guest-discount-box {
+  margin-top: 14px;
+  padding: 14px 12px 12px;
+  border: 1px solid #dfe7ef;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.edit-guest-discount-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.edit-guest-discount-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.edit-guest-discount-header p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.edit-guest-discount-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.edit-guest-discount-toggle input {
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.edit-guest-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-guest-form-group label {
+  color: #716d65;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.edit-guest-discount-input-group input {
+  width: 100%;
+  margin-top: 0;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.edit-guest-discount-result-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid #eef2f7;
+}
+
+.edit-guest-discount-result-label {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.edit-guest-discount-result-box strong {
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.edit-guest-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  padding: 16px 20px 20px;
+  background: #fefeff;
+  border-top: 1px solid #eef2f7;
+  flex-shrink: 0;
+}
+
+.edit-guest-total {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: left;
+  margin-left: 0;
+}
+
+.edit-guest-save {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 6px;
+  background: #b89455;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.edit-guest-form-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.edit-guest-form-body::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.7);
+  border-radius: 999px;
+}
+
+.edit-guest-form-body::-webkit-scrollbar-track {
+  background: transparent;
+}

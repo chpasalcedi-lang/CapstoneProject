@@ -15,6 +15,22 @@ const CORKAGE_OPTIONS = {
   Whiskey: { rate: 300, unit: "bottle" },
 };
 
+const defaultCorkageState = Object.fromEntries(
+  Object.entries(CORKAGE_OPTIONS).map(([option]) => [
+    option,
+    { enabled: false, price: "" },
+  ])
+);
+
+const getCorkagePrice = (option, config) => {
+  if (!config?.enabled) return 0;
+  const value = config.price;
+  if (value === "" || value === null || value === undefined) {
+    return Number(CORKAGE_OPTIONS[option]?.rate) || 0;
+  }
+  return Math.max(0, Number(value) || 0);
+};
+
 function AdminAddGuest() {
   const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
   const formatCurrency = (value) => {
@@ -26,11 +42,7 @@ function AdminAddGuest() {
     group_name: "",
     number_of_children: "",
     number_of_guests: "",
-    corkage: {
-      Food: 0,
-      Beer: 0,
-      Whiskey: 0,
-    },
+    corkage: defaultCorkageState,
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
@@ -65,21 +77,34 @@ function AdminAddGuest() {
     const adults = parseInt(values.number_of_guests) || 0;
     const children = parseInt(values.number_of_children) || 0;
     const guestTotal = adults * PRICE_PER_ADULT + children * PRICE_PER_CHILD;
-    const corkageTotal = Object.entries(values.corkage).reduce((total, [option, qty]) => {
-      const quantity = Math.max(0, parseInt(qty, 10) || 0);
-      if (quantity <= 0) return total;
-      return total + (CORKAGE_OPTIONS[option].rate * quantity);
+    const corkageTotal = Object.entries(values.corkage).reduce((total, [option, config]) => {
+      return total + getCorkagePrice(option, config);
     }, 0);
     return (guestTotal + corkageTotal).toFixed(2);
   };
 
-  const handleCorkageChange = (option, nextValue) => {
-    const safeValue = Math.max(0, parseInt(nextValue, 10) || 0);
+  const handleCorkageToggle = (option) => {
     setValues((prev) => ({
       ...prev,
       corkage: {
         ...prev.corkage,
-        [option]: safeValue,
+        [option]: {
+          enabled: !prev.corkage[option]?.enabled,
+          price: prev.corkage[option]?.enabled ? "" : prev.corkage[option]?.price || "",
+        },
+      },
+    }));
+  };
+
+  const handleCorkagePriceChange = (option, nextValue) => {
+    setValues((prev) => ({
+      ...prev,
+      corkage: {
+        ...prev.corkage,
+        [option]: {
+          ...prev.corkage[option],
+          price: nextValue,
+        },
       },
     }));
   };
@@ -102,8 +127,8 @@ function AdminAddGuest() {
 
     const totalPrice = calculateTotalPrice();
     const corkageSummary = Object.entries(values.corkage)
-      .filter(([, qty]) => Number(qty) > 0)
-      .map(([option, qty]) => `${option}${qty > 1 ? ` x${qty}` : ""}`)
+      .filter(([, config]) => config?.enabled)
+      .map(([option, config]) => `${option} - ₱${formatCurrency(getCorkagePrice(option, config))}`)
       .join(", ") || "No Corkage";
 
     const payload = {
@@ -127,11 +152,7 @@ function AdminAddGuest() {
         group_name: "",
         number_of_children: "",
         number_of_guests: "",
-        corkage: {
-          Food: 0,
-          Beer: 0,
-          Whiskey: 0,
-        },
+        corkage: defaultCorkageState,
       });
     } catch (err) {
       console.error("Error: ", err);
@@ -228,7 +249,8 @@ function AdminAddGuest() {
                 <div className="add-guest-form">
                     <h2>Add New Guest Arrival</h2>
                     <form onSubmit={handleSubmit}>
-                      <p className="price-display">Guest Rate: ₱{formatCurrency(PRICE_PER_CHILD)}/child | ₱{formatCurrency(PRICE_PER_ADULT)}/adult | Corkage: Food ₱500/group, Beer ₱300/case, Whiskey ₱300/bottle</p>
+                      <p className="price-display">Guest Rate: ₱{formatCurrency(PRICE_PER_CHILD)}/child | ₱{formatCurrency(PRICE_PER_ADULT)}/adult </p>
+                      <p className="price-display"> Corkage: Food ₱500/group, Beer ₱300/case, Whiskey ₱300/bottle</p>
 
                       <div className="add-form-group">
                         <label htmlFor="group-name">Group name</label>
@@ -253,24 +275,34 @@ function AdminAddGuest() {
 
                       <div className="add-form-group">
                         <label>Corkage</label>
-                        <div className="corkage-grid">
-                          {Object.entries(CORKAGE_OPTIONS).map(([option, { rate, unit }]) => (
-                            <div className="corkage-card" key={option}>
-                              <div className="corkage-card-header">
-                                <span>{option}</span>
-                                <strong>₱{formatCurrency(rate)}</strong>
+                        <details className="corkage-dropdown" open>
+                          <summary>Choose corkage</summary>
+                          <div className="corkage-list">
+                            {Object.entries(CORKAGE_OPTIONS).map(([option, { unit }]) => (
+                              <div className="corkage-option" key={option}>
+                                <label className="corkage-option-label">
+                                  <input
+                                    type="checkbox"
+                                    checked={!!values.corkage[option]?.enabled}
+                                    onChange={() => handleCorkageToggle(option)}
+                                  />
+                                  <span>{option}</span>
+                                </label>
+                                <div className="corkage-price-wrap">
+                                  <small>{unit}</small>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={values.corkage[option]?.enabled ? values.corkage[option]?.price ?? '' : ''}
+                                    onChange={(e) => handleCorkagePriceChange(option, e.target.value)}
+                                    placeholder={String(CORKAGE_OPTIONS[option].rate)}
+                                    disabled={!values.corkage[option]?.enabled}
+                                  />
+                                </div>
                               </div>
-                              <small>{unit}</small>
-                              <input
-                                type="number"
-                                min="0"
-                                value={values.corkage[option] || 0}
-                                onChange={(e) => handleCorkageChange(option, e.target.value)}
-                                placeholder="0"
-                              />
-                            </div>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
+                        </details>
                       </div>
 
                       <div className="add-form-summary">
@@ -280,10 +312,8 @@ function AdminAddGuest() {
                         </div>
                         <div>
                           <p className="summary-label">Corkage:</p>
-                          <p className="summary-price">₱{formatCurrency(Object.entries(values.corkage).reduce((total, [option, qty]) => {
-                            const quantity = Math.max(0, parseInt(qty, 10) || 0);
-                            if (quantity <= 0) return total;
-                            return total + (CORKAGE_OPTIONS[option].rate * quantity);
+                          <p className="summary-price">₱{formatCurrency(Object.entries(values.corkage).reduce((total, [option, config]) => {
+                            return total + getCorkagePrice(option, config);
                           }, 0))}</p>
                         </div>
                         <div>

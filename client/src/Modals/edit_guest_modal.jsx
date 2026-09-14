@@ -83,16 +83,27 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
   useEffect(() => {
     if (!guest) return;
     const rawCorkage = guest.corkage && guest.corkage !== 'No Corkage' ? guest.corkage : 'No Corkage';
+    const parsedCorkage = parseCorkageState(rawCorkage);
     const breakdown = getLegacyBreakdown(guest, rawCorkage === 'No Corkage' ? [] : rawCorkage.split(',').map((item) => item.trim()));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const baseCorkageTotal = Object.entries(parsedCorkage).reduce(
+      (sum, [option, config]) => sum + getCorkagePrice(option, config),
+      0
+    );
+    const baseGuestTotal = (Number(breakdown.children || 0) * PRICE_PER_CHILD)
+      + (Number(breakdown.adults || 0) * PRICE_PER_ADULT)
+      + baseCorkageTotal;
+    const savedTotal = Number(guest.total_price || 0);
+    const savedDiscount = Number(guest.discount || 0);
+    const shouldRestoreDiscount = savedDiscount > 0 || (savedTotal > 0 && savedTotal < baseGuestTotal);
+
     setForm({
       group_name: guest.group_name || '',
       number_of_children: breakdown.children,
       number_of_adults: breakdown.adults,
-      corkage: parseCorkageState(rawCorkage),
+      corkage: parsedCorkage,
     });
-    setDiscountEnabled(false);
-    setLastPrice('');
+    setDiscountEnabled(shouldRestoreDiscount);
+    setLastPrice(shouldRestoreDiscount && savedTotal > 0 ? String(savedTotal) : '');
   }, [guest]);
 
   if (!show || !guest) return null;

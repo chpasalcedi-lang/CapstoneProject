@@ -139,6 +139,7 @@ class Server {
         const columns = [
             "ALTER TABLE guest ADD COLUMN number_of_children INT NOT NULL DEFAULT 0",
             "ALTER TABLE guest ADD COLUMN number_of_adults INT NOT NULL DEFAULT 0",
+            "ALTER TABLE guest ADD COLUMN discount DECIMAL(10,2) NOT NULL DEFAULT 0",
         ];
 
         for (const sql of columns) {
@@ -702,12 +703,13 @@ class GuestArrivalController {
                 ? req.body.corkage.trim()
                 : 'No Corkage';
             const totalPrice = Number(req.body.total_price);
+            const discount = Number(req.body.discount) || 0;
 
             if (!Number.isFinite(numberOfGuests) || numberOfGuests <= 0 || !Number.isFinite(totalPrice)) {
                 return res.status(400).json({ error: 'Invalid guest arrival values.' });
             }
 
-            const sql = 'INSERT INTO guest (group_name, number_of_children, number_of_adults, number_of_guests, corkage, total_price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)';
+            const sql = 'INSERT INTO guest (group_name, number_of_children, number_of_adults, number_of_guests, corkage, total_price, discount, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
             const values = [
                 groupName || null,
                 numberOfChildren,
@@ -715,6 +717,7 @@ class GuestArrivalController {
                 numberOfGuests,
                 corkage,
                 totalPrice,
+                discount,
                 req.body.created_at || new Date()
             ];
             const result = await this.db.query(sql, values);
@@ -732,13 +735,14 @@ class GuestArrivalController {
             const numberOfAdults = Number(req.body.number_of_adults) || 0;
             const numberOfGuests = numberOfChildren + numberOfAdults;
             const totalPrice = Number(req.body.total_price);
+            const discount = Number(req.body.discount) || 0;
             if (!Number.isInteger(guestId) || guestId <= 0 || numberOfGuests <= 0 || !Number.isFinite(totalPrice)) {
                 return res.status(400).json({ error: 'Invalid guest arrival values.' });
             }
 
             const result = await this.db.query(
-                'UPDATE guest SET group_name = ?, number_of_children = ?, number_of_adults = ?, number_of_guests = ?, corkage = ?, total_price = ? WHERE id = ?',
-                [req.body.group_name?.trim() || null, numberOfChildren, numberOfAdults, numberOfGuests, req.body.corkage || 'No Corkage', totalPrice, guestId]
+                'UPDATE guest SET group_name = ?, number_of_children = ?, number_of_adults = ?, number_of_guests = ?, corkage = ?, total_price = ?, discount = ? WHERE id = ?',
+                [req.body.group_name?.trim() || null, numberOfChildren, numberOfAdults, numberOfGuests, req.body.corkage || 'No Corkage', totalPrice, discount, guestId]
             );
             if (result.affectedRows === 0) return res.status(404).json({ error: 'Guest arrival not found' });
             return res.status(200).json({ message: 'Guest arrival updated successfully' });

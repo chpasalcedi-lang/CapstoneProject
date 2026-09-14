@@ -22,13 +22,19 @@ const defaultCorkageState = Object.fromEntries(
   ])
 );
 
-const getCorkagePrice = (option, config) => {
+const getCorkageQuantity = (option, config) => {
   if (!config?.enabled) return 0;
   const value = config.price;
   if (value === "" || value === null || value === undefined) {
-    return Number(CORKAGE_OPTIONS[option]?.rate) || 0;
+    return 1;
   }
   return Math.max(0, Number(value) || 0);
+};
+
+const getCorkagePrice = (option, config) => {
+  if (!config?.enabled) return 0;
+  const rate = Number(CORKAGE_OPTIONS[option]?.rate) || 0;
+  return getCorkageQuantity(option, config) * rate;
 };
 
 function AdminAddGuest() {
@@ -289,13 +295,13 @@ function AdminAddGuest() {
                                   <span>{option}</span>
                                 </label>
                                 <div className="corkage-price-wrap">
-                                  <small>{unit}</small>
+                                  <small>{unit} / {CORKAGE_OPTIONS[option].rate}</small>
                                   <input
                                     type="number"
                                     min="0"
                                     value={values.corkage[option]?.enabled ? values.corkage[option]?.price ?? '' : ''}
                                     onChange={(e) => handleCorkagePriceChange(option, e.target.value)}
-                                    placeholder={String(CORKAGE_OPTIONS[option].rate)}
+                                    placeholder="0"
                                     disabled={!values.corkage[option]?.enabled}
                                   />
                                 </div>

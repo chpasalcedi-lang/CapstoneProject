@@ -72,7 +72,7 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: #e5e7eb;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
   color: #374151;
   display: inline-flex;
   align-items: center;
@@ -83,7 +83,7 @@
 }
 
 .add-room-modal-close:hover {
-  background: #d1d5db;
+  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
   transform: scale(1.03);
   color: #111827;
 }

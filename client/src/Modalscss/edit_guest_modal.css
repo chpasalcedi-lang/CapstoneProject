@@ -11,17 +11,17 @@
 
 .edit-guest-panel {
   position: relative;
-  width: min(100%, 420px);
+  width: 520px;
   max-width: 100%;
-  height: 500px;
   max-height: 90vh;
-  background: #f7f4ed;
-  color: #252525;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  color: #111827;
   border-radius: 10px;
-  box-shadow: 0 24px 70px rgba(0,0,0,.35);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 @media (max-width: 480px) {
@@ -90,50 +90,49 @@
 }
 
 .edit-guest-close {
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
-  border: 1px solid rgba(0,0,0,0.2);
-  background: transparent;
-  color: #333333;
-  font-size: 28px;
-  line-height: 1;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  color: #6b7280;
+  font-size: 0.95rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 2px;
   padding: 0;
+  transition: background 0.15s ease, transform 0.12s ease, color 0.12s ease;
+}
+
+.edit-guest-close:hover {
+  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
+  color: #111827;
+  transform: scale(1.03);
 }
 
 .edit-guest-header {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 18px 16px;
-  background: #f3f1ed;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  border-bottom: 1px solid #e5e7eb;
   flex-shrink: 0;
-  min-height: 62px;
 }
 
 .edit-guest-title {
   margin: 0;
-  color: #3d3d3d;
-  font-size: 0.72rem;
+  color: #111827;
+  font-size: 1.22rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .edit-guest-form-body {
-  background: #f7f9fc;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
   padding: 20px 20px 12px;
   overflow-y: auto;
   flex: 1;
@@ -170,11 +169,10 @@
 
 .edit-guest-panel label,
 .edit-guest-panel legend {
-  color: #716d65;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .06em;
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .edit-guest-panel input[type="text"],
@@ -183,12 +181,13 @@
   display: block;
   width: 100%;
   margin-top: 6px;
-  padding: 11px 12px;
+  padding: 9px 12px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
   background: #ffffff;
   color: #111827;
   box-sizing: border-box;
+  font: inherit;
 }
 
 .edit-guest-panel fieldset {
@@ -392,31 +391,46 @@
 
 .edit-guest-actions {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 14px;
-  padding: 16px 20px 20px;
-  background: #fefeff;
-  border-top: 1px solid #eef2f7;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  border-top: 1px solid #e5e7eb;
   flex-shrink: 0;
 }
 
 .edit-guest-total {
-  font-size: 18px;
-  font-weight: 700;
-  text-align: left;
-  margin-left: 0;
+  margin-right: auto;
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .edit-guest-save {
-  width: 100%;
-  padding: 12px;
-  border: 0;
+  padding: 9px 18px;
   border-radius: 6px;
-  background: #b89455;
-  color: #fff;
-  font-weight: 700;
+  background: #1d1d1e;
+  color: #ececec;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.edit-guest-save:hover {
+  background: #2d2d2e;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.edit-guest-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-guest-save:disabled:hover {
+  background: #1d1d1e;
+  box-shadow: none;
 }
 
 .edit-guest-form-body::-webkit-scrollbar {

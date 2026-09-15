@@ -33,7 +33,7 @@
 }
 
 .walkin-form-card {
-  background: #111111;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
   width: 520px;
   max-width: 100%;
   max-height: 80vh;
@@ -41,8 +41,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 35px rgba(31, 41, 55, 0.12);
   overflow-x: hidden;
+  border: 1px solid #e5e7eb;
 }
 
 .walkin-reservation-modal-header {
@@ -51,13 +52,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(249, 248, 248, 0.08);
+  border-bottom: 1px solid #e5e7eb;
   flex: 0 0 auto;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .walkin-reservation-modal-title {
   font-size: 20px;
-  color: #f5f3ee;
+  color: #1f2937;
   margin: 0;
 }
 
@@ -68,8 +70,8 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f5f3ee;
+  background: #e5e7eb;
+  color: #374151;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -78,9 +80,9 @@
 }
 
 .walkin-reservation-modal-close:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: #d1d5db;
   transform: scale(1.03);
-  color: #ffffff;
+  color: #111827;
 }
 
 .walkin-reservation-modal-body {
@@ -89,6 +91,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: 20px 30px;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .walkin-reservation-modal-body::-webkit-scrollbar {
@@ -96,7 +99,7 @@
 }
 
 .walkin-reservation-modal-body::-webkit-scrollbar-thumb {
-  background: #444;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
@@ -122,7 +125,7 @@
 .walkin-reservation-form-group label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #d3d3d3;
+  color: #374151;
 }
 
 .walkin-date-input-wrap {
@@ -184,16 +187,16 @@
   width: 100%;
   padding: 10px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #0c0c0c;
-  color: #f5f3ee;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
   font-size: 0.9rem;
   transition: 0.15s;
   box-sizing: border-box;
 }
 
 .walkin-reservation-form-group select option {
-  color: #0c0c0c;
+  color: #111827;
   background: #ffffff;
 }
 
@@ -204,7 +207,8 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .walkin-reservation-btn-cancel,
@@ -218,13 +222,13 @@
 }
 
 .walkin-reservation-btn-cancel {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ccc;
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+  color: #374151;
 }
 
 .walkin-reservation-btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: #d1d5db;
 }
 
 .walkin-reservation-btn-save {
@@ -248,8 +252,8 @@
   max-width: 460px;
   padding: 12px 14px;
   margin: 14px auto 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #0c0c0c;
+  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.45);
   border-radius: 8px;
   box-sizing: border-box;
 }
@@ -258,8 +262,9 @@
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
-  border: 1px solid rgba(200, 169, 110, 0.22);
-  background: linear-gradient(135deg, rgba(19, 19, 19, 0.98), rgba(33, 26, 17, 0.98));
+  border: 1px solid #e9d7a6;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 .discount-section-header {
@@ -272,13 +277,13 @@
 .discount-section-header h3 {
   margin: 0 0 2px;
   font-size: 0.95rem;
-  color: #f5f3ee;
+  color: #1f2937;
 }
 
 .discount-section-header p {
   margin: 0;
   font-size: 0.78rem;
-  color: #a8a8a8;
+  color: #6b7280;
 }
 
 .discount-toggle {
@@ -286,7 +291,7 @@
   align-items: center;
   gap: 6px;
   font-size: 0.8rem;
-  color: #d3d3d3;
+  color: #374151;
 }
 
 .discount-toggle input {
@@ -304,19 +309,19 @@
   align-items: center;
   padding: 10px 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(120, 119, 109, 0.18);
 }
 
 .discount-result-label {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #bdbdbd;
+  color: #4b5563;
 }
 
 .discount-result-box strong {
-  color: #c8a96e;
+  color: #8a6b2d;
   font-size: 0.95rem;
 }
 
@@ -357,7 +362,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #9ca3af;
+  color: #374151;
   overflow-wrap: anywhere;
 }
 
@@ -365,11 +370,11 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  color: #f5f3ee;
+  color: #111827;
 }
 
 .walkin-reservation-price-value.total {
-  color: #c8a96e;
+  color: #8a6b2d;
 }
 
 .walkin-reservation-price-divider {
@@ -386,8 +391,92 @@
   border-radius: 12px;
   background: rgba(200, 169, 110, 0.12);
   border: 1px solid rgba(200, 169, 110, 0.2);
-  color: #e5c87f;
+  color: #8a6b2d;
   font-size: 0.95rem;
+}
+
+.walkin-form-card details.corkage-dropdown {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f7f7f5 !important;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.walkin-form-card details.corkage-dropdown summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  color: #111827;
+  font-weight: 600;
+  background: #f7f7f5;
+}
+
+.walkin-form-card .corkage-dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.walkin-form-card .corkage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: #f3f4f6 !important;
+}
+
+.walkin-form-card .corkage-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f7f7f5 !important;
+  color: #111827 !important;
+}
+
+.walkin-form-card .corkage-option-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #111827 !important;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.walkin-form-card .corkage-option-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #c8a96e;
+  margin: 0;
+}
+
+.walkin-form-card .corkage-price-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.walkin-form-card .corkage-price-wrap small {
+  color: #6b7280 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.walkin-form-card .corkage-price-wrap input {
+  width: 110px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff !important;
+  color: #111827 !important;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.walkin-form-card .corkage-price-wrap input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 600px) {

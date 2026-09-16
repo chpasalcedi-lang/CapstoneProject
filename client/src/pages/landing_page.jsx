@@ -407,6 +407,10 @@ function LandingPage() {
                 <span className="pool-note-dash">—</span>
                 <span>Rates are per head and cover pool access for the day. Corkage applies to food and drinks brought in from outside; bringing your own is welcome as long as the corkage fee is settled at the gate.</span>
               </div>
+               <div className="pool-note-strip">
+                <span className="pool-note-dash">—</span>
+                <span></span>
+              </div>
             </section>
 
 

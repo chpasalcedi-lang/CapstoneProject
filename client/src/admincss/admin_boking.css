@@ -259,6 +259,26 @@ body {
   overflow: hidden;
 }
 
+.event-bookings-section {
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.event-bookings-section h1 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #555;
+  font-weight: 500;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 0;
+}
+
 .guests-table-container h1 {
   font-family: 'DM Sans', sans-serif;
   font-size: 11px;
@@ -272,6 +292,12 @@ body {
 }
 
 .guests-table-wrapper {
+  max-height: 575px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.event-bookings-table-wrapper {
   max-height: 575px;
   overflow-y: auto;
   overflow-x: auto;
@@ -315,7 +341,14 @@ body {
   min-width: 900px;
 }
 
-.guests-table thead {
+.event-bookings-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.guests-table thead,
+.event-bookings-table thead {
   position: sticky;
   top: 0;
   z-index: 10;
@@ -329,7 +362,8 @@ body {
 }
 
 .guests-table-cancel-request thead th,
-.guests-table thead th {
+.guests-table thead th,
+.event-bookings-table thead th {
   text-align: auto;
   padding: 14px 16px;
   font-size: 10.5px;
@@ -343,17 +377,20 @@ body {
 }
 
 .guests-table tbody tr,
-.guests-table-cancel-request tbody tr {
+.guests-table-cancel-request tbody tr,
+.event-bookings-table tbody tr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition: background 0.15s;
 }
 
-.guests-table tbody tr:hover {
+.guests-table tbody tr:hover,
+.event-bookings-table tbody tr:hover {
   background: rgba(255, 255, 255, 0.02);
 }
 
 .guests-table td,
-.guests-table-cancel-request td {
+.guests-table-cancel-request td,
+.event-bookings-table td {
   padding: 14px 16px;
   font-size: 12px;
   color: #777;
@@ -362,7 +399,8 @@ body {
 }
 
 .guests-table td:first-child,
-.guests-table-cancel-request td:first-child {
+.guests-table-cancel-request td:first-child,
+.event-bookings-table td:first-child {
   color: #f0ede8;
   font-weight: 500;
   width: 220px;
@@ -553,6 +591,7 @@ body {
     min-height: 34px;
   }
   .admin-booking-page .guests-table-wrapper,
+  .admin-booking-page .event-bookings-table-wrapper,
   .admin-booking-page .guests-table-wrapper-cancel-request {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -673,6 +712,7 @@ body {
 .admin-booking-page--light .guests-topbar h1,
 .admin-booking-page--light .booking-stat-value,
 .admin-booking-page--light .guests-table-container h1,
+.admin-booking-page--light .event-bookings-section h1,
 .admin-booking-page--light .guests-table-container-cancel-request h1 {
   color: #253238;
 }
@@ -682,6 +722,7 @@ body {
 .admin-booking-page--light .dashboard-nav-links p,
 .admin-booking-page--light .booking-stat-label,
 .admin-booking-page--light .guests-table td,
+.admin-booking-page--light .event-bookings-table td,
 .admin-booking-page--light .guests-table-cancel-request td {
   color: #687477;
 }
@@ -709,6 +750,7 @@ body {
 .admin-booking-page--light .booking-stat-card,
 .admin-booking-page--light .admin-booking-stats-bar-content,
 .admin-booking-page--light .guests-table-container,
+.admin-booking-page--light .event-bookings-section,
 .admin-booking-page--light .guests-table-container-cancel-request {
   background: #f7f4ed;
   border-color: rgba(37, 50, 56, 0.12);
@@ -736,23 +778,27 @@ body {
 }
 
 .admin-booking-page--light .guests-table-cancel-request thead th,
-.admin-booking-page--light .guests-table thead th {
+.admin-booking-page--light .guests-table thead th,
+.admin-booking-page--light .event-bookings-table thead th {
   color: #687477;
   background: #e5e1d8;
   border-color: rgba(37, 50, 56, 0.12);
 }
 
 .admin-booking-page--light .guests-table td:first-child,
+.admin-booking-page--light .event-bookings-table td:first-child,
 .admin-booking-page--light .guests-table-cancel-request td:first-child {
   color: #253238;
 }
 
 .admin-booking-page--light .guests-table tbody tr,
+.admin-booking-page--light .event-bookings-table tbody tr,
 .admin-booking-page--light .guests-table-cancel-request tbody tr {
   border-color: rgba(37, 50, 56, 0.1);
 }
 
 .admin-booking-page--light .guests-table tbody tr:hover,
+.admin-booking-page--light .event-bookings-table tbody tr:hover,
 .admin-booking-page--light .guests-table-cancel-request tbody tr:hover {
   background: rgba(37, 50, 56, 0.04);
 }

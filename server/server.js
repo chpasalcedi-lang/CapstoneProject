@@ -452,6 +452,8 @@ class ReservationController {
         app.post('/add_event_booking', this.addEventBooking.bind(this));
         app.get('/check_event_booking_availability', this.checkEventBookingAvailability.bind(this));
         app.get('/get_event_bookings', this.getEventBookings.bind(this));
+        app.post('/update_event_booking/:id', this.updateEventBooking.bind(this));
+        app.delete('/delete_event_booking/:id', this.deleteEventBooking.bind(this));
         app.get('/get_reservations', this.getReservations.bind(this));
         app.post('/update_reservation/:id', this.updateReservation.bind(this));
         app.post('/cancel_reservation_request/:id', this.cancelReservationRequest.bind(this));
@@ -545,6 +547,7 @@ class ReservationController {
 
     async addEventBooking(req, res) {
         try {
+            await this.eventStatusReady;
             const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
             const {
                 event_name: eventName,
@@ -622,8 +625,8 @@ class ReservationController {
             const totalPrice = Math.max(0, (dailyPrice * eventDays) - savedDiscount);
 
             const insertSql = `INSERT INTO events
-                (event_name, guest_name, phone_number, start_date, end_date, time_in, time_out, notes, discount, price, total_price, rooms, guest_number, email)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                (event_name, guest_name, phone_number, start_date, end_date, time_in, time_out, notes, discount, price, total_price, rooms, guest_number, email, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
             const result = await this.db.query(insertSql, [
                 cleanEventName,
                 cleanGuestName,
@@ -639,6 +642,7 @@ class ReservationController {
                 numericRoomId,
                 numericGuestNumber,
                 cleanEmail,
+                'pending',
             ]);
 
             return res.status(200).json({ message: 'Event booking saved successfully!', bookingId: result.insertId });
@@ -672,11 +676,62 @@ class ReservationController {
 
     async getEventBookings(req, res) {
         try {
-            const rows = await this.db.query("SELECT id, DATE_FORMAT(start_date, '%Y-%m-%d') AS start_date, DATE_FORMAT(end_date, '%Y-%m-%d') AS end_date, rooms FROM events ORDER BY id DESC");
+            await this.eventStatusReady;
+            const rows = await this.db.query(`SELECT e.id, e.event_name, e.guest_name, e.phone_number, e.email,
+                DATE_FORMAT(e.start_date, '%Y-%m-%d') AS start_date,
+                DATE_FORMAT(e.end_date, '%Y-%m-%d') AS end_date,
+                e.time_in, e.time_out, e.notes, e.discount, e.price, e.total_price,
+                e.rooms, e.guest_number, e.status, rm.room_number, rm.room_name, rm.room_label
+                FROM events e
+                LEFT JOIN rooms rm ON e.rooms = rm.id
+                ORDER BY e.id DESC`);
             return res.status(200).json(rows);
         } catch (error) {
             console.error('Error fetching event bookings:', error);
             return res.status(500).json({ error: 'Unable to fetch event bookings.' });
+        }
+    }
+
+    async updateEventBooking(req, res) {
+        try {
+            await this.eventStatusReady;
+            const eventId = Number(req.params.id);
+            const status = String(req.body?.status || '').toLowerCase();
+            const allowedStatuses = ['pending', 'confirmed', 'complete', 'cancelled'];
+
+            if (!Number.isInteger(eventId) || eventId <= 0 || !allowedStatuses.includes(status)) {
+                return res.status(400).json({ error: 'Invalid event booking ID or status.' });
+            }
+
+            const result = await this.db.query('UPDATE events SET status = ? WHERE id = ?', [status, eventId]);
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Event booking not found.' });
+            }
+
+            return res.status(200).json({ message: 'Event booking status updated successfully.' });
+        } catch (error) {
+            console.error('Error updating event booking:', error);
+            return res.status(500).json({ error: 'Unable to update event booking.' });
+        }
+    }
+
+    async deleteEventBooking(req, res) {
+        try {
+            await this.eventStatusReady;
+            const eventId = Number(req.params.id);
+            if (!Number.isInteger(eventId) || eventId <= 0) {
+                return res.status(400).json({ error: 'Invalid event booking ID.' });
+            }
+
+            const result = await this.db.query('DELETE FROM events WHERE id = ?', [eventId]);
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Event booking not found.' });
+            }
+
+            return res.status(200).json({ message: 'Event booking deleted successfully.' });
+        } catch (error) {
+            console.error('Error deleting event booking:', error);
+            return res.status(500).json({ error: 'Unable to delete event booking.' });
         }
     }
 

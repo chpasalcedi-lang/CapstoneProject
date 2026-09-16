@@ -13,9 +13,11 @@ import EditGuestModal from '../Modals/edit_guest_modal';
 function AdminGuest() {
     const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
     const [bookings, setBookings] = useState([]);
+    const [eventBookings, setEventBookings] = useState([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [guestArrivals, setGuestArrivals] = useState([]);
     const [loadingBookings, setLoadingBookings] = useState(true);
+    const [loadingEvents, setLoadingEvents] = useState(true);
     const [loadingGuests, setLoadingGuests] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
@@ -34,6 +36,7 @@ function AdminGuest() {
     const [selectedGuest, setSelectedGuest] = useState(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [currentBookingPage, setCurrentBookingPage] = useState(1);
+    const [currentEventPage, setCurrentEventPage] = useState(1);
     const [currentGuestPage, setCurrentGuestPage] = useState(1);
     const [currentFeedbackPage, setCurrentFeedbackPage] = useState(1);
     const itemsPerPage = 10;
@@ -144,6 +147,17 @@ function AdminGuest() {
             }
         };
 
+        const fetchEventBookings = async () => {
+            try {
+                const res = await apiClient.get('/get_event_bookings');
+                setEventBookings(res.data || []);
+            } catch (err) {
+                console.error('Error fetching event bookings:', err);
+            } finally {
+                setLoadingEvents(false);
+            }
+        };
+
         const fetchGuestArrivals = async () => {
             try {
                 const res = await apiClient.get("/get_guest_arrivals");
@@ -167,8 +181,27 @@ function AdminGuest() {
         };
 
         fetchBookings();
+        fetchEventBookings();
         fetchGuestArrivals();
         fetchFeedback();
+
+        const handleEventBookingUpdate = () => {
+            fetchEventBookings();
+        };
+
+        const handleStorageRefresh = (event) => {
+            if (event.key === 'dashboardRefreshTrigger') {
+                fetchEventBookings();
+            }
+        };
+
+        window.addEventListener('event-booking-updated', handleEventBookingUpdate);
+        window.addEventListener('storage', handleStorageRefresh);
+
+        return () => {
+            window.removeEventListener('event-booking-updated', handleEventBookingUpdate);
+            window.removeEventListener('storage', handleStorageRefresh);
+        };
     }, []);
 
     const filteredBookings = bookings.filter((booking) => {
@@ -190,6 +223,26 @@ function AdminGuest() {
         const checkInDate = new Date(booking.check_in_date);
         const bookingMonth = checkInDate.getMonth() + 1;
         return searchMatch && bookingMonth === parseInt(selectedMonth);
+    });
+
+    const filteredEventBookings = eventBookings.filter((booking) => {
+        const status = String(booking.status || 'pending').toLowerCase();
+        if (status !== 'confirmed' && status !== 'complete') return false;
+
+        const query = searchTerm.toLowerCase();
+        const searchMatch = [
+            booking.event_name,
+            booking.guest_name,
+            booking.room_number,
+            booking.room_name,
+            booking.phone_number,
+            booking.email,
+        ].some((value) => String(value || '').toLowerCase().includes(query));
+
+        if (!selectedMonth) return searchMatch;
+
+        const eventMonth = new Date(booking.start_date).getMonth() + 1;
+        return searchMatch && eventMonth === parseInt(selectedMonth, 10);
     });
 
     const filteredGuestArrivals = guestArrivals.filter((guest) => {
@@ -217,6 +270,11 @@ function AdminGuest() {
     const bookingStartIndex = (currentBookingPage - 1) * itemsPerPage;
     const paginatedBookings = filteredBookings.slice(bookingStartIndex, bookingStartIndex + itemsPerPage);
 
+    // Pagination for event bookings
+    const totalEventPages = Math.ceil(filteredEventBookings.length / itemsPerPage);
+    const eventStartIndex = (currentEventPage - 1) * itemsPerPage;
+    const paginatedEventBookings = filteredEventBookings.slice(eventStartIndex, eventStartIndex + itemsPerPage);
+
     // Pagination for guests
     const totalGuestPages = Math.ceil(filteredGuestArrivals.length / itemsPerPage);
     const guestStartIndex = (currentGuestPage - 1) * itemsPerPage;
@@ -230,6 +288,12 @@ function AdminGuest() {
     const handleBookingPageChange = (page) => {
         if (page >= 1 && page <= totalBookingPages) {
             setCurrentBookingPage(page);
+        }
+    };
+
+    const handleEventPageChange = (page) => {
+        if (page >= 1 && page <= totalEventPages) {
+            setCurrentEventPage(page);
         }
     };
 
@@ -274,6 +338,42 @@ function AdminGuest() {
         } catch (err) {
             console.error("Error deleting booking:", err);
             Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to delete booking' });
+        }
+    };
+
+    const handleDeleteEventBooking = async (id) => {
+        if (!isAdmin) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Access denied',
+                text: 'Only admin can access this action.',
+            });
+            return;
+        }
+
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Delete event booking',
+            text: 'This will permanently remove the event booking. Continue?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it',
+            cancelButtonText: 'Keep booking',
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await apiClient.delete(`/delete_event_booking/${id}`);
+            setEventBookings((currentBookings) => currentBookings.filter((booking) => booking.id !== id));
+            Swal.fire({ icon: 'success', title: 'Deleted', text: 'Event booking deleted successfully.' });
+        } catch (err) {
+            console.error('Error deleting event booking:', err);
+            const errorText = 'Failed to delete event booking.';
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: errorText,
+            });
         }
     };
 
@@ -342,6 +442,7 @@ function AdminGuest() {
 
     useEffect(() => {
         setCurrentBookingPage(1);
+        setCurrentEventPage(1);
     }, [searchTerm, selectedMonth]);
 
     useEffect(() => {
@@ -357,6 +458,12 @@ function AdminGuest() {
             setCurrentBookingPage(totalBookingPages);
         }
     }, [currentBookingPage, totalBookingPages]);
+
+    useEffect(() => {
+        if (totalEventPages > 0 && currentEventPage > totalEventPages) {
+            setCurrentEventPage(totalEventPages);
+        }
+    }, [currentEventPage, totalEventPages]);
 
     useEffect(() => {
         if (totalGuestPages > 0 && currentGuestPage > totalGuestPages) {
@@ -556,7 +663,7 @@ function AdminGuest() {
                                 </table>
                             </div>
                             {filteredBookings.length > 0 && (
-                                <div className="pagination-container">
+                                <div className="pagination-container booking-pagination">
                                     <button 
                                         className="pagination-btn prev-btn" 
                                         onClick={() => handleBookingPageChange(currentBookingPage - 1)}
@@ -599,6 +706,127 @@ function AdminGuest() {
                                 </div>
                             )}
                         </div>
+                        <p className="event-list-label" id="event-list">Event list</p>
+                        <div className="event-list-filters">
+                            <input type="text" className="search-input" placeholder="Search by guest, room, phone, or email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+                            <select className="search-options" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                                <option value="">All Months</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        
+                        <div className="event-list-section">
+                            <div className="event-list-table-wrapper">
+                                <table className="event-list-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Guest Name</th>
+                                            <th>Number</th>
+                                            <th>Email</th>
+                                            <th>rooms</th>
+                                            <th>Check-Date</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th className="actions-header">Actions</th>
+                                        </tr>
+                                    </thead>    
+                                    <tbody>
+                                    {loadingEvents ? (
+                                        <tr>
+                                            <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                                Loading events...
+                                            </td>
+                                        </tr>
+                                    ) : filteredEventBookings.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                                No events found.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        paginatedEventBookings.map((booking) => (
+                                            <tr key={booking.id}>
+                                                <td>{booking.guest_name || '-'}</td>
+                                                <td>{booking.phone_number || '-'}</td>
+                                                <td>{booking.email}</td>
+                                                <td>{booking.room_number || booking.room_name || booking.rooms || '-'}</td>
+                                                <td>{formatBookingDate(booking.start_date)}</td>
+                                                <td>{booking.time_in || '-'} - {booking.time_out || '-'}</td>
+                                                <td>{booking.status || 'pending'}</td>
+                                                <td className="actions-cell">
+                                                    <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                        view
+                                                    </button>
+                                                    <button className="btn guest btn-primary" onClick={() => handleEdit(booking)}>
+                                                        edit
+                                                    </button>
+                                                    <button className="btn guest btn-danger" onClick={() => handleDeleteEventBooking(booking.id)}>
+                                                        delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                                </table>
+                            </div>
+                        </div>
+                            {filteredEventBookings.length > 0 && (
+                                <div className="pagination-container event-pagination">
+                                    <button 
+                                        className="pagination-btn prev-btn" 
+                                        onClick={() => handleEventPageChange(currentEventPage - 1)}
+                                        disabled={currentEventPage === 1}
+                                        aria-label="Previous page"
+                                    >
+                                        &lt;
+                                    </button>
+                                    <div className="pagination-numbers">
+                                        {Array.from({ length: Math.min(totalEventPages, 5) }, (_, i) => {
+                                            let pageNum;
+                                            if (totalEventPages <= 5) {
+                                                pageNum = i + 1;
+                                            } else if (currentEventPage <= 3) {
+                                                pageNum = i + 1;
+                                            } else if (currentEventPage >= totalEventPages - 2) {
+                                                pageNum = totalEventPages - 4 + i;
+                                            } else {
+                                                pageNum = currentEventPage - 2 + i;
+                                            }
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    className={`pagination-number ${currentEventPage === pageNum ? 'active' : ''}`}
+                                                    onClick={() => handleEventPageChange(pageNum)}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <button 
+                                        className="pagination-btn next-btn" 
+                                        onClick={() => handleEventPageChange(currentEventPage + 1)}
+                                        disabled={currentEventPage === totalEventPages}
+                                        aria-label="Next page"
+                                    >
+                                        &gt;
+                                    </button>
+                                </div>
+                            )}
+                        
+                    
                     
                         <p className="Guest-section-label" id="guest-list"> Guest list </p>
                         <div className="guests-booking-headers">

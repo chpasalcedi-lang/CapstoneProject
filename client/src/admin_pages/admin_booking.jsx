@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import emailjs from "@emailjs/browser";
 import "../admincss/admin_boking.css";
 import ViewBookingModal from "../Modals/view_booking_modal.jsx";
+import ViewEventModal from "../Modals/view_event_modal.jsx";
 
 // EmailJS API key
 emailjs.init("-Vq78NrvG691mgYQ3");
@@ -12,13 +13,16 @@ emailjs.init("-Vq78NrvG691mgYQ3");
 function AdminBooking() {
     const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
     const [bookings, setBookings] = useState([]);
+    const [eventBookings, setEventBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewModal, setViewModal] = useState(false);
+    const [eventViewModal, setEventViewModal] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [currentBookingPage, setCurrentBookingPage] = useState(1);
+    const [currentEventPage, setCurrentEventPage] = useState(1);
     const [currentCancelPage, setCurrentCancelPage] = useState(1);
     const itemsPerPage = 10;
     const [adminData] = useState(() => {
@@ -36,8 +40,12 @@ function AdminBooking() {
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const res = await apiClient.get('/get_reservations');
-                setBookings(res.data);
+                const [reservationResponse, eventResponse] = await Promise.all([
+                    apiClient.get('/get_reservations'),
+                    apiClient.get('/get_event_bookings'),
+                ]);
+                setBookings(reservationResponse.data || []);
+                setEventBookings(eventResponse.data || []);
             } catch (err) {
                 console.error("Error fetching bookings:", err);
             } finally {
@@ -96,6 +104,11 @@ function AdminBooking() {
     const handleView = (booking) => {
         setSelectedBooking(booking);
         setViewModal(true);
+    };
+
+    const handleEventView = (booking) => {
+        setSelectedBooking(booking);
+        setEventViewModal(true);
     };
 
     const handleConfirm = async (booking) => {
@@ -218,6 +231,55 @@ function AdminBooking() {
         }
     };
 
+    const refreshEventBookings = async () => {
+        const response = await apiClient.get('/get_event_bookings');
+        setEventBookings(response.data || []);
+        localStorage.setItem('dashboardRefreshTrigger', Date.now().toString());
+        window.dispatchEvent(new Event('event-booking-updated'));
+    };
+
+    const handleEventConfirm = async (booking) => {
+        const currentStatus = String(booking?.status || 'pending').toLowerCase();
+        const targetStatus = currentStatus === 'pending' ? 'confirmed' : currentStatus === 'confirmed' ? 'complete' : null;
+
+        if (!targetStatus) return;
+
+        try {
+            await apiClient.post(`/update_event_booking/${booking.id}`, { status: targetStatus });
+            await refreshEventBookings();
+            Swal.fire({
+                icon: 'success',
+                title: targetStatus === 'complete' ? 'Complete' : 'Confirmed',
+                text: `Event booking marked ${targetStatus}.`,
+            });
+        } catch (err) {
+            console.error('Error updating event booking:', err);
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to update event booking.' });
+        }
+    };
+
+    const handleEventCancel = async (booking) => {
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Cancel event booking',
+            text: 'Are you sure you want to cancel this event booking?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it',
+            cancelButtonText: 'Keep booking',
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await apiClient.post(`/update_event_booking/${booking.id}`, { status: 'cancelled' });
+            await refreshEventBookings();
+            Swal.fire({ icon: 'success', title: 'Cancelled', text: 'Event booking cancelled successfully.' });
+        } catch (err) {
+            console.error('Error cancelling event booking:', err);
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to cancel event booking.' });
+        }
+    };
+
     const handleFilterChange = (status) => {
         setFilterStatus((prev) => (prev === status ? 'all' : status));
     };
@@ -298,6 +360,10 @@ function AdminBooking() {
     const cancelStartIndex = (currentCancelPage - 1) * itemsPerPage;
     const paginatedCancelRequests = cancelRequestBookings.slice(cancelStartIndex, cancelStartIndex + itemsPerPage);
 
+    const totalEventPages = Math.ceil(eventBookings.length / itemsPerPage);
+    const eventStartIndex = (currentEventPage - 1) * itemsPerPage;
+    const paginatedEventBookings = eventBookings.slice(eventStartIndex, eventStartIndex + itemsPerPage);
+
     useEffect(() => {
         setCurrentBookingPage(1);
     }, [filterStatus, searchTerm]);
@@ -313,6 +379,18 @@ function AdminBooking() {
             setCurrentCancelPage(totalCancelPages);
         }
     }, [currentCancelPage, totalCancelPages]);
+
+    useEffect(() => {
+        if (totalEventPages > 0 && currentEventPage > totalEventPages) {
+            setCurrentEventPage(totalEventPages);
+        }
+    }, [currentEventPage, totalEventPages]);
+
+    const handleEventPageChange = (page) => {
+        if (page >= 1 && page <= totalEventPages) {
+            setCurrentEventPage(page);
+        }
+    };
 
     return (
         <div className={`admin-booking-page ${isLightMode ? 'admin-booking-page--light' : ''}`}>
@@ -539,6 +617,105 @@ function AdminBooking() {
                                         </button>
                                     </div>
                                 )}
+                    
+                    <div className="event-bookings-section">
+                        <h1>Events Bookings</h1>
+                        <div className="event-bookings-table-wrapper">
+                            <table className="event-bookings-table">
+                                <thead>
+                                    <tr>
+                                        <th>Guest</th>
+                                        <th>Number</th>
+                                        <th>Check-Date</th>
+                                        <th>Time</th>
+                                        <th>Discount</th>
+                                        <th>Total Price</th>
+                                        <th>Status</th>
+                                        <th className="actions-header">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                                Loading bookings...
+                                            </td>
+                                        </tr>
+                                    ) : eventBookings.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                                No event bookings found.
+                                            </td>
+                                        </tr>
+                                    ) : paginatedEventBookings.map((booking) => {
+                                        const eventStatus = String(booking.status || 'pending').toLowerCase();
+                                        const eventDate = booking.end_date && booking.end_date !== booking.start_date
+                                            ? `${formatBookingDate(booking.start_date)} - ${formatBookingDate(booking.end_date)}`
+                                            : formatBookingDate(booking.start_date);
+                                        return (
+                                        <tr key={booking.id}>
+                                            <td>{booking.event_name || 'Event booking'}{booking.guest_name ? ` - ${booking.guest_name}` : ''}</td>
+                                            <td>{booking.guest_number ?? '-'}</td>
+                                            <td>{eventDate || '-'}</td>
+                                            <td>{booking.time_in || '-'} - {booking.time_out || '-'}</td>
+                                            <td>{booking.discount !== undefined && booking.discount !== null ? `₱${formatCurrency(booking.discount)}` : 'N/A'}</td>
+                                            <td>{booking.total_price !== undefined && booking.total_price !== null ? `₱${formatCurrency(booking.total_price)}` : 'N/A'}</td>
+                                            <td><span className={`status-${eventStatus}`}>
+                                                {booking.status || 'pending'}
+                                            </span></td>
+                                            <td className="actions-cell">
+                                                <button className="btn guest btn-primary" onClick={() => handleEventView(booking)}>view</button>
+                                                <button className="btn guest btn-primary" onClick={() => handleEventConfirm(booking)}
+                                                        disabled={['cancelled', 'complete'].includes(eventStatus)}>
+                                                        {eventStatus === 'pending' ? 'Confirm' : 'Done'}
+                                                </button>
+                                                <button className="btn guest btn-danger" onClick={() => handleEventCancel(booking)}
+                                                    disabled={['cancelled', 'complete'].includes(eventStatus)}>cancel</button>
+                                            </td>
+                                        </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {eventBookings.length > 0 && (
+                                    <div className="pagination-container">
+                                        <button className="pagination-btn prev-btn" 
+                                            onClick={() => handleEventPageChange(currentEventPage - 1)} disabled={currentEventPage === 1} aria-label="Previous page">
+                                            &lt;
+                                        </button>
+                                        <div className="pagination-numbers">
+                                            {Array.from({ length: Math.min(totalEventPages, 5) }, (_, i) => {
+                                                let pageNum;
+                                                if (totalEventPages <= 5) {
+                                                    pageNum = i + 1;
+                                                } else if (currentEventPage <= 3) {
+                                                    pageNum = i + 1;
+                                                } else if (currentEventPage >= totalEventPages - 2) {
+                                                    pageNum = totalEventPages - 4 + i;
+                                                } else {
+                                                    pageNum = currentEventPage - 2 + i;
+                                                }
+                                                return (
+                                                    <button key={pageNum} className={`pagination-number ${currentEventPage === pageNum ? 'active' : ''}`} 
+                                                        onClick={() => handleEventPageChange(pageNum)}>
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        <button 
+                                            className="pagination-btn next-btn" 
+                                            onClick={() => handleEventPageChange(currentEventPage + 1)}
+                                            disabled={currentEventPage === totalEventPages}
+                                            aria-label="Next page"
+                                        >
+                                            &gt;
+                                        </button>
+                                    </div>
+                                )}
+
                     <div className="guests-table-container-cancel-request">
                         <h1>Recent Cancel Requests</h1>
                         <div className="guests-table-wrapper-cancel-request">
@@ -639,6 +816,11 @@ function AdminBooking() {
                 show={viewModal} 
                 onClose={() => setViewModal(false)} 
                 booking={selectedBooking} 
+            />
+            <ViewEventModal
+                show={eventViewModal}
+                onClose={() => setEventViewModal(false)}
+                booking={selectedBooking}
             />
         </div>
     );

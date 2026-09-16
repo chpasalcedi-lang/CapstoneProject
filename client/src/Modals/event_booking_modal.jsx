@@ -53,12 +53,9 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
     event.preventDefault();
     if (isSubmitting) return;
 
-    if (form.end_date < form.start_date) {
-      Swal.fire({ icon: 'error', title: 'Invalid dates', text: 'End date cannot be earlier than start date.' });
-      return;
-    }
+    const eventDate = form.start_date;
 
-    if (form.start_date === form.end_date && form.time_out <= form.time_in) {
+    if (form.start_date && form.time_out <= form.time_in) {
       Swal.fire({ icon: 'error', title: 'Invalid time', text: 'Time out must be later than time in.' });
       return;
     }
@@ -68,8 +65,8 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
       const availability = await apiClient.get('/check_event_booking_availability', {
         params: {
           room_id: room.id,
-          start_date: form.start_date,
-          end_date: form.end_date,
+          start_date: eventDate,
+          end_date: eventDate,
         },
       });
 
@@ -85,6 +82,8 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
       const response = await apiClient.post('/add_event_booking', {
         ...form,
         room_id: room.id,
+        start_date: eventDate,
+        end_date: eventDate,
         rooms: form.rooms || room.room_name || room.room_label || '',
         price: Number(form.price) || 0,
         total_price: totalPrice,
@@ -131,7 +130,7 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
             <label>Phone number<input name="phone_number" required inputMode="numeric" pattern="09[0-9]{9}" maxLength="11" value={form.phone_number} onChange={updateField} placeholder="09XXXXXXXXX" /></label>
             <label>Number of guests<input name="guest_number" required type="number" min="1" max="10000" step="1" value={form.guest_number} onChange={updateField} placeholder="e.g. 50" /></label>
             <label>Email<input name="email" required maxLength="254" type="email" value={form.email} onChange={updateField} disabled={Boolean(userEmail)} /></label>
-            <label>Start date<input name="start_date" required type="date" min={new Date().toISOString().slice(0, 10)} value={form.start_date} onChange={updateField} /></label>
+            <label>Date<input name="start_date" required type="date" min={new Date().toISOString().slice(0, 10)} value={form.start_date} onChange={updateField} /></label>
             <label>Time in<input name="time_in" required type="time" value={form.time_in} onChange={updateField} /></label>
             <label>Time out<input name="time_out" required type="time" value={form.time_out} onChange={updateField} /></label>
             <label className="event-booking-full">Rooms<input name="rooms" value={form.rooms || ''} readOnly aria-readonly="true" /></label>

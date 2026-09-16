@@ -245,7 +245,8 @@ body {
 
 @media (max-width: 768px) {
   .guests-booking-headers,
-  .feedback-booking-headers {
+  .feedback-booking-headers,
+  .event-list-filters {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
@@ -492,7 +493,8 @@ body {
 @media (max-width: 900px) {
   .feedback-tables .actions-cell,
   .booking-table .actions-cell,
-  .guests-tables .actions-cell {
+  .guests-tables .actions-cell,
+  .event-list-table .actions-cell {
     gap: 8px;
   }
   .btn.guest {
@@ -876,8 +878,10 @@ body {
 .admin-guest-page--light .admin-guest-stats-bar-content,
 .admin-guest-page--light .guests-booking-headers,
 .admin-guest-page--light .feedback-booking-headers,
+.admin-guest-page--light .event-list-filters,
 .admin-guest-page--light .guests-booking-table,
 .admin-guest-page--light .guests-table-containers,
+.admin-guest-page--light .event-list-section,
 .admin-guest-page--light .feedback-table-containers,
 .admin-guest-page--light .guests-headers-content {
   background: #f7f4ed;
@@ -907,6 +911,7 @@ body {
 
 .admin-guest-page--light .booking-table thead th,
 .admin-guest-page--light .guests-tables thead th,
+.admin-guest-page--light .event-list-table thead th,
 .admin-guest-page--light .feedback-tables thead th {
   color: #687477;
   background: #e5e1d8;
@@ -915,18 +920,21 @@ body {
 
 .admin-guest-page--light .booking-table td:first-child,
 .admin-guest-page--light .guests-tables td:first-child,
+.admin-guest-page--light .event-list-table td:first-child,
 .admin-guest-page--light .feedback-tables td:first-child {
   color: #253238;
 }
 
 .admin-guest-page--light .booking-table tbody tr,
 .admin-guest-page--light .guests-tables tbody tr,
+.admin-guest-page--light .event-list-table tbody tr,
 .admin-guest-page--light .feedback-tables tbody tr {
   border-color: rgba(37, 50, 56, 0.1);
 }
 
 .admin-guest-page--light .booking-table tbody tr:hover,
 .admin-guest-page--light .guests-tables tbody tr:hover,
+.admin-guest-page--light .event-list-table tbody tr:hover,
 .admin-guest-page--light .feedback-tables tbody tr:hover {
   background: rgba(37, 50, 56, 0.04);
 }
@@ -956,4 +964,138 @@ body {
   background: rgba(183, 139, 57, 0.14);
   border-color: rgba(139, 101, 30, 0.3);
   color: #8b651e;
+}
+
+.event-list-label {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #999;
+  font-weight: 500;
+  margin: 24px 0 0;
+  padding: 0;
+}
+
+.event-list-filters {
+  margin: 16px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 18px;
+}
+
+.event-list-section {
+  padding: 0;
+  margin-bottom: 28px;
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: auto;
+  max-height: 530px;
+}
+
+.event-list-table-wrapper {
+  width: 100%;
+  overflow: auto;
+}
+
+.event-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.event-list-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.event-list-table thead th {
+  text-align: auto;
+  padding: 11px 12px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #3f3f3f;
+  background: #0f0f0f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+}
+
+.event-list-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+}
+
+.event-list-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.event-list-table td {
+  padding: 11px 12px;
+  font-size: 12px;
+  color: #777;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.event-list-table td:first-child {
+  color: #f0ede8;
+  font-weight: 500;
+}
+
+.event-list-table .actions-cell {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.event-list-table .actions-cell .btn.guest {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  text-align: center;
+}
+
+.admin-guest-page--light .event-list-label {
+  color: #687477;
+}
+
+.admin-guest-page--light .event-list-filters,
+.admin-guest-page--light .event-list-section {
+  background: #f7f4ed;
+  border-color: rgba(37, 50, 56, 0.12);
+  box-shadow: 0 12px 28px rgba(37, 50, 56, 0.06);
+}
+
+.admin-guest-page--light .event-list-table thead th {
+  color: #687477;
+  background: #e5e1d8;
+  border-color: rgba(37, 50, 56, 0.12);
+}
+
+.admin-guest-page--light .event-list-table td {
+  color: #687477;
+}
+
+.admin-guest-page--light .event-list-table td:first-child {
+  color: #253238;
+}
+
+.admin-guest-page--light .event-list-table tbody tr {
+  border-color: rgba(37, 50, 56, 0.1);
+}
+
+.admin-guest-page--light .event-list-table tbody tr:hover {
+  background: rgba(37, 50, 56, 0.04);
 }

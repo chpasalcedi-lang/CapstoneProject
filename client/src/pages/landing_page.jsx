@@ -459,7 +459,7 @@ function LandingPage() {
                   <p>Experience our premium infinity pool with elegant ambiance, breathtaking views, and world-class comfort designed for your perfect stay.
                   </p>
                   <Link to="/Reservation">
-                      <button className="about-btn-pool">Check Available</button>
+                      <button className="about-btn-pool">Book Events</button>
                   </Link>
               </div>
           </div>

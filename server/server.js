@@ -994,7 +994,10 @@ class GuestArrivalController {
 
     async getGuestArrivals(req, res) {
         try {
-            const rows = await this.db.query('SELECT * FROM guest ORDER BY created_at DESC');
+            const rows = await this.db.query(`SELECT id, group_name, number_of_children,
+                number_of_adults, number_of_guests, corkage, total_price, discount,
+                DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+                FROM guest ORDER BY created_at DESC`);
             return res.status(200).json(rows);
         } catch (error) {
             console.error('Error fetching guest arrivals:', error);

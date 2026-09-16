@@ -118,6 +118,18 @@ function AdminGuest() {
 
     const formatGuestDateTime = (dateString) => {
         if (!dateString) return '';
+        const databaseDate = String(dateString).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::\d{2})?/);
+        if (databaseDate) {
+            const [, year, month, day, hours, minutes] = databaseDate;
+            const hourNumber = Number(hours);
+            const hour12 = hourNumber % 12 || 12;
+            const meridiem = hourNumber >= 12 ? 'PM' : 'AM';
+            const monthName = new Date(Number(year), Number(month) - 1, Number(day))
+                .toLocaleDateString('en-US', { month: 'long' })
+                .toUpperCase();
+            return `${monthName} ${Number(day)} at ${hour12}:${minutes} ${meridiem}`;
+        }
+
         const date = new Date(dateString);
         if (Number.isNaN(date.getTime())) return '';
 

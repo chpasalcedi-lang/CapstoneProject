@@ -3,6 +3,17 @@ import apiClient from '../api';
 import Swal from 'sweetalert2';
 import '../Modalscss/book_reservation_modal.css';
 
+const parseDateOnly = (value) => {
+    if (!value) return null;
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const [year, month, day] = value.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    }
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+
 const formatDateForInput = (dateStr) => {
     if (!dateStr) return '';
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
@@ -10,8 +21,14 @@ const formatDateForInput = (dateStr) => {
         const [day, month, year] = dateStr.split('/');
         return `${year}-${month}-${day}`;
     }
-    const parsed = new Date(dateStr);
-    return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0];
+
+    const parsed = parseDateOnly(dateStr);
+    if (!parsed) return '';
+
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 const getTodayISO = () => {
@@ -23,9 +40,9 @@ const getTodayISO = () => {
 };
 
 const getTomorrowISO = (dateValue) => {
-    const baseDate = dateValue ? new Date(dateValue) : new Date();
-    const nextDate = new Date(baseDate);
-    nextDate.setDate(nextDate.getDate() + 1);
+    const baseDate = dateValue ? parseDateOnly(dateValue) : new Date();
+    if (!baseDate) return getTodayISO();
+    const nextDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + 1);
     const year = nextDate.getFullYear();
     const month = String(nextDate.getMonth() + 1).padStart(2, '0');
     const day = String(nextDate.getDate()).padStart(2, '0');
@@ -35,13 +52,13 @@ const getTomorrowISO = (dateValue) => {
 const onlyDigits = (input) => String(input || '').replace(/\D/g, '');
 
 const calculateTotalPrice = (checkIn, checkOut, price) => {
-    const start = new Date(checkIn);
-    const end = new Date(checkOut);
+    const start = parseDateOnly(checkIn);
+    const end = parseDateOnly(checkOut);
     const nightlyRate = price !== undefined && price !== null ? parseFloat(String(price).replace(/,/g, '')) : NaN;
-    if (!checkIn || !checkOut || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || Number.isNaN(nightlyRate)) {
+    if (!checkIn || !checkOut || !start || !end || Number.isNaN(nightlyRate)) {
         return null;
     }
-    const nights = Math.max(1, Math.ceil((end - start) / 86400000));
+    const nights = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400000));
     return Number.isFinite(nightlyRate) ? nightlyRate * nights : null;
 };
 
@@ -59,10 +76,13 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     });
     const [rooms, setRooms] = useState([]);
     const [allReservations, setAllReservations] = useState([]);
+    const [discountEnabled, setDiscountEnabled] = useState(false);
+    const [lastPrice, setLastPrice] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (booking) {
+            const hasSavedDiscount = Number(booking.discount || 0) > 0 || (Number(booking.total_price || 0) > 0 && Number(booking.total_price || 0) < Number(booking.sub_total || booking.total_price || 0));
             setValues({
                 last_name: booking.last_name || '',
                 first_name: booking.first_name || '',
@@ -74,6 +94,8 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                 notes: booking.notes || '',
                 room_number: booking.room_number || '',
             });
+            setDiscountEnabled(hasSavedDiscount);
+            setLastPrice(hasSavedDiscount && Number(booking.total_price || 0) > 0 ? String(booking.total_price) : '');
         }
     }, [booking]);
 
@@ -96,8 +118,8 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
 
     const toDateOnly = (value) => {
         if (!value) return null;
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return null;
+        const date = parseDateOnly(value);
+        if (!date || Number.isNaN(date.getTime())) return null;
         return new Date(date.getFullYear(), date.getMonth(), date.getDate());
     };
 
@@ -140,6 +162,13 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         [values.check_in_date, values.check_out_date, roomPrice]
     );
 
+    const lastPriceValue = Number(lastPrice || 0);
+    const hasDiscountValue = discountEnabled && lastPriceValue > 0;
+    const discountSaved = hasDiscountValue ? Math.max(0, (totalPrice || 0) - Math.min(totalPrice || 0, lastPriceValue)) : 0;
+    const finalPrice = hasDiscountValue ? Math.max(0, Math.min(totalPrice || 0, lastPriceValue)) : (totalPrice || 0);
+    const discountPercent = hasDiscountValue && (totalPrice || 0) > 0 ? (discountSaved / (totalPrice || 1)) * 100 : 0;
+    const displayedTotalPrice = hasDiscountValue ? finalPrice : (totalPrice || 0);
+
     const handleCancel = () => {
         onClose();
     };
@@ -147,7 +176,27 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     if (!show || !booking) return null;
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, checked } = e.target;
+
+        if (name === 'apply_discount') {
+            setDiscountEnabled(checked);
+            if (!checked) {
+                setLastPrice('');
+            }
+            return;
+        }
+
+        if (name === 'last_price') {
+            const sanitizedValue = value.replace(/[^\d.]/g, '');
+            setLastPrice(sanitizedValue);
+            if (sanitizedValue === '' || Number(sanitizedValue) <= 0) {
+                setDiscountEnabled(false);
+            } else {
+                setDiscountEnabled(true);
+            }
+            return;
+        }
+
         if (name === 'phone_number') {
             setValues((prev) => ({ ...prev, [name]: onlyDigits(value) }));
             return;
@@ -209,9 +258,9 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
             return;
         }
 
-        const checkIn = new Date(values.check_in_date);
-        const checkOut = new Date(values.check_out_date);
-        const today = new Date(getTodayISO());
+        const checkIn = parseDateOnly(values.check_in_date);
+        const checkOut = parseDateOnly(values.check_out_date);
+        const today = parseDateOnly(getTodayISO());
 
         if (checkIn < today) {
             Swal.fire({ icon: 'error', title: 'Invalid check-in', text: 'Check-in cannot be in the past.' });
@@ -220,6 +269,11 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
 
         if (checkOut <= checkIn) {
             Swal.fire({ icon: 'error', title: 'Invalid dates', text: 'Check-out cannot be earlier than check-in. Please choose valid dates.' });
+            return;
+        }
+
+        if (discountEnabled && (lastPrice === '' || Number(lastPrice) < 0)) {
+            Swal.fire({ icon: 'error', title: 'Discount required', text: 'Please enter a valid last price before updating the discount.' });
             return;
         }
 
@@ -246,14 +300,35 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         if (values.notes !== (booking.notes || '')) updateData.notes = values.notes;
         if (roomId && String(roomId) !== String(booking.room_id)) updateData.room_id = roomId;
 
+        const baseTotal = Number(totalPrice || 0);
+        const resolvedFinalPrice = hasDiscountValue ? Math.max(0, Math.min(baseTotal, lastPriceValue)) : baseTotal;
+        const resolvedDiscount = hasDiscountValue && baseTotal > 0 ? Number(discountPercent.toFixed(2)) : 0;
+
+        const previousDiscount = Number(booking.discount || 0);
+        const previousTotal = Number(booking.total_price || 0);
+
+        const shouldUpdateDiscount = hasDiscountValue
+            ? previousDiscount !== resolvedDiscount || previousTotal !== resolvedFinalPrice
+            : previousDiscount > 0 || previousTotal !== baseTotal;
+
+        if (shouldUpdateDiscount) {
+            updateData.discount = Number(resolvedDiscount.toFixed(2));
+            updateData.total_price = Number(resolvedFinalPrice.toFixed(2));
+        }
+
         if (Object.keys(updateData).length === 0) {
+            Swal.fire({ icon: 'error', title: 'No valid fields to update', text: 'Please change the reservation or discount before saving.' });
             return;
         }
 
         setIsSubmitting(true);
         try {
             await apiClient.post(`/update_reservation/${booking.id}`, updateData);
-            Swal.fire({ icon: 'success', title: 'Updated', text: 'Reservation updated successfully.' });
+            Swal.fire({
+                icon: 'success',
+                title: 'Updated',
+                text: `Reservation updated successfully. Final total: ₱${formatRoomPrice(displayedTotalPrice || 0)}`,
+            });
             onUpdate();
             setTimeout(onClose, 1500);
         } catch (err) {
@@ -320,17 +395,103 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                     <div className="book-reservation-form-row">
                         <div className="book-reservation-form-group">
                             <label>Check-in Date</label>
-                            <input type="date" name="check_in_date" required min={getTodayISO()} value={values.check_in_date} onChange={handleCheckInDateChange} />
+                            <div className="book-date-input-wrap">
+                                <input
+                                    type="date"
+                                    name="check_in_date"
+                                    required
+                                    min={getTodayISO()}
+                                    value={values.check_in_date}
+                                    onChange={handleCheckInDateChange}
+                                    className={`book-input ${values.check_in_date ? 'has-value' : ''}`}
+                                    onClick={(event) => event.currentTarget.showPicker?.()}
+                                />
+                                {!values.check_in_date && <span className="book-date-placeholder">dd/mm/yyyy</span>}
+                                <i className="fa-regular fa-calendar-days book-date-icon" aria-hidden="true"></i>
+                            </div>
                         </div>
                         <div className="book-reservation-form-group">
                             <label>Check-out Date</label>
-                            <input type="date" name="check_out_date" required min={values.check_in_date ? getTomorrowISO(values.check_in_date) : getTomorrowISO()} value={values.check_out_date} onChange={handleCheckOutDateChange} />
+                            <div className="book-date-input-wrap">
+                                <input
+                                    type="date"
+                                    name="check_out_date"
+                                    required
+                                    min={values.check_in_date ? getTomorrowISO(values.check_in_date) : getTomorrowISO()}
+                                    value={values.check_out_date}
+                                    onChange={handleCheckOutDateChange}
+                                    className={`book-input ${values.check_out_date ? 'has-value' : ''}`}
+                                    onClick={(event) => event.currentTarget.showPicker?.()}
+                                />
+                                {!values.check_out_date && <span className="book-date-placeholder">dd/mm/yyyy</span>}
+                                <i className="fa-regular fa-calendar-days book-date-icon" aria-hidden="true"></i>
+                            </div>
                         </div>
                     </div>
 
                     <div className="book-reservation-form-group">
                         <label>Notes <span className="optional">Optional</span></label>
                         <textarea name="notes" rows="3" value={values.notes} onChange={handleChange} placeholder="..."></textarea>
+                    </div>
+                    <div className="book-reservation-form-price discount-section">
+                        <div className="discount-section-header">
+                            <div>
+                                <h3>Discount</h3>
+                                <p>Apply a fixed amount and see the percentage.</p>
+                            </div>
+                            <label className="discount-toggle">
+                                <input type="checkbox" name="apply_discount" checked={discountEnabled} onChange={handleChange} />
+                                <span>Enable</span>
+                            </label>
+                        </div>
+
+                        {discountEnabled && (
+                            <>
+                                <div className="book-reservation-form-group discount-input-group">
+                                    <label htmlFor="last_price">Last Price</label>
+                                    <input
+                                        type="number"
+                                        name="last_price"
+                                        value={lastPrice}
+                                        onChange={handleChange}
+                                        placeholder="e.g. 2500"
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                </div>
+                                <div className="discount-result-box">
+                                    <span className="discount-result-label">Price</span>
+                                    <strong>
+                                        {`₱${formatRoomPrice(totalPrice || 0)}`}
+                                    </strong>
+                                </div>
+
+                                <div className="discount-result-box">
+                                    <span className="discount-result-label">Discount saved</span>
+                                    <strong>
+                                        {lastPrice && Number(lastPrice) > 0
+                                            ? `₱${formatRoomPrice(discountSaved)}`
+                                            : '₱0.00'}
+                                    </strong>
+                                </div>
+                                <div className="discount-result-box">
+                                    <span className="discount-result-label">Discount</span>
+                                    <strong>
+                                        {lastPrice && Number(lastPrice) > 0
+                                            ? `${discountPercent.toFixed(2)}%`
+                                            : '0%'}
+                                    </strong>
+                                </div>
+                                <div className="discount-result-box">
+                                    <span className="discount-result-label">Final Price</span>
+                                    <strong>
+                                        {lastPrice && Number(lastPrice) > 0
+                                            ? `₱${formatRoomPrice(finalPrice)}`
+                                            : `₱${formatRoomPrice(totalPrice || 0)}`}
+                                    </strong>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </form>
 
@@ -355,14 +516,16 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                             </div>
                             <div>
                                 <p className="book-reservation-price-label">
-                                    Total {values.check_in_date && values.check_out_date ? `(${Math.max(1, Math.ceil((new Date(values.check_out_date) - new Date(values.check_in_date)) / 86400000))} nights)` : ''}
+                                    Total {values.check_in_date && values.check_out_date ? `(${Math.max(1, Math.ceil((parseDateOnly(values.check_out_date).getTime() - parseDateOnly(values.check_in_date).getTime()) / 86400000))} nights)` : ''}
                                 </p>
                                 <p className="book-reservation-price-value total">
-                                    {totalPrice ? `₱${totalPrice.toLocaleString()}` : '₱0'}
+                                    {displayedTotalPrice ? `₱${formatRoomPrice(displayedTotalPrice)}` : '₱0'}
                                 </p>
                             </div>
                         </div>
                     </div>
+
+                    
                 </div>
 
                 <div className="book-reservation-modal-footer">

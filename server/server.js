@@ -550,7 +550,18 @@ class ReservationController {
             if (req.body.notes) updates.notes = this.crypto.encrypt(req.body.notes);
             if (Object.prototype.hasOwnProperty.call(req.body, 'cancel_notes_request')) updates.cancel_notes_request = String(req.body.cancel_notes_request || '');
             if (req.body.room_id !== undefined) updates.room_id = req.body.room_id;
-
+            if (Object.prototype.hasOwnProperty.call(req.body, 'room_price')) {
+                const parsedRoomPrice = Number(req.body.room_price);
+                if (!Number.isNaN(parsedRoomPrice)) updates.room_price = parsedRoomPrice;
+            }
+            if (Object.prototype.hasOwnProperty.call(req.body, 'total_price')) {
+                const parsedTotalPrice = Number(req.body.total_price);
+                if (!Number.isNaN(parsedTotalPrice)) updates.total_price = parsedTotalPrice;
+            }
+            if (Object.prototype.hasOwnProperty.call(req.body, 'discount')) {
+                const parsedDiscount = Number(req.body.discount);
+                if (!Number.isNaN(parsedDiscount)) updates.discount = parsedDiscount;
+            }
             if (!Object.keys(updates).length) {
                 return res.status(400).json({ error: 'No valid fields to update.' });
             }

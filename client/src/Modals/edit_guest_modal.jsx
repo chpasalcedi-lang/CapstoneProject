@@ -96,6 +96,7 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
     const savedDiscount = Number(guest.discount || 0);
     const shouldRestoreDiscount = savedDiscount > 0 || (savedTotal > 0 && savedTotal < baseGuestTotal);
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm({
       group_name: guest.group_name || '',
       number_of_children: breakdown.children,
@@ -240,6 +241,13 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
                       min="0"
                       step="0.01"
                     />
+                  </div>
+
+                  <div className="edit-guest-discount-result-box">
+                    <span className="edit-guest-discount-result-label">Price</span>
+                    <strong>
+                      {`₱${formatAmount(baseTotalPrice)}`}
+                    </strong>
                   </div>
 
                   <div className="edit-guest-discount-result-box">

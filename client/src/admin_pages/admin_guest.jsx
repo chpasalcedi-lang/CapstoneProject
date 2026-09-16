@@ -124,12 +124,14 @@ function AdminGuest() {
         const monthDay = date.toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
+            timeZone: 'Asia/Manila',
         }).toUpperCase();
 
         const time = date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true,
+            timeZone: 'Asia/Manila',
         });
 
         return `${monthDay} at ${time}`;

@@ -409,7 +409,7 @@ function LandingPage() {
               </div>
                <div className="pool-note-strip">
                 <span className="pool-note-dash">—</span>
-                <span>Our pool depth ranges from 6ft to 7ft, giving guests plenty of room to swim and relax.</span>
+                <span>Adults' pool depth ranges from 6ft to 7ft, offering plenty of room to swim and relax. Kids' pool depth ranges from 3ft to 4ft, giving little ones a safe space to splash and play.</span>
               </div>
             </section>
 

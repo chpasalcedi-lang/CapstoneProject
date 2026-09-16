@@ -4,6 +4,7 @@ import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../pagescss/res_book.css"; 
 import BookReservationModal from "../Modals/book_reservation_modal.jsx";
+import EventBookingModal from "../Modals/event_booking_modal.jsx";
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
 import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
@@ -17,6 +18,8 @@ function ResBook() {
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [selectedRoomPrice, setSelectedRoomPrice] = useState(null);
   const [selectedRoomNumber, setSelectedRoomNumber] = useState(null);
+  const [eventBookingRoom, setEventBookingRoom] = useState(null);
+  const [showEventBookingModal, setShowEventBookingModal] = useState(false);
   const [data, setData] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -166,6 +169,12 @@ function ResBook() {
       }).then(() => {
         navigate('/Login');
       });
+      return;
+    }
+
+    if (room.room_type?.toLowerCase() === 'event') {
+      setEventBookingRoom(room);
+      setShowEventBookingModal(true);
       return;
     }
 
@@ -608,6 +617,15 @@ function ResBook() {
         </div>
       </section>
       <BookReservationModal showModal={BookshowModal} setShowModal={setBookShowModal} roomId={selectedRoomId} roomPrice={selectedRoomPrice} roomNumber={selectedRoomNumber} refreshData={fetchData} />
+      <EventBookingModal
+        show={showEventBookingModal}
+        onClose={() => setShowEventBookingModal(false)}
+        room={eventBookingRoom}
+        onSaved={() => {
+          setShowEventBookingModal(false);
+          fetchData();
+        }}
+      />
       
       <ViewLanding
         show={showViewModal}

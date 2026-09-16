@@ -65,7 +65,24 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
 
     setIsSubmitting(true);
     try {
-      await apiClient.post('/add_event_booking', {
+      const availability = await apiClient.get('/check_event_booking_availability', {
+        params: {
+          room_id: room.id,
+          start_date: form.start_date,
+          end_date: form.end_date,
+        },
+      });
+
+      if (availability.data?.available !== true) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Event room unavailable',
+          text: 'This event room is already booked for the selected dates.',
+        });
+        return;
+      }
+
+      const response = await apiClient.post('/add_event_booking', {
         ...form,
         room_id: room.id,
         rooms: form.rooms || room.room_name || room.room_label || '',
@@ -75,6 +92,11 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
         discount: Number(form.discount) || 0,
         guest_number: Number(form.guest_number) || 0,
       });
+
+      if (!response.data?.bookingId) {
+        throw new Error('The booking was not saved. Please try again.');
+      }
+
       Swal.fire({ icon: 'success', title: 'Booking submitted', text: 'Your event booking request has been saved.' });
       if (onSaved) onSaved();
     } catch (error) {
@@ -106,7 +128,7 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
           <div className="event-booking-grid">
             <label>Event name<input name="event_name" required maxLength="120" value={form.event_name} onChange={updateField} placeholder="e.g. Birthday celebration" /></label>
             <label>Guest name<input name="guest_name" required maxLength="120" value={form.guest_name} onChange={updateField} placeholder="e.g. Juan Dela Cruz" /></label>
-            <label>Phone number<input name="phone_number" required inputMode="numeric" pattern="09\\d{9}" maxLength="11" value={form.phone_number} onChange={updateField} placeholder="09XXXXXXXXX" /></label>
+            <label>Phone number<input name="phone_number" required inputMode="numeric" pattern="09[0-9]{9}" maxLength="11" value={form.phone_number} onChange={updateField} placeholder="09XXXXXXXXX" /></label>
             <label>Number of guests<input name="guest_number" required type="number" min="1" max="10000" step="1" value={form.guest_number} onChange={updateField} placeholder="e.g. 50" /></label>
             <label>Start date<input name="start_date" required type="date" min={new Date().toISOString().slice(0, 10)} value={form.start_date} onChange={updateField} /></label>
             <label>End date<input name="end_date" required type="date" min={form.start_date || new Date().toISOString().slice(0, 10)} value={form.end_date} onChange={updateField} /></label>

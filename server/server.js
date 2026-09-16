@@ -448,47 +448,14 @@ class ReservationController {
     constructor(app, db, crypto) {
         this.db = db;
         this.crypto = crypto;
-        this.eventBookingTableReady = this.ensureEventBookingTable();
         app.post('/add_reservation', this.addReservation.bind(this));
         app.post('/add_event_booking', this.addEventBooking.bind(this));
+        app.get('/check_event_booking_availability', this.checkEventBookingAvailability.bind(this));
+        app.get('/get_event_bookings', this.getEventBookings.bind(this));
         app.get('/get_reservations', this.getReservations.bind(this));
         app.post('/update_reservation/:id', this.updateReservation.bind(this));
         app.post('/cancel_reservation_request/:id', this.cancelReservationRequest.bind(this));
         app.delete('/delete_reservation/:id', this.deleteReservation.bind(this));
-    }
-
-    async ensureEventBookingTable() {
-        try {
-            await this.db.query(`CREATE TABLE IF NOT EXISTS event_bookings (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                event_name VARCHAR(255) NOT NULL,
-                guest_name VARCHAR(255) NOT NULL,
-                phone_number VARCHAR(30) NOT NULL,
-                start_date DATE NOT NULL,
-                end_date DATE NOT NULL,
-                time_in TIME NOT NULL,
-                time_out TIME NOT NULL,
-                notes TEXT,
-                discount DECIMAL(10,2) NOT NULL DEFAULT 0,
-                price DECIMAL(10,2) NOT NULL DEFAULT 0,
-                total_price DECIMAL(10,2) NOT NULL DEFAULT 0,
-                rooms VARCHAR(255) NOT NULL,
-                guest_number INT NOT NULL DEFAULT 0,
-                email VARCHAR(255) NOT NULL,
-                room_id INT NULL,
-                booking_status VARCHAR(30) NOT NULL DEFAULT 'pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )`);
-            try {
-                await this.db.query('ALTER TABLE event_bookings ADD COLUMN total_price DECIMAL(10,2) NOT NULL DEFAULT 0');
-            } catch (error) {
-                if (!String(error.message || '').includes('Duplicate column')) {
-                    throw error;
-                }
-            }
-        } catch (error) {
-            console.error('Unable to prepare event bookings table:', error.message);
-        }
     }
 
     parsePrice(value) {
@@ -578,7 +545,6 @@ class ReservationController {
 
     async addEventBooking(req, res) {
         try {
-            await this.eventBookingTableReady;
             const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
             const {
                 event_name: eventName,
@@ -641,7 +607,7 @@ class ReservationController {
             }
 
             const activeBooking = await this.db.query(
-                "SELECT id FROM event_bookings WHERE room_id = ? AND booking_status IN ('pending', 'confirmed', 'occupied') AND NOT (end_date < ? OR start_date > ?) LIMIT 1",
+                'SELECT id FROM events WHERE rooms = ? AND NOT (end_date < ? OR start_date > ?) LIMIT 1',
                 [numericRoomId, startDate, endDate]
             );
             if (activeBooking.length) {
@@ -655,9 +621,9 @@ class ReservationController {
             }
             const totalPrice = Math.max(0, (dailyPrice * eventDays) - savedDiscount);
 
-            const insertSql = `INSERT INTO event_bookings
-                (event_name, guest_name, phone_number, start_date, end_date, time_in, time_out, notes, discount, price, total_price, rooms, guest_number, email, room_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            const insertSql = `INSERT INTO events
+                (event_name, guest_name, phone_number, start_date, end_date, time_in, time_out, notes, discount, price, total_price, rooms, guest_number, email)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
             const result = await this.db.query(insertSql, [
                 cleanEventName,
                 cleanGuestName,
@@ -670,16 +636,47 @@ class ReservationController {
                 savedDiscount,
                 dailyPrice,
                 totalPrice,
-                String(eventRoom.room_name || eventRoom.room_label || '').trim(),
+                numericRoomId,
                 numericGuestNumber,
                 cleanEmail,
-                numericRoomId,
             ]);
 
             return res.status(200).json({ message: 'Event booking saved successfully!', bookingId: result.insertId });
         } catch (error) {
             console.error('Error adding event booking:', error);
             return res.status(500).json({ error: 'Unable to save event booking.', details: error.message });
+        }
+    }
+
+    async checkEventBookingAvailability(req, res) {
+        try {
+            const roomId = Number(req.query.room_id);
+            const startDate = req.query.start_date;
+            const endDate = req.query.end_date;
+
+            if (!Number.isInteger(roomId) || roomId <= 0 || !this.isValidDate(startDate) || !this.isValidDate(endDate) || endDate < startDate) {
+                return res.status(400).json({ error: 'Please provide a valid room and date range.' });
+            }
+
+            const activeBooking = await this.db.query(
+                'SELECT id FROM events WHERE rooms = ? AND NOT (end_date < ? OR start_date > ?) LIMIT 1',
+                [roomId, startDate, endDate]
+            );
+
+            return res.status(200).json({ available: activeBooking.length === 0 });
+        } catch (error) {
+            console.error('Error checking event booking availability:', error);
+            return res.status(500).json({ error: 'Unable to check event room availability.' });
+        }
+    }
+
+    async getEventBookings(req, res) {
+        try {
+            const rows = await this.db.query("SELECT id, DATE_FORMAT(start_date, '%Y-%m-%d') AS start_date, DATE_FORMAT(end_date, '%Y-%m-%d') AS end_date, rooms FROM events ORDER BY id DESC");
+            return res.status(200).json(rows);
+        } catch (error) {
+            console.error('Error fetching event bookings:', error);
+            return res.status(500).json({ error: 'Unable to fetch event bookings.' });
         }
     }
 

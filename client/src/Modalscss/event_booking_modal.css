@@ -9,6 +9,10 @@
   background: rgba(0, 0, 0, 0.55);
 }
 
+.swal2-container {
+  z-index: 3000 !important;
+}
+
 .event-booking-modal {
   width: 520px;
   max-width: 100%;

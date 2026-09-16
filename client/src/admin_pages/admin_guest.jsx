@@ -4,6 +4,7 @@ import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../admincss/admin_guest.css";
 import EditBookingModal from '../Modals/Edit_booking_modal';
+import EditEventModal from '../Modals/edit_event_modal';
 import ViewBookingModal from '../Modals/view_booking_modal';
 import FeedbackModal from '../Modals/feedback._modal';
 import ViewGuestModal from '../Modals/view_guest_modal';
@@ -28,6 +29,7 @@ function AdminGuest() {
     const [viewModal, setViewModal] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [editModal, setEditModal] = useState(false);
+    const [editEventModal, setEditEventModal] = useState(false);
     const [selectedEditBooking, setSelectedEditBooking] = useState(null);
     const [feedbackModal, setFeedbackModal] = useState(false);
     const [selectedFeedback, setSelectedFeedback] = useState(null);
@@ -73,6 +75,16 @@ function AdminGuest() {
     const handleEdit = (booking) => {
         setSelectedEditBooking(booking);
         setEditModal(true);
+    };
+
+    const handleEditEvent = (booking) => {
+        setSelectedBooking(booking);
+        setEditEventModal(true);
+    };
+
+    const refreshEventBookings = async () => {
+        const response = await apiClient.get('/get_event_bookings');
+        setEventBookings(response.data || []);
     };
 
     const handleViewFeedback = (feedback) => {
@@ -782,7 +794,7 @@ function AdminGuest() {
                                                     <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
                                                         view
                                                     </button>
-                                                    <button className="btn guest btn-primary" onClick={() => handleEdit(booking)}>
+                                                    <button className="btn guest btn-primary" onClick={() => handleEditEvent(booking)}>
                                                         edit
                                                     </button>
                                                     <button className="btn guest btn-danger" onClick={() => handleDeleteEventBooking(booking.id)}>
@@ -1061,6 +1073,12 @@ function AdminGuest() {
                     // Refetch bookings after update
                     apiClient.get("/get_reservations").then(res => setBookings(res.data));
                 }}/>
+            <EditEventModal
+                show={editEventModal}
+                onClose={() => setEditEventModal(false)}
+                booking={selectedBooking}
+                onUpdated={refreshEventBookings}
+            />
             <ViewBookingModal 
                 show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking} onEdit={handleEdit}/>
             <FeedbackModal show={feedbackModal} onClose={() => setFeedbackModal(false)} feedback={selectedFeedback} />

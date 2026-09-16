@@ -699,11 +699,69 @@ class ReservationController {
             const status = String(req.body?.status || '').toLowerCase();
             const allowedStatuses = ['pending', 'confirmed', 'complete', 'cancelled'];
 
-            if (!Number.isInteger(eventId) || eventId <= 0 || !allowedStatuses.includes(status)) {
-                return res.status(400).json({ error: 'Invalid event booking ID or status.' });
+            if (!Number.isInteger(eventId) || eventId <= 0) {
+                return res.status(400).json({ error: 'Invalid event booking ID.' });
             }
 
-            const result = await this.db.query('UPDATE events SET status = ? WHERE id = ?', [status, eventId]);
+            const updates = {};
+            if (status) {
+                if (!allowedStatuses.includes(status)) {
+                    return res.status(400).json({ error: 'Invalid event booking status.' });
+                }
+                updates.status = status;
+            }
+
+            const textFields = ['event_name', 'guest_name', 'phone_number', 'email', 'start_date', 'end_date', 'time_in', 'time_out', 'notes'];
+            textFields.forEach((field) => {
+                if (req.body?.[field] !== undefined) updates[field] = String(req.body[field]).trim();
+            });
+            if (req.body?.guest_number !== undefined) updates.guest_number = Number(req.body.guest_number);
+            if (req.body?.discount !== undefined) updates.discount = Number(req.body.discount);
+
+            if (updates.start_date && !this.isValidDate(updates.start_date)) {
+                return res.status(400).json({ error: 'Invalid event date.' });
+            }
+            if (updates.end_date && !this.isValidDate(updates.end_date)) {
+                return res.status(400).json({ error: 'Invalid event end date.' });
+            }
+            if (updates.start_date && updates.end_date && updates.end_date < updates.start_date) {
+                return res.status(400).json({ error: 'Event end date cannot be earlier than the start date.' });
+            }
+            if (updates.time_in && !this.isValidTime(updates.time_in)) {
+                return res.status(400).json({ error: 'Invalid event start time.' });
+            }
+            if (updates.time_out && !this.isValidTime(updates.time_out)) {
+                return res.status(400).json({ error: 'Invalid event end time.' });
+            }
+            if (updates.guest_number !== undefined && (!Number.isInteger(updates.guest_number) || updates.guest_number < 1 || updates.guest_number > 10000)) {
+                return res.status(400).json({ error: 'Invalid guest count.' });
+            }
+            if (updates.discount !== undefined && (!Number.isFinite(updates.discount) || updates.discount < 0)) {
+                return res.status(400).json({ error: 'Invalid discount.' });
+            }
+            if (!Object.keys(updates).length) {
+                return res.status(400).json({ error: 'No event booking fields to update.' });
+            }
+
+            if (updates.discount !== undefined || updates.start_date || updates.end_date) {
+                const existingRows = await this.db.query('SELECT price, start_date, end_date, discount FROM events WHERE id = ?', [eventId]);
+                if (!existingRows.length) {
+                    return res.status(404).json({ error: 'Event booking not found.' });
+                }
+                const existing = existingRows[0];
+                const price = Number(existing.price) || 0;
+                const discount = updates.discount ?? (Number(existing.discount) || 0);
+                const startDate = updates.start_date || String(existing.start_date).slice(0, 10);
+                const endDate = updates.end_date || String(existing.end_date).slice(0, 10);
+                if (endDate < startDate) {
+                    return res.status(400).json({ error: 'Event end date cannot be earlier than the start date.' });
+                }
+                const eventDays = Math.max(1, Math.round((new Date(`${endDate}T00:00:00`) - new Date(`${startDate}T00:00:00`)) / 86400000) + 1);
+                updates.total_price = Math.max(0, (price * eventDays) - discount);
+            }
+
+            const sql = `UPDATE events SET ${Object.keys(updates).map((key) => `${key} = ?`).join(', ')} WHERE id = ?`;
+            const result = await this.db.query(sql, [...Object.values(updates), eventId]);
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Event booking not found.' });
             }

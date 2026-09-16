@@ -654,7 +654,7 @@ function AdminBooking() {
                                             : formatBookingDate(booking.start_date);
                                         return (
                                         <tr key={booking.id}>
-                                            <td>{booking.event_name || 'Event booking'}{booking.guest_name ? ` - ${booking.guest_name}` : ''}</td>
+                                            <td>{booking.guest_name}</td>
                                             <td>{booking.guest_number ?? '-'}</td>
                                             <td>{eventDate || '-'}</td>
                                             <td>{booking.time_in || '-'} - {booking.time_out || '-'}</td>

@@ -21,7 +21,7 @@
   display: flex;
   flex-direction: column;
   border-radius: 10px;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -63,7 +63,7 @@
   min-width: 36px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   color: #6b7280;
   cursor: pointer;
   display: inline-flex;
@@ -73,7 +73,7 @@
 }
 
 .event-booking-close:hover {
-  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
+  background: #f3f4f6;
   color: #111827;
   transform: scale(1.03);
 }
@@ -135,7 +135,7 @@
   gap: 12px;
   margin: 0;
   padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.45);
+  background: #ffffff;
   border: 0.5px solid #e5e7eb;
   width: 100%;
   box-sizing: border-box;
@@ -223,7 +223,7 @@
 
 .event-booking-cancel {
   border: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   color: #374151;
 }
 

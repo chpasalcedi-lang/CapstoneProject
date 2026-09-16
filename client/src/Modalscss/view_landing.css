@@ -28,7 +28,7 @@
 .landing-modal-header {
     position: sticky;
     top: 0;
-    background: #fefeff;
+    background: #ffffff;
     z-index: 2;
     display: flex;
     justify-content: space-between;
@@ -52,7 +52,7 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+    background: #ffffff;
     color: #6b7280;
     display: inline-flex;
     align-items: center;
@@ -63,7 +63,7 @@
 }
 
 .landing-close-btn:hover {
-    background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
+    background: #f3f4f6;
     transform: scale(1.03);
     color: #111827;
 }
@@ -76,7 +76,7 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    background: #f7f9fc;
+    background: #ffffff;
 }
 
 

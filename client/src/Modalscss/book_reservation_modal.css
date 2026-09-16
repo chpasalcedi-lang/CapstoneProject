@@ -25,7 +25,7 @@
 }
 
 .book-reservation-modal {
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   width: 520px;
   max-width: 100%;
   max-height: 90vh;
@@ -60,7 +60,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   color: #040404;
   flex-shrink: 0;
   border-bottom: 1px solid #e5e7eb;
@@ -94,7 +94,7 @@
   min-width: 36px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   color: #6b7280;
   display: inline-flex;
   align-items: center;
@@ -105,14 +105,14 @@
 }
 
 .book-reservation-modal-close:hover {
-  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
+  background: #f3f4f6;
   color: #111827;
   transform: scale(1.03);
 }
 
 .book-reservation-modal-body {
   padding: 20px 20px 12px;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   overflow-y: auto;
   flex: 1;
 }
@@ -278,7 +278,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   flex-shrink: 0;
 }
 

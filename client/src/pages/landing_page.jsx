@@ -7,6 +7,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import pool1 from '../image/pool1.jpg';
 import pool2 from '../image/pool2.jpg';
 import pool3 from '../image/pool3.jpg';
+import waterpool from '../image/waterpool.jpg';
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
 import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
@@ -413,11 +414,12 @@ function LandingPage() {
 
       <section className="about-pool" id="about-pool">
           <div className="about-pool-content">
-              <div id="carouselExampleDark" className="carousel carousel-dark slide" data-bs-ride="carousel">
+              <div id="carouselExampleDark" className="carousel carousel-dark slide" data-bs-ride="carousel" data-bs-interval="4000">
                   <div className="carousel-indicators">
                       <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" className="active" aria-current="true" aria-label="Slide 1"></button>
                       <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
                       <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
                   </div>
                   <div className="carousel-inner">
                       <div className="carousel-item active" data-bs-interval="10000">
@@ -435,6 +437,11 @@ function LandingPage() {
                       <div className="carousel-caption d-none d-md-block">
                       </div>
                       </div>
+                      <div className="carousel-item">
+                          <img src={waterpool} className="d-block w-100" alt="Pool 4"/>
+                      <div className="carousel-caption d-none d-md-block">
+                      </div>
+                      </div>
                   </div>
                   <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
                       <span className="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -445,7 +452,8 @@ function LandingPage() {
               </div>
               <div className="about-pool-text">
                   <h1>MESSIAH POOL RESORT</h1>
-                  <p>Experience our premium infinity pool with elegant ambiance, breathtaking views, and world-class comfort designed for your perfect stay.</p>
+                  <p>Experience our premium infinity pool with elegant ambiance, breathtaking views, and world-class comfort designed for your perfect stay.
+                  </p>
                   <Link to="/Reservation">
                       <button className="about-btn-pool">Check Available</button>
                   </Link>

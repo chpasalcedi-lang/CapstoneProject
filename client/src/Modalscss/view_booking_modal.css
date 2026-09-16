@@ -12,14 +12,14 @@
 
 
 .modal-content {
-    background: #111111;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+    border: 1px solid #e5e7eb;
     border-radius: 20px;
     width: 100%;
     max-width: 500px;
     max-height: 88vh;
     overflow: hidden;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
     animation: modal-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -28,18 +28,18 @@
 .modal-header {
     position: sticky;
     top: 0;
-    background: #111111;
+    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
     z-index: 2;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 22px 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .modal-header h2 {
     margin: 0;
-    color: #f5f3ee;
+    color: #111827;
     font-size: 18px;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -52,20 +52,27 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    color: #f5f3ee;
+    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+    color: #111827;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.18s ease, transform 0.12s ease, color 0.12s ease;
+    transition: background 0.18s ease, transform 0.12s ease, color 0.18s ease;
     font-size: 1rem;
 }
 
 .close-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
     transform: scale(1.03);
-    color: #ffffff;
+    color: #111827;
+}
+
+.close-btn i,
+.close-btn svg,
+.close-btn .fa-solid,
+.close-btn .fa-xmark {
+    color: #111827 !important;
 }
 
 .modal-body {
@@ -76,12 +83,13 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 
 .booking-detail {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 16px;
 }
@@ -116,14 +124,14 @@
 .booking-detail label {
     font-size: 11px;
     font-weight: 600;
-    color: #666;
+    color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
 
 .booking-detail p {
     margin: 0;
-    color: #f5f3ee;
+    color: #111827;
     font-size: 14px;
     line-height: 1.5;
 }
@@ -135,7 +143,7 @@
 }
 
 .notes-text {
-    color: #c8c4bc !important;
+    color: #374151 !important;
     line-height: 1.65 !important;
 }
 
@@ -177,24 +185,26 @@
     display: flex;
     gap: 10px;
     padding: 16px 24px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .btn-secondary {
     flex: 1;
     padding: 10px 16px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: transparent;
-    color: #f5f3ee;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s, border-color 0.15s;
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: #f3f4f6;
+    border-color: #cbd5e1;
 }
 
 .btn-primary {
@@ -202,7 +212,7 @@
     padding: 10px 16px;
     border-radius: 10px;
     border: none;
-    background: #c8a96e;
+    background: #d8c18b;
     color: #111111;
     font-size: 13px;
     font-weight: 600;
@@ -211,7 +221,7 @@
 }
 
 .btn-primary:hover {
-    background: #d4b97e;
+    background: #e5d7ae;
 }
 
 .btn-primary:active {

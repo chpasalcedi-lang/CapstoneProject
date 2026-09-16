@@ -69,7 +69,7 @@
   height: 36px;
   border: none;
   border-radius: 999px;
-  background: #f3f4f6;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
   color: #6b7280;
   display: inline-flex;
   align-items: center;
@@ -79,7 +79,7 @@
 }
 
 .cancel-reservation-modal-close:hover {
-  background: #e5e7eb;
+  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
   color: #111827;
   transform: scale(1.03);
 }

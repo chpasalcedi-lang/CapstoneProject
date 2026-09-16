@@ -35,7 +35,7 @@
 
 /* CARD */
 .add-room-form-card {
-  background: #111111;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
   width: 520px;
   max-width: 100%;
   max-height: 85vh;
@@ -54,14 +54,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(249, 248, 248, 0.08);
+  border-bottom: 1px solid #e5e7eb;
   flex: 0 0 auto;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .add-room-modal-title {
   margin: 0;
   font-size: 1.25rem;
-  color: #f5f3ee;
+  color: #111827;
 }
 
 .add-room-modal-close {
@@ -71,8 +72,8 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f5f3ee;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  color: #374151;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -82,9 +83,9 @@
 }
 
 .add-room-modal-close:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
   transform: scale(1.03);
-  color: #ffffff;
+  color: #111827;
 }
 
 /* BODY */
@@ -92,6 +93,7 @@
   overflow-y: auto;
   flex: 1;
   padding: 20px 30px;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .add-room-modal-body::-webkit-scrollbar {
@@ -130,19 +132,19 @@
   font-size: 0.82rem;
   font-weight: 600;
   margin-bottom: 6px;
-  color: #d3d3d3;
+  color: #374151;
 }
 
 .add-room-form-group input,
 .add-room-form-group select,
 .add-room-form-group textarea {
   padding: 9px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid #d1d5db;
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #111111;
-  color: #f5f3ee;
+  background: #ffffff;
+  color: #111827;
   width: 100%;
   box-sizing: border-box;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
@@ -157,9 +159,14 @@
 
 .add-room-form-group input:hover,
 .add-room-form-group select:hover,
-.add-room-form-group textarea:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: #1a1a1a;
+.add-room-form-group textarea:hover,
+.add-room-form-group input:focus,
+.add-room-form-group select:focus,
+.add-room-form-group textarea:focus {
+  border-color: #cbd5e1;
+  background: #f3efe6;
+  box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.12);
+  outline: none;
 }
 
 .add-room-form-group select option {
@@ -179,8 +186,9 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 0 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid #e5e7eb;
   flex: 0 0 auto;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .add-room-btn-cancel,
@@ -195,13 +203,13 @@
 }
 
 .add-room-btn-cancel {
-  background: rgba(255, 255, 255, 0.06);
-  color: #d3d3d3;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #e5e7eb;
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 
 .add-room-btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: #d1d5db;
 }
 
 .add-room-btn-save {

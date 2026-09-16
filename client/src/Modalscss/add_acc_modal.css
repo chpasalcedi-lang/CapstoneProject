@@ -35,7 +35,7 @@
 
 /* card */
 .add-acc-form-card {
-  background: #111111;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
   width: 520px;
   max-width: 100%;
   max-height: 80vh;
@@ -53,13 +53,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(249, 248, 248, 0.08);
+  border-bottom: 1px solid #e5e7eb;
   flex: 0 0 auto;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .add-acc-modal-title {
   font-size: 20px;
-  color: #f5f3ee;
+  color: #111827;
   margin: 0;
 }
 
@@ -71,8 +72,8 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f5f3ee;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  color: #111827;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -82,12 +83,13 @@
 
 .add-acc-modal-close i {
   font-size: 1rem;
+  color: #111827 !important;
 }
 
 .add-acc-modal-close:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
   transform: scale(1.03);
-  color: #ffffff;
+  color: #111827;
 }
 
 /* BODY */
@@ -96,6 +98,7 @@
   min-height: 0;
   overflow-y: auto;
   padding: 20px 30px;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .add-acc-modal-body::-webkit-scrollbar {
@@ -118,7 +121,7 @@
 .add-acc-form-group label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #d3d3d3;
+  color: #374151;
 }
 
 .add-acc-form-group input,
@@ -126,14 +129,23 @@
   width: 100%;
   padding: 10px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #0c0c0c;
-  color: #f5f3ee;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
   font-size: 0.9rem;
   transition: 0.15s;
   box-sizing: border-box;
 }
 
+.add-acc-form-group input:hover,
+.add-acc-form-group select:hover,
+.add-acc-form-group input:focus,
+.add-acc-form-group select:focus {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.12);
+  outline: none;
+}
 
 .add-acc-form-group select option {
   color: #0c0c0c;
@@ -147,7 +159,8 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
 }
 
 .add-acc-btn-cancel,
@@ -161,13 +174,13 @@
 }
 
 .add-acc-btn-cancel {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ccc;
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+  color: #374151;
 }
 
 .add-acc-btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: #d1d5db;
 }
 
 .add-acc-btn-save {

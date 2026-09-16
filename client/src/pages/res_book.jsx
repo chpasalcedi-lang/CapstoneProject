@@ -4,6 +4,7 @@ import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../pagescss/res_book.css"; 
 import BookReservationModal from "../Modals/book_reservation_modal.jsx";
+import EventBookingModal from "../Modals/event_booking_modal.jsx";
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
 import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
@@ -17,8 +18,11 @@ function ResBook() {
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [selectedRoomPrice, setSelectedRoomPrice] = useState(null);
   const [selectedRoomNumber, setSelectedRoomNumber] = useState(null);
+  const [eventBookingRoom, setEventBookingRoom] = useState(null);
+  const [showEventBookingModal, setShowEventBookingModal] = useState(false);
   const [data, setData] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [eventBookings, setEventBookings] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [checkIn, setCheckIn] = useState('');
@@ -104,7 +108,7 @@ function ResBook() {
     if (!room?.id || !startDate || !endDate) return false;
     const rangeStart = new Date(startDate);
     const rangeEnd = new Date(endDate);
-    return reservations.some((r) => {
+    const hasReservationOverlap = reservations.some((r) => {
       if (!r.room_id) return false;
       if (Number(r.room_id) !== Number(room.id)) return false;
       const status = (r.res_status || '').toLowerCase();
@@ -113,7 +117,14 @@ function ResBook() {
       const reservationEnd = new Date(r.check_out_date);
       return isDateOverlap(rangeStart, rangeEnd, reservationStart, reservationEnd);
     });
-  }, [reservations, isDateOverlap]);
+    const hasEventOverlap = eventBookings.some((booking) => {
+      if (Number(booking.rooms) !== Number(room.id)) return false;
+      const bookingStart = String(booking.start_date).slice(0, 10);
+      const bookingEnd = String(booking.end_date).slice(0, 10);
+      return startDate <= bookingEnd && endDate >= bookingStart;
+    });
+    return hasReservationOverlap || hasEventOverlap;
+  }, [reservations, eventBookings, isDateOverlap]);
 
   const getNextDayISO = (dateValue) => {
     if (!dateValue) return '';
@@ -126,7 +137,7 @@ function ResBook() {
   const isRoomOccupiedNow = useCallback((room) => {
     if (!room?.id) return false;
     const today = new Date();
-    return reservations.some((r) => {
+    const hasReservation = reservations.some((r) => {
       if (!r.room_id) return false;
       if (Number(r.room_id) !== Number(room.id)) return false;
       const status = (r.res_status || '').toLowerCase();
@@ -135,7 +146,14 @@ function ResBook() {
       const rEnd = new Date(r.check_out_date);
       return today >= rStart && today < rEnd;
     });
-  }, [reservations]);
+    const todayValue = new Date().toISOString().slice(0, 10);
+    const hasEventBooking = eventBookings.some((booking) => (
+      Number(booking.rooms) === Number(room.id)
+      && todayValue >= String(booking.start_date).slice(0, 10)
+      && todayValue <= String(booking.end_date).slice(0, 10)
+    ));
+    return hasReservation || hasEventBooking;
+  }, [reservations, eventBookings]);
 
   const formatRoomPrice = (price) => {
     const numeric = Number(String(price || '').replace(/,/g, ''));
@@ -166,6 +184,12 @@ function ResBook() {
       }).then(() => {
         navigate('/Login');
       });
+      return;
+    }
+
+    if (room.room_type?.toLowerCase() === 'event') {
+      setEventBookingRoom(room);
+      setShowEventBookingModal(true);
       return;
     }
 
@@ -214,6 +238,10 @@ function ResBook() {
 
     const fetchData = useCallback(() => {
       setLoading(true);
+
+      apiClient.get('/get_event_bookings')
+        .then((eventRes) => setEventBookings(eventRes.data || []))
+        .catch((error) => console.error('Error fetching event bookings:', error));
 
       // show cached data first to avoid empty results on refresh
       const cached = localStorage.getItem('roomsCache');
@@ -561,7 +589,7 @@ function ResBook() {
         <div className="booking-results-content">
           { loading ? (
             <div className="booking-loading">Loading rooms...</div>
-          ) : filteredData.length === 0 ? (
+          ) : computedFiltered.length === 0 ? (
             <div className="booking-results-grid booking-empty">
               <div>
                 <h2>No rooms available</h2>
@@ -571,7 +599,7 @@ function ResBook() {
             </div>
           ) : (
             <div className="booking-results-grid">
-                {filteredData.map((room) => {
+                {computedFiltered.map((room) => {
                   const isUnavailable = room.room_status === 'Occupied' || room._isMaintenance;
                   return (
                   <div className="booking-room-card" key={room.id}>
@@ -608,6 +636,15 @@ function ResBook() {
         </div>
       </section>
       <BookReservationModal showModal={BookshowModal} setShowModal={setBookShowModal} roomId={selectedRoomId} roomPrice={selectedRoomPrice} roomNumber={selectedRoomNumber} refreshData={fetchData} />
+      <EventBookingModal
+        show={showEventBookingModal}
+        onClose={() => setShowEventBookingModal(false)}
+        room={eventBookingRoom}
+        onSaved={() => {
+          setShowEventBookingModal(false);
+          fetchData();
+        }}
+      />
       
       <ViewLanding
         show={showViewModal}

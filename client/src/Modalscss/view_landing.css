@@ -52,7 +52,7 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: #f3f4f6;
+    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
     color: #6b7280;
     display: inline-flex;
     align-items: center;
@@ -63,7 +63,7 @@
 }
 
 .landing-close-btn:hover {
-    background: #e5e7eb;
+    background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
     transform: scale(1.03);
     color: #111827;
 }

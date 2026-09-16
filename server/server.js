@@ -449,6 +449,9 @@ class ReservationController {
         this.db = db;
         this.crypto = crypto;
         app.post('/add_reservation', this.addReservation.bind(this));
+        app.post('/add_event_booking', this.addEventBooking.bind(this));
+        app.get('/check_event_booking_availability', this.checkEventBookingAvailability.bind(this));
+        app.get('/get_event_bookings', this.getEventBookings.bind(this));
         app.get('/get_reservations', this.getReservations.bind(this));
         app.post('/update_reservation/:id', this.updateReservation.bind(this));
         app.post('/cancel_reservation_request/:id', this.cancelReservationRequest.bind(this));
@@ -461,6 +464,40 @@ class ReservationController {
         }
         const parsed = parseFloat(String(value).replace(/,/g, ''));
         return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    parseStrictMoney(value) {
+        if (typeof value === 'number') {
+            return Number.isFinite(value) && value >= 0 && value <= 100000000
+                ? Number(value.toFixed(2))
+                : null;
+        }
+        if (typeof value !== 'string' || !/^\d{1,11}(?:\.\d{1,2})?$/.test(value.trim())) {
+            return null;
+        }
+        const parsed = Number(value);
+        return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100000000
+            ? Number(parsed.toFixed(2))
+            : null;
+    }
+
+    isValidDate(value) {
+        if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+        const date = new Date(`${value}T00:00:00Z`);
+        return date.getUTCFullYear() === Number(value.slice(0, 4))
+            && date.getUTCMonth() + 1 === Number(value.slice(5, 7))
+            && date.getUTCDate() === Number(value.slice(8, 10));
+    }
+
+    isValidTime(value) {
+        if (typeof value !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) return false;
+        return true;
+    }
+
+    normalizeEventText(value, maxLength) {
+        if (typeof value !== 'string') return null;
+        const normalized = value.trim().replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '');
+        return normalized && normalized.length <= maxLength ? normalized : null;
     }
 
     async addReservation(req, res) {
@@ -503,6 +540,143 @@ class ReservationController {
         } catch (error) {
             console.error('Error adding reservation:', error);
             return res.status(500).json({ error: 'Database query error!', details: error.message });
+        }
+    }
+
+    async addEventBooking(req, res) {
+        try {
+            const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+            const {
+                event_name: eventName,
+                guest_name: guestName,
+                phone_number: phoneNumber,
+                start_date: startDate,
+                end_date: endDate,
+                time_in: timeIn,
+                time_out: timeOut,
+                notes,
+                discount,
+                guest_number: guestNumber,
+                email,
+                room_id: roomId,
+            } = body;
+
+            const cleanEventName = this.normalizeEventText(eventName, 120);
+            const cleanGuestName = this.normalizeEventText(guestName, 120);
+            const cleanNotes = typeof notes === 'string' ? notes.trim().replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '') : '';
+            const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+            const cleanPhone = typeof phoneNumber === 'string' ? phoneNumber.trim() : '';
+            const numericRoomId = Number(roomId);
+            const numericGuestNumber = Number(guestNumber);
+
+            if (!cleanEventName || !cleanGuestName || !cleanPhone || !cleanEmail || !this.isValidDate(startDate) || !this.isValidDate(endDate) || !this.isValidTime(timeIn) || !this.isValidTime(timeOut)) {
+                return res.status(400).json({ error: 'Please provide valid event, contact, date, and time details.' });
+            }
+
+            if (cleanPhone.length !== 11 || !/^09\d{9}$/.test(cleanPhone)) {
+                return res.status(400).json({ error: 'Phone number must be a valid 11-digit Philippine mobile number.' });
+            }
+
+            if (cleanEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+                return res.status(400).json({ error: 'Please provide a valid email address.' });
+            }
+
+            if (cleanNotes.length > 2000) {
+                return res.status(400).json({ error: 'Notes must not exceed 2,000 characters.' });
+            }
+
+            if (!Number.isInteger(numericRoomId) || numericRoomId <= 0 || !Number.isInteger(numericGuestNumber) || numericGuestNumber < 1 || numericGuestNumber > 10000) {
+                return res.status(400).json({ error: 'Please provide valid room and guest values.' });
+            }
+
+            const today = new Date();
+            const todayValue = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            if (startDate < todayValue || endDate < startDate || (startDate === endDate && timeOut <= timeIn)) {
+                return res.status(400).json({ error: 'Event dates and times must be valid and cannot be in the past.' });
+            }
+
+            const roomRows = await this.db.query('SELECT room_name, room_label, room_type, room_price FROM rooms WHERE id = ? LIMIT 1', [numericRoomId]);
+            const eventRoom = roomRows[0];
+            if (!eventRoom || String(eventRoom.room_type || '').toLowerCase() !== 'event') {
+                return res.status(400).json({ error: 'The selected room is not an event room.' });
+            }
+
+            const dailyPrice = this.parseStrictMoney(eventRoom.room_price);
+            if (dailyPrice === null || dailyPrice <= 0) {
+                return res.status(400).json({ error: 'The selected event room does not have a valid price.' });
+            }
+
+            const activeBooking = await this.db.query(
+                'SELECT id FROM events WHERE rooms = ? AND NOT (end_date < ? OR start_date > ?) LIMIT 1',
+                [numericRoomId, startDate, endDate]
+            );
+            if (activeBooking.length) {
+                return res.status(409).json({ error: 'The selected event room is already booked for those dates.' });
+            }
+
+            const eventDays = Math.max(1, Math.round((new Date(`${endDate}T00:00:00`) - new Date(`${startDate}T00:00:00`)) / 86400000) + 1);
+            const savedDiscount = this.parseStrictMoney(discount || '0');
+            if (savedDiscount === null || savedDiscount > dailyPrice * eventDays) {
+                return res.status(400).json({ error: 'Discount must be a valid amount within the booking total.' });
+            }
+            const totalPrice = Math.max(0, (dailyPrice * eventDays) - savedDiscount);
+
+            const insertSql = `INSERT INTO events
+                (event_name, guest_name, phone_number, start_date, end_date, time_in, time_out, notes, discount, price, total_price, rooms, guest_number, email)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            const result = await this.db.query(insertSql, [
+                cleanEventName,
+                cleanGuestName,
+                cleanPhone,
+                startDate,
+                endDate,
+                timeIn,
+                timeOut,
+                cleanNotes,
+                savedDiscount,
+                dailyPrice,
+                totalPrice,
+                numericRoomId,
+                numericGuestNumber,
+                cleanEmail,
+            ]);
+
+            return res.status(200).json({ message: 'Event booking saved successfully!', bookingId: result.insertId });
+        } catch (error) {
+            console.error('Error adding event booking:', error);
+            return res.status(500).json({ error: 'Unable to save event booking.', details: error.message });
+        }
+    }
+
+    async checkEventBookingAvailability(req, res) {
+        try {
+            const roomId = Number(req.query.room_id);
+            const startDate = req.query.start_date;
+            const endDate = req.query.end_date;
+
+            if (!Number.isInteger(roomId) || roomId <= 0 || !this.isValidDate(startDate) || !this.isValidDate(endDate) || endDate < startDate) {
+                return res.status(400).json({ error: 'Please provide a valid room and date range.' });
+            }
+
+            const activeBooking = await this.db.query(
+                'SELECT id FROM events WHERE rooms = ? AND NOT (end_date < ? OR start_date > ?) LIMIT 1',
+                [roomId, startDate, endDate]
+            );
+
+            return res.status(200).json({ available: activeBooking.length === 0 });
+        } catch (error) {
+            console.error('Error checking event booking availability:', error);
+            return res.status(500).json({ error: 'Unable to check event room availability.' });
+        }
+    }
+
+    async getEventBookings(req, res) {
+        try {
+            const rows = await this.db.query("SELECT id, DATE_FORMAT(start_date, '%Y-%m-%d') AS start_date, DATE_FORMAT(end_date, '%Y-%m-%d') AS end_date, rooms FROM events ORDER BY id DESC");
+            return res.status(200).json(rows);
+        } catch (error) {
+            console.error('Error fetching event bookings:', error);
+            return res.status(500).json({ error: 'Unable to fetch event bookings.' });
         }
     }
 

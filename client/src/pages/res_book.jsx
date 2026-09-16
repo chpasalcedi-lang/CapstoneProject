@@ -589,7 +589,7 @@ function ResBook() {
         <div className="booking-results-content">
           { loading ? (
             <div className="booking-loading">Loading rooms...</div>
-          ) : computedFiltered.length === 0 ? (
+          ) : filteredData.length === 0 ? (
             <div className="booking-results-grid booking-empty">
               <div>
                 <h2>No rooms available</h2>
@@ -599,7 +599,7 @@ function ResBook() {
             </div>
           ) : (
             <div className="booking-results-grid">
-                {computedFiltered.map((room) => {
+                {filteredData.map((room) => {
                   const isUnavailable = room.room_status === 'Occupied' || room._isMaintenance;
                   return (
                   <div className="booking-room-card" key={room.id}>

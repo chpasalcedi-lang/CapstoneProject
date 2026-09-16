@@ -130,11 +130,11 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
             <label>Guest name<input name="guest_name" required maxLength="120" value={form.guest_name} onChange={updateField} placeholder="e.g. Juan Dela Cruz" /></label>
             <label>Phone number<input name="phone_number" required inputMode="numeric" pattern="09[0-9]{9}" maxLength="11" value={form.phone_number} onChange={updateField} placeholder="09XXXXXXXXX" /></label>
             <label>Number of guests<input name="guest_number" required type="number" min="1" max="10000" step="1" value={form.guest_number} onChange={updateField} placeholder="e.g. 50" /></label>
+            <label>Email<input name="email" required maxLength="254" type="email" value={form.email} onChange={updateField} disabled={Boolean(userEmail)} /></label>
             <label>Start date<input name="start_date" required type="date" min={new Date().toISOString().slice(0, 10)} value={form.start_date} onChange={updateField} /></label>
             <label>Time in<input name="time_in" required type="time" value={form.time_in} onChange={updateField} /></label>
             <label>Time out<input name="time_out" required type="time" value={form.time_out} onChange={updateField} /></label>
             <label className="event-booking-full">Rooms<input name="rooms" value={form.rooms || ''} readOnly aria-readonly="true" /></label>
-            <label>Email<input name="email" required maxLength="254" type="email" value={form.email} onChange={updateField} disabled={Boolean(userEmail)} /></label>
             <label className="event-booking-full">Notes<textarea name="notes" rows="3" maxLength="2000" value={form.notes} onChange={updateField} placeholder="Additional event details" /></label>
           </div>
 

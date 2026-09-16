@@ -409,7 +409,7 @@ function LandingPage() {
               </div>
                <div className="pool-note-strip">
                 <span className="pool-note-dash">—</span>
-                <span></span>
+                <span>Our pool depth ranges from 6ft to 7ft, giving guests plenty of room to swim and relax.</span>
               </div>
             </section>
 

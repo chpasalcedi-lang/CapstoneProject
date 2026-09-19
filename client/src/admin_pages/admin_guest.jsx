@@ -1080,7 +1080,7 @@ function AdminGuest() {
                 onUpdated={refreshEventBookings}
             />
             <ViewBookingModal 
-                show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking} onEdit={handleEdit}/>
+                show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking} />
             <FeedbackModal show={feedbackModal} onClose={() => setFeedbackModal(false)} feedback={selectedFeedback} />
             <ViewGuestModal show={viewGuestModal} onClose={() => setViewGuestModal(false)} guest={selectedGuest} />
             <EditGuestModal show={editGuestModal} onClose={() => setEditGuestModal(false)} guest={selectedGuest} onUpdate={handleUpdateGuest} />

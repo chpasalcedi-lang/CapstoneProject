@@ -10,7 +10,7 @@ function formatDate(dateStr) {
     });
 }
 
-function ViewBookingModal({ show, onClose, booking, onEdit }) {
+function ViewBookingModal({ show, onClose, booking }) {
     if (!show || !booking) return null;
 
     const status = booking.res_status?.toLowerCase() || 'pending';
@@ -93,20 +93,6 @@ function ViewBookingModal({ show, onClose, booking, onEdit }) {
                     )}
 
                 </div>
-                <div className="modal-footer">
-                    {onEdit && (
-                        <button
-                            className="btn-primary"
-                            onClick={() => {
-                                if (onClose) onClose();
-                                onEdit(booking);
-                            }}
-                        >
-                            Edit Booking
-                        </button>
-                    )}
-                </div>
-
             </div>
         </div>
     );

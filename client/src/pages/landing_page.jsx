@@ -552,10 +552,12 @@ function LandingPage() {
             <span>Event spaces · rooms description</span>
           </div>
           <h1 className="event-info-title">A room for every kind of gathering.</h1>
-          <p className="event-info-subtitle">Choose a private stay or an open, welcoming space for your next celebration at Messiah.</p>
-          <button className="event-info-cta" type="button" onClick={() => setShowEventBookingModal(true)}>
-            Book an event <span aria-hidden="true">&#8599;</span>
-          </button>
+          <div className="event-info-action-row">
+            <p className="event-info-subtitle">Choose a private stay or an open, welcoming space for your next celebration at Messiah.</p>
+            <button className="event-info-cta" type="button" onClick={() => setShowEventBookingModal(true)}>
+              Book an event 
+            </button>
+          </div>
           <div className="event-info-facts">
             <div className="event-info-fact">
               <span className="event-info-num">01</span>

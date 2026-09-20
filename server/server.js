@@ -140,7 +140,24 @@ class Server {
         this.setupRoutes();
         this.reservationSourceReady = this.ensureReservationSourceColumn();
         this.guestColumnsReady = this.ensureGuestColumns();
+        this.eventBookingRoomsReady = this.ensureEventBookingRoomsTable();
         this.db.verifyConnection();
+    }
+
+    async ensureEventBookingRoomsTable() {
+        try {
+            await this.db.query(`CREATE TABLE IF NOT EXISTS event_booking_rooms (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                event_id INT NOT NULL,
+                room_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_event_room (event_id, room_id),
+                INDEX idx_event_booking_rooms_event (event_id),
+                INDEX idx_event_booking_rooms_room (room_id)
+            )`);
+        } catch (error) {
+            console.error('Unable to prepare event room selections:', error);
+        }
     }
 
     async ensureReservationSourceColumn() {
@@ -580,6 +597,7 @@ class ReservationController {
                 guest_number: guestNumber,
                 email,
                 room_id: roomId,
+                room_ids: roomIds,
             } = body;
 
             const cleanEventName = this.normalizeEventText(eventName, 120);
@@ -589,6 +607,8 @@ class ReservationController {
             const cleanPhone = typeof phoneNumber === 'string' ? phoneNumber.trim() : '';
             const numericRoomId = Number(roomId);
             const numericGuestNumber = Number(guestNumber);
+            const requestedRoomIds = Array.isArray(roomIds) ? roomIds : (roomId ? [roomId] : []);
+            const numericRoomIds = [...new Set(requestedRoomIds.map(Number).filter((id) => Number.isInteger(id) && id > 0))];
 
             if (!cleanEventName || !cleanGuestName || !cleanPhone || !cleanEmail || !this.isValidDate(startDate) || !this.isValidDate(endDate) || !this.isValidTime(timeIn) || !this.isValidTime(timeOut)) {
                 return res.status(400).json({ error: 'Please provide valid event, contact, date, and time details.' });
@@ -606,8 +626,17 @@ class ReservationController {
                 return res.status(400).json({ error: 'Notes must not exceed 2,000 characters.' });
             }
 
-            if (!Number.isInteger(numericRoomId) || numericRoomId <= 0 || !Number.isInteger(numericGuestNumber) || numericGuestNumber < 1 || numericGuestNumber > 10000) {
-                return res.status(400).json({ error: 'Please provide valid room and guest values.' });
+            if (roomId !== null && roomId !== undefined && roomId !== ''
+                && (!Number.isInteger(numericRoomId) || numericRoomId <= 0)) {
+                return res.status(400).json({ error: 'Please provide a valid room value.' });
+            }
+
+            if (requestedRoomIds.length !== numericRoomIds.length) {
+                return res.status(400).json({ error: 'Please provide valid room selections.' });
+            }
+
+            if (!Number.isInteger(numericGuestNumber) || numericGuestNumber < 1 || numericGuestNumber > 10000) {
+                return res.status(400).json({ error: 'Please provide a valid guest value.' });
             }
 
             const today = new Date();
@@ -616,23 +645,43 @@ class ReservationController {
                 return res.status(400).json({ error: 'Event dates and times must be valid and cannot be in the past.' });
             }
 
-            const roomRows = await this.db.query('SELECT room_name, room_label, room_type, room_price FROM rooms WHERE id = ? LIMIT 1', [numericRoomId]);
-            const eventRoom = roomRows[0];
-            if (!eventRoom || String(eventRoom.room_type || '').toLowerCase() !== 'event') {
-                return res.status(400).json({ error: 'The selected room is not an event room.' });
-            }
+            let dailyPrice = 0;
+            if (numericRoomIds.length) {
+                await this.eventBookingRoomsReady;
+                const placeholders = numericRoomIds.map(() => '?').join(', ');
+                const roomRows = await this.db.query(`SELECT id, room_name, room_label, room_type, room_price FROM rooms WHERE id IN (${placeholders})`, numericRoomIds);
+                if (roomRows.length !== numericRoomIds.length) {
+                    return res.status(400).json({ error: 'One or more selected rooms could not be found.' });
+                }
 
-            const dailyPrice = this.parseStrictMoney(eventRoom.room_price);
-            if (dailyPrice === null || dailyPrice <= 0) {
-                return res.status(400).json({ error: 'The selected event room does not have a valid price.' });
-            }
+                const roomTotal = roomRows.reduce((total, room) => {
+                    const price = this.parseStrictMoney(room.room_price);
+                    return total + (price && price > 0 ? price : 0);
+                }, 0);
+                const exemptedGuests = roomRows.reduce((total, room) => {
+                    const roomType = String(room.room_type || '').toLowerCase();
+                    const roomText = `${room.room_name || ''} ${room.room_label || ''}`;
+                    if (roomType === 'family' || roomType === 'double' || roomType === 'couple') return total + 2;
+                    if (roomType === 'event') return total + (/big|large/i.test(roomText) ? 100 : 70);
+                    return total;
+                }, 0);
+                dailyPrice = roomTotal + (Math.max(0, numericGuestNumber - exemptedGuests) * 175);
+                if (roomTotal <= 0) {
+                    return res.status(400).json({ error: 'Selected rooms do not have valid prices.' });
+                }
 
-            const activeBooking = await this.db.query(
-                'SELECT id FROM events WHERE rooms = ? AND NOT (end_date < ? OR start_date > ?) LIMIT 1',
-                [numericRoomId, startDate, endDate]
-            );
-            if (activeBooking.length) {
-                return res.status(409).json({ error: 'The selected event room is already booked for those dates.' });
+                const activeBooking = await this.db.query(
+                    `SELECT id FROM events WHERE NOT (end_date < ? OR start_date > ?)
+                     AND (rooms IN (${placeholders}) OR EXISTS (
+                       SELECT 1 FROM event_booking_rooms ebr WHERE ebr.event_id = events.id AND ebr.room_id IN (${placeholders})
+                     )) LIMIT 1`,
+                    [startDate, endDate, ...numericRoomIds, ...numericRoomIds]
+                );
+                if (activeBooking.length) {
+                    return res.status(409).json({ error: 'One or more selected rooms are already booked for those dates.' });
+                }
+            } else {
+                dailyPrice = numericGuestNumber * 175;
             }
 
             const eventDays = Math.max(1, Math.round((new Date(`${endDate}T00:00:00`) - new Date(`${startDate}T00:00:00`)) / 86400000) + 1);
@@ -657,11 +706,18 @@ class ReservationController {
                 savedDiscount,
                 dailyPrice,
                 totalPrice,
-                numericRoomId,
+                numericRoomIds[0] || null,
                 numericGuestNumber,
                 cleanEmail,
                 'pending',
             ]);
+
+            if (numericRoomIds.length) {
+                await this.db.query(
+                    `INSERT INTO event_booking_rooms (event_id, room_id) VALUES ${numericRoomIds.map(() => '(?, ?)').join(', ')}`,
+                    numericRoomIds.flatMap((selectedId) => [result.insertId, selectedId])
+                );
+            }
 
             return res.status(200).json({ message: 'Event booking saved successfully!', bookingId: result.insertId });
         } catch (error) {

@@ -18,38 +18,54 @@ const initialForm = {
   email: '',
 };
 
-function landingEventModal({ show, onClose, room, onSaved }) {
+function LandingEventModal({ show, onClose, room, onSaved }) {
   const [form, setForm] = useState(initialForm);
   const [eventRooms, setEventRooms] = useState([]);
-  const [selectedRoomId, setSelectedRoomId] = useState('');
+  const [selectedRoomIds, setSelectedRoomIds] = useState([]);
+  const [roomPickerOpen, setRoomPickerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userEmail = localStorage.getItem('userEmail') || '';
 
   useEffect(() => {
     if (!show) return;
+    const currentRoomId = room?.id;
     apiClient.get('/get_rooms')
       .then((response) => {
-        const availableEventRooms = (response.data || []).filter((item) => (
-          String(item.room_type || '').toLowerCase() === 'event'
-          && (String(item.room_status || '').toLowerCase() === 'available' || item.id === room?.id)
+        const availableRooms = (response.data || []).filter((item) => (
+          String(item.room_status || '').toLowerCase() === 'available'
+            || (currentRoomId != null && String(item.id) === String(currentRoomId))
         ));
-        setEventRooms(availableEventRooms);
+        setEventRooms(availableRooms);
       })
       .catch((error) => console.error('Error fetching event rooms:', error));
+  }, [show, room]);
 
-    setSelectedRoomId(room?.id ? String(room.id) : '');
+  useEffect(() => {
+    setSelectedRoomIds(room?.id != null ? [String(room.id)] : []);
+    setRoomPickerOpen(room?.id != null);
     setForm({
       ...initialForm,
       rooms: room?.room_name || room?.room_label || '',
       price: room?.room_price ?? '',
       email: userEmail,
     });
-  }, [show, room, userEmail]);
+  }, [room, userEmail]);
 
   if (!show || !room) return null;
 
-  const selectedRoom = eventRooms.find((item) => String(item.id) === selectedRoomId) || room;
-  const eventPrice = Number(selectedRoom.room_price ?? form.price) || 0;
+  const selectedRooms = eventRooms.filter((item) => selectedRoomIds.includes(String(item.id)));
+  const selectedRoom = selectedRooms[0] || null;
+  const guestCount = Number(form.guest_number) || 0;
+  const roomPrice = selectedRooms.reduce((total, item) => total + (Number(item.room_price) || 0), 0);
+  const exemptedGuests = selectedRooms.reduce((total, item) => {
+    const roomType = String(item.room_type || '').toLowerCase();
+    const roomText = `${item.room_name || ''} ${item.room_label || ''}`;
+    if (roomType === 'family' || roomType === 'double' || roomType === 'couple') return total + 2;
+    if (roomType === 'event') return total + (/big|large/i.test(roomText) ? 100 : 70);
+    return total;
+  }, 0);
+  const chargeableGuests = Math.max(0, guestCount - exemptedGuests);
+  const eventPrice = roomPrice + (chargeableGuests * 175);
   const eventDays = 1;
   const totalPrice = Math.max(0, (eventPrice * eventDays) - (Number(form.discount) || 0));
 
@@ -61,15 +77,17 @@ function landingEventModal({ show, onClose, room, onSaved }) {
     setForm((current) => ({ ...current, [name]: nextValue }));
   };
 
-  const handleRoomChange = (event) => {
-    const nextRoomId = event.target.value;
-    const nextRoom = eventRooms.find((item) => String(item.id) === nextRoomId);
-    setSelectedRoomId(nextRoomId);
-    setForm((current) => ({
-      ...current,
-      rooms: nextRoom?.room_name || nextRoom?.room_label || '',
-      price: nextRoom?.room_price ?? '',
-    }));
+  const handleRoomCheckboxChange = (eventRoom, checked) => {
+    const roomId = String(eventRoom.id);
+    setSelectedRoomIds((current) => checked
+      ? [...new Set([...current, roomId])]
+      : current.filter((id) => id !== roomId));
+  };
+
+  const closeModal = () => {
+    setSelectedRoomIds([]);
+    setRoomPickerOpen(false);
+    onClose();
   };
 
   const submit = async (event) => {
@@ -84,29 +102,13 @@ function landingEventModal({ show, onClose, room, onSaved }) {
 
     setIsSubmitting(true);
     try {
-      const availability = await apiClient.get('/check_event_booking_availability', {
-        params: {
-          room_id: selectedRoom.id,
-          start_date: eventDate,
-          end_date: eventDate,
-        },
-      });
-
-      if (availability.data?.available !== true) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Event room unavailable',
-          text: 'This event room is already booked for the selected dates.',
-        });
-        return;
-      }
-
       const response = await apiClient.post('/add_event_booking', {
         ...form,
-        room_id: selectedRoom.id,
+        room_id: selectedRoom?.id || null,
+        room_ids: selectedRoomIds,
         start_date: eventDate,
         end_date: eventDate,
-        rooms: form.rooms || selectedRoom.room_name || selectedRoom.room_label || '',
+        rooms: form.rooms || selectedRoom?.room_name || selectedRoom?.room_label || '',
         price: eventPrice,
         total_price: totalPrice,
         event_days: eventDays,
@@ -119,6 +121,8 @@ function landingEventModal({ show, onClose, room, onSaved }) {
       }
 
       Swal.fire({ icon: 'success', title: 'Booking submitted', text: 'Your event booking request has been saved.' });
+      setSelectedRoomIds([]);
+      setRoomPickerOpen(false);
       if (onSaved) onSaved();
     } catch (error) {
       Swal.fire({
@@ -132,14 +136,14 @@ function landingEventModal({ show, onClose, room, onSaved }) {
   };
 
   return (
-    <div className="event-booking-overlay" onClick={onClose}>
+    <div className="event-booking-overlay" onClick={closeModal}>
       <div className="event-booking-modal" onClick={(event) => event.stopPropagation()}>
         <div className="event-booking-header">
           <div>
             <p className="event-booking-eyebrow">Event reservation</p>
             <h2>Book an event room</h2>
           </div>
-          <button type="button" className="event-booking-close" onClick={onClose} disabled={isSubmitting} aria-label="Close event booking form">
+          <button type="button" className="event-booking-close" onClick={closeModal} disabled={isSubmitting} aria-label="Close event booking form">
             <i className="fa-solid fa-xmark" />
           </button>
         </div>
@@ -154,18 +158,51 @@ function landingEventModal({ show, onClose, room, onSaved }) {
             <label>Date<div className="event-booking-date-time-wrap"><input className={form.start_date ? 'has-value' : ''} name="start_date" required type="date" min={new Date().toISOString().slice(0, 10)} value={form.start_date} onChange={updateField} onClick={(event) => event.currentTarget.showPicker?.()} /><i className="fa-regular fa-calendar-days event-booking-date-time-icon" aria-hidden="true" /></div></label>
             <label>Time in<div className="event-booking-date-time-wrap"><input className={form.time_in ? 'has-value' : ''} name="time_in" required type="time" value={form.time_in} onChange={updateField} onClick={(event) => event.currentTarget.showPicker?.()} /><i className="fa-regular fa-clock event-booking-date-time-icon" aria-hidden="true" /></div></label>
             <label>Time out<div className="event-booking-date-time-wrap"><input className={form.time_out ? 'has-value' : ''} name="time_out" required type="time" value={form.time_out} onChange={updateField} onClick={(event) => event.currentTarget.showPicker?.()} /><i className="fa-regular fa-clock event-booking-date-time-icon" aria-hidden="true" /></div></label>
-            <label className="event-booking-full">Function room<select name="room_id" value={selectedRoomId} onChange={handleRoomChange}>
-              <option value="">Select a function room</option>
-              {eventRooms.map((eventRoom) => {
-                const roomText = `${eventRoom.room_name || eventRoom.room_label || ''}`.toLowerCase();
-                const roomSize = /big|large/i.test(roomText) ? 'Big Function Room' : 'Small Function Room';
-                return (
-                  <option key={eventRoom.id} value={String(eventRoom.id)}>
-                    {roomSize} - ₱{Number(eventRoom.room_price || 0).toLocaleString('en-PH')}
-                  </option>
-                );
-              })}
-            </select></label>
+            <div className="event-booking-full event-booking-room-picker">
+              <button
+                type="button"
+                className={`event-booking-room-toggle ${roomPickerOpen ? 'is-open' : ''}`}
+                onClick={() => {
+                  setRoomPickerOpen((isOpen) => !isOpen);
+                }}
+                aria-expanded={roomPickerOpen}
+              >
+                <span>{roomPickerOpen ? 'Rooms selected' : 'Select rooms or function rooms'}</span>
+                <i className={`fa-solid fa-chevron-${roomPickerOpen ? 'up' : 'down'}`} aria-hidden="true" />
+              </button>
+              {roomPickerOpen && <div className="event-booking-room-list">
+                {eventRooms.length === 0 ? (
+                  <p className="event-booking-room-empty">No available rooms found.</p>
+                ) : eventRooms.map((eventRoom) => {
+                  const roomType = String(eventRoom.room_type || '').toLowerCase();
+                  const roomName = eventRoom.room_name || eventRoom.room_label || 'Unnamed room';
+                  const roomPrice = Number(eventRoom.room_price);
+                  const roomDescription = roomType === 'event' ? 'Event room' : `${eventRoom.room_type || 'Room'} available`;
+
+                  return (
+                    <label className="event-booking-room-option" key={eventRoom.id}>
+                      <input
+                        type="checkbox"
+                        checked={selectedRoomIds.includes(String(eventRoom.id))}
+                        onChange={(event) => handleRoomCheckboxChange(eventRoom, event.target.checked)}
+                      />
+                      <span className="event-booking-room-option-copy">
+                        <strong>{roomName}</strong>
+                        <small>{roomDescription}</small>
+                      </span>
+                      {roomType !== 'event' && (
+                        <span className="event-booking-room-number">
+                          Room {eventRoom.room_number || eventRoom.id}
+                        </span>
+                      )}
+                      <span className="event-booking-room-option-price">
+                        {roomPrice > 0 ? `₱${roomPrice.toLocaleString('en-PH')}` : 'Price unavailable'}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>}
+            </div>
             <label className="event-booking-full">Notes<textarea name="notes" rows="3" maxLength="2000" value={form.notes} onChange={updateField} placeholder="Additional event details" /></label>
           </div>
 
@@ -177,7 +214,7 @@ function landingEventModal({ show, onClose, room, onSaved }) {
                   <i className="fa-solid fa-building" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="event-booking-price-label">Event room price / day</p>
+                  <p className="event-booking-price-label">{selectedRooms.length ? 'Room and entrance price' : 'Pool entrance price'}</p>
                   <p className="event-booking-price-value">₱{eventPrice.toLocaleString('en-PH')}</p>
                 </div>
               </div>
@@ -194,7 +231,7 @@ function landingEventModal({ show, onClose, room, onSaved }) {
         </div>
 
         <div className="event-booking-footer">
-          <button type="button" className="event-booking-cancel" onClick={onClose} disabled={isSubmitting}>Cancel</button>
+          <button type="button" className="event-booking-cancel" onClick={closeModal} disabled={isSubmitting}>Cancel</button>
           <button type="submit" form="event-booking-form" className="event-booking-submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Book event'}</button>
         </div>
       </div>
@@ -202,4 +239,4 @@ function landingEventModal({ show, onClose, room, onSaved }) {
   );
 }
 
-export default landingEventModal;
+export default LandingEventModal;

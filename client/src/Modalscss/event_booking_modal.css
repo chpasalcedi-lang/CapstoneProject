@@ -105,6 +105,132 @@
   grid-column: 1 / -1;
 }
 
+.event-booking-room-picker {
+  gap: 8px !important;
+}
+
+.event-booking-field-label {
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.event-booking-room-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 400;
+  text-align: left;
+}
+
+.event-booking-room-toggle.is-open {
+  border-color: #315f3a;
+  color: #315f3a;
+}
+
+.event-booking-room-toggle:focus-visible {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.07);
+}
+
+.event-booking-room-list {
+  display: grid;
+  max-height: 172px;
+  overflow-y: auto;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.event-booking-room-option {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px !important;
+  min-height: 52px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #eef0f2;
+  color: #111827 !important;
+  cursor: pointer;
+  font-size: 0.82rem !important;
+  font-weight: 400 !important;
+}
+
+.event-booking-room-option:last-child {
+  border-bottom: 0;
+}
+
+.event-booking-room-option input {
+  width: 16px !important;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: #315f3a;
+  cursor: pointer;
+}
+
+.event-booking-room-option.is-disabled {
+  background: #f9fafb;
+  color: #9ca3af !important;
+  cursor: not-allowed;
+}
+
+.event-booking-room-option.is-disabled input {
+  cursor: not-allowed;
+}
+
+.event-booking-room-option-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.event-booking-room-option-copy strong {
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-booking-room-option-copy small {
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.event-booking-room-number {
+  flex: 0 0 auto;
+  color: #6b7280;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.event-booking-room-option-price {
+  flex: 0 0 auto;
+  color: #374151;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.event-booking-room-empty {
+  margin: 0;
+  padding: 14px 12px;
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
 .event-booking-grid input,
 .event-booking-grid select,
 .event-booking-grid textarea {

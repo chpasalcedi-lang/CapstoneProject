@@ -18,13 +18,26 @@ const initialForm = {
   email: '',
 };
 
-function EventBookingModal({ show, onClose, room, onSaved }) {
+function landingEventModal({ show, onClose, room, onSaved }) {
   const [form, setForm] = useState(initialForm);
+  const [eventRooms, setEventRooms] = useState([]);
+  const [selectedRoomId, setSelectedRoomId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userEmail = localStorage.getItem('userEmail') || '';
 
   useEffect(() => {
     if (!show) return;
+    apiClient.get('/get_rooms')
+      .then((response) => {
+        const availableEventRooms = (response.data || []).filter((item) => (
+          String(item.room_type || '').toLowerCase() === 'event'
+          && (String(item.room_status || '').toLowerCase() === 'available' || item.id === room?.id)
+        ));
+        setEventRooms(availableEventRooms);
+      })
+      .catch((error) => console.error('Error fetching event rooms:', error));
+
+    setSelectedRoomId(room?.id ? String(room.id) : '');
     setForm({
       ...initialForm,
       rooms: room?.room_name || room?.room_label || '',
@@ -35,7 +48,8 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
 
   if (!show || !room) return null;
 
-  const eventPrice = Number(form.price) || 0;
+  const selectedRoom = eventRooms.find((item) => String(item.id) === selectedRoomId) || room;
+  const eventPrice = Number(selectedRoom.room_price ?? form.price) || 0;
   const eventDays = 1;
   const totalPrice = Math.max(0, (eventPrice * eventDays) - (Number(form.discount) || 0));
 
@@ -45,6 +59,17 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
       ? value.replace(/\D/g, '').slice(0, 11)
       : value;
     setForm((current) => ({ ...current, [name]: nextValue }));
+  };
+
+  const handleRoomChange = (event) => {
+    const nextRoomId = event.target.value;
+    const nextRoom = eventRooms.find((item) => String(item.id) === nextRoomId);
+    setSelectedRoomId(nextRoomId);
+    setForm((current) => ({
+      ...current,
+      rooms: nextRoom?.room_name || nextRoom?.room_label || '',
+      price: nextRoom?.room_price ?? '',
+    }));
   };
 
   const submit = async (event) => {
@@ -61,7 +86,7 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
     try {
       const availability = await apiClient.get('/check_event_booking_availability', {
         params: {
-          room_id: room.id,
+          room_id: selectedRoom.id,
           start_date: eventDate,
           end_date: eventDate,
         },
@@ -78,11 +103,11 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
 
       const response = await apiClient.post('/add_event_booking', {
         ...form,
-        room_id: room.id,
+        room_id: selectedRoom.id,
         start_date: eventDate,
         end_date: eventDate,
-        rooms: form.rooms || room.room_name || room.room_label || '',
-        price: Number(form.price) || 0,
+        rooms: form.rooms || selectedRoom.room_name || selectedRoom.room_label || '',
+        price: eventPrice,
         total_price: totalPrice,
         event_days: eventDays,
         discount: Number(form.discount) || 0,
@@ -113,7 +138,6 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
           <div>
             <p className="event-booking-eyebrow">Event reservation</p>
             <h2>Book an event room</h2>
-            <p className="event-booking-room">{room.room_name || room.room_label}</p>
           </div>
           <button type="button" className="event-booking-close" onClick={onClose} disabled={isSubmitting} aria-label="Close event booking form">
             <i className="fa-solid fa-xmark" />
@@ -122,7 +146,7 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
 
         <form id="event-booking-form" className="event-booking-body" onSubmit={submit}>
           <div className="event-booking-grid">
-            <label>Event name<input name="event_name" required maxLength="120" value={form.event_name} onChange={updateField} placeholder="e.g. Birthday celebration" /></label>
+            <label>Event name <input name="event_name" required maxLength="120" value={form.event_name} onChange={updateField} placeholder="e.g. Birthday celebration" /></label>
             <label>Guest name<input name="guest_name" required maxLength="120" value={form.guest_name} onChange={updateField} placeholder="e.g. Juan Dela Cruz" /></label>
             <label>Phone number<input name="phone_number" required inputMode="numeric" pattern="09[0-9]{9}" maxLength="11" value={form.phone_number} onChange={updateField} placeholder="09XXXXXXXXX" /></label>
             <label>Number of guests<input name="guest_number" required type="number" min="1" max="10000" step="1" value={form.guest_number} onChange={updateField} placeholder="e.g. 50" /></label>
@@ -130,7 +154,18 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
             <label>Date<div className="event-booking-date-time-wrap"><input className={form.start_date ? 'has-value' : ''} name="start_date" required type="date" min={new Date().toISOString().slice(0, 10)} value={form.start_date} onChange={updateField} onClick={(event) => event.currentTarget.showPicker?.()} /><i className="fa-regular fa-calendar-days event-booking-date-time-icon" aria-hidden="true" /></div></label>
             <label>Time in<div className="event-booking-date-time-wrap"><input className={form.time_in ? 'has-value' : ''} name="time_in" required type="time" value={form.time_in} onChange={updateField} onClick={(event) => event.currentTarget.showPicker?.()} /><i className="fa-regular fa-clock event-booking-date-time-icon" aria-hidden="true" /></div></label>
             <label>Time out<div className="event-booking-date-time-wrap"><input className={form.time_out ? 'has-value' : ''} name="time_out" required type="time" value={form.time_out} onChange={updateField} onClick={(event) => event.currentTarget.showPicker?.()} /><i className="fa-regular fa-clock event-booking-date-time-icon" aria-hidden="true" /></div></label>
-            <label className="event-booking-full">Rooms<input name="rooms" value={form.rooms || ''} readOnly aria-readonly="true" /></label>
+            <label className="event-booking-full">Function room<select name="room_id" value={selectedRoomId} onChange={handleRoomChange}>
+              <option value="">Select a function room</option>
+              {eventRooms.map((eventRoom) => {
+                const roomText = `${eventRoom.room_name || eventRoom.room_label || ''}`.toLowerCase();
+                const roomSize = /big|large/i.test(roomText) ? 'Big Function Room' : 'Small Function Room';
+                return (
+                  <option key={eventRoom.id} value={String(eventRoom.id)}>
+                    {roomSize} - ₱{Number(eventRoom.room_price || 0).toLocaleString('en-PH')}
+                  </option>
+                );
+              })}
+            </select></label>
             <label className="event-booking-full">Notes<textarea name="notes" rows="3" maxLength="2000" value={form.notes} onChange={updateField} placeholder="Additional event details" /></label>
           </div>
 
@@ -167,4 +202,4 @@ function EventBookingModal({ show, onClose, room, onSaved }) {
   );
 }
 
-export default EventBookingModal;
+export default landingEventModal;

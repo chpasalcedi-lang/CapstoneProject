@@ -11,6 +11,7 @@ import waterpool from '../image/waterpool.jpg';
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
 import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
+import LandingEventModal from "../Modals/landing_event_modal.jsx";
 import "../pagescss/landing_page.css";
 
 const resortSlides = [
@@ -19,6 +20,13 @@ const resortSlides = [
   { image: pool3, tint: '#c96a2e', label: 'GOLDEN HOUR', title: 'Sunset by the Water' },
   { image: waterpool, tint: '#2f6fa8', label: 'MIRROR WATER', title: 'Still Water, Open Sky' },
 ];
+
+const formatRoomPrice = (value) => {
+  const price = Number(value);
+  return Number.isFinite(price) && price > 0
+    ? `₱${price.toLocaleString('en-PH')}`
+    : 'Price unavailable';
+};
 
 function LandingPage() {
   const location = useLocation();
@@ -33,11 +41,45 @@ function LandingPage() {
   const [loadingReservations, setLoadingReservations] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [activeResortSlide, setActiveResortSlide] = useState(0);
+  const [roomPrices, setRoomPrices] = useState({ couple: null, family: null, eventSmall: null, eventBig: null });
+  const [eventBookingRoom, setEventBookingRoom] = useState(null);
+  const [showEventBookingModal, setShowEventBookingModal] = useState(false);
   const menuButtonRef = useRef(null);
   const [userEmail, setUserEmail] = useState(() => {
     // The public profile belongs only to customer sessions.
     return localStorage.getItem("userEmail");
   });
+
+  useEffect(() => {
+    const fetchRoomPrices = async () => {
+      try {
+        const response = await apiClient.get('/get_rooms');
+        const rooms = response.data || [];
+        const findPrice = (roomTypes) => {
+          const acceptedTypes = Array.isArray(roomTypes) ? roomTypes : [roomTypes];
+          const room = rooms.find((item) => acceptedTypes.includes(String(item.room_type || '').toLowerCase()));
+          return room?.room_price;
+        };
+
+        const eventRooms = rooms.filter((item) => String(item.room_type || '').toLowerCase() === 'event');
+        const eventSmallRoom = eventRooms.find((room) => /small/i.test(`${room.room_name || ''} ${room.room_label || ''}`));
+        const eventBigRoom = eventRooms.find((room) => /big|large/i.test(`${room.room_name || ''} ${room.room_label || ''}`));
+
+        setEventBookingRoom(eventSmallRoom || eventBigRoom || eventRooms[0] || null);
+
+        setRoomPrices({
+          couple: findPrice('double'),
+          family: findPrice('family'),
+          eventSmall: eventSmallRoom?.room_price || eventRooms[0]?.room_price,
+          eventBig: eventBigRoom?.room_price || eventRooms[1]?.room_price,
+        });
+      } catch (error) {
+        console.error('Error fetching room prices:', error);
+      }
+    };
+
+    fetchRoomPrices();
+  }, []);
 
   const toggleMenu = () => {
     setMenuOpen((prev) => {
@@ -247,8 +289,8 @@ function LandingPage() {
                       <div className="profile-dropdown-credentials">
                         {loadingReservations ? (
                           <p className="profile-credentials-loading">Loading reservations...</p>
-                        ) : reservations.length === 0 ? (
-                          <p className="profile-credentials-empty">No reservations found</p>
+                          ) : reservations.length === 0 ? (
+                            <p className="profile-credentials-empty">No reservations found</p>
                         ) : (
                           reservations.map((booking) => (
                             <div className="profile-dropdown-credential-card" key={booking.id}>
@@ -435,6 +477,9 @@ function LandingPage() {
             </section>
 
 
+            
+
+
 
 
       <section className="about-pool resort-slider" id="about-pool">
@@ -499,6 +544,94 @@ function LandingPage() {
             />
           ))}
         </div>
+
+
+        <div className="event-info-hero">
+          <div className="event-kicker">
+            <span className="event-kicker-dot" />
+            <span>Event spaces · rooms description</span>
+          </div>
+          <h1 className="event-info-title">A room for every kind of gathering.</h1>
+          <p className="event-info-subtitle">Choose a private stay or an open, welcoming space for your next celebration at Messiah.</p>
+          <button className="event-info-cta" type="button" onClick={() => setShowEventBookingModal(true)}>
+            Book an event <span aria-hidden="true">&#8599;</span>
+          </button>
+          <div className="event-info-facts">
+            <div className="event-info-fact">
+              <span className="event-info-num">01</span>
+              <span className="event-info-lbl">Couple rooms for restful stays</span>
+            </div>
+            <div className="event-info-fact">
+              <span className="event-info-num">02</span>
+              <span className="event-info-lbl">Family rooms made to gather</span>
+            </div>
+            <div className="event-info-fact">
+              <span className="event-info-num">03</span>
+              <span className="event-info-lbl">Function rooms for occasions</span>
+            </div>
+          </div>
+        </div>
+
+              <div className="event-information" id="event-information">
+                <div className="event-information-block">
+                  <div className="event-panel-head">
+                    <span className="event-panel-mark">i.</span>
+                    <h2>Couple Rooms</h2>
+                  </div>
+                  <p className="event-information-description event-price-row"><strong>Price</strong><span>Per night / <b>{formatRoomPrice(roomPrices.couple)}</b></span></p>
+                  <p className="event-information-description"><strong>Best for</strong><span>Couples and short stays</span></p>
+                  <p className="event-information-description"><strong>Room type</strong><span>Private and comfortable</span></p>
+                  <div className="event-feature-block">
+                    <strong>Room features</strong>
+                    <ul className="event-feature-list">
+                      <li>Fully air-conditioned</li>
+                      <li>Free high-speed Wi-Fi</li>
+                        <li>Private bathroom with hot and cold shower</li>
+                      <li>Bath essentials and fresh towels</li>
+                      <li>Good for 2–3 guests</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="event-information-block">
+                  <div className="event-panel-head">
+                    <span className="event-panel-mark">ii.</span>
+                    <h2>Family Rooms</h2>
+                  </div>
+                  <p className="event-information-description event-price-row"><strong>Price</strong><span>Per night / <b>{formatRoomPrice(roomPrices.family)}</b></span></p>
+                  <p className="event-information-description"><strong>Best for</strong><span>Families and group stays</span></p>
+                  <p className="event-information-description"><strong>Room type</strong><span>Spacious and family-friendly</span></p>
+                  <div className="event-feature-block">
+                    <strong>Room features</strong>
+                    <ul className="event-feature-list">
+                      <li>Fully air-conditioned</li>
+                      <li>Free high-speed Wi-Fi</li>
+                      <li>Private bathroom with hot and cold shower</li>
+                      <li>Bath essentials and fresh towels</li>
+                      <li>Good for 4–5 guests</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="event-information-block">
+                  <div className="event-panel-head">
+                    <span className="event-panel-mark">iii.</span>
+                    <h2>Event Function rooms</h2>
+                  </div>
+                  <p className="event-information-description event-price-row"><strong>Small room</strong><span>{formatRoomPrice(roomPrices.eventSmall)}</span></p>
+                  <p className="event-information-description event-price-row"><strong>Big room</strong><span>{formatRoomPrice(roomPrices.eventBig)}</span></p>
+                  <p className="event-information-description"><strong>Best for</strong><span>Parties and celebrations</span></p>
+                  <p className="event-information-description"><strong>Room type</strong><span>Flexible function space</span></p>
+                  <div className="event-feature-block">
+                    <strong>Event features</strong>
+                    <ul className="event-feature-list">
+                      <li>Fully air-conditioned venue</li>
+                      <li>Free high-speed Wi-Fi</li>
+                      <li>Tables and chairs included</li>
+                      <li>Small room: up to 70 guests</li>
+                      <li>Big room: up to 100 guests</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
       </section>
 
       
@@ -594,6 +727,13 @@ function LandingPage() {
         onClose={() => setShowCancelModal(false)}
         booking={selectedBooking}
         onConfirm={handleCancelReservation}
+      />
+
+      <LandingEventModal
+        show={showEventBookingModal}
+        onClose={() => setShowEventBookingModal(false)}
+        room={eventBookingRoom}
+        onSaved={() => setShowEventBookingModal(false)}
       />
 
       <footer className="landing-footer">

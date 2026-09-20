@@ -106,6 +106,7 @@
 }
 
 .event-booking-grid input,
+.event-booking-grid select,
 .event-booking-grid textarea {
   width: 100%;
   box-sizing: border-box;
@@ -118,15 +119,44 @@
   font-weight: 400;
 }
 
+.event-booking-grid select {
+  cursor: pointer;
+}
+
 .event-booking-grid textarea {
   resize: vertical;
 }
 
 .event-booking-grid input:focus,
+.event-booking-grid select:focus,
 .event-booking-grid textarea:focus {
   outline: none;
   border-color: #111827;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.07);
+}
+
+.event-booking-date-time-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.event-booking-date-time-wrap input {
+  padding-right: 42px;
+  cursor: pointer;
+}
+
+.event-booking-date-time-wrap input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}
+
+.event-booking-date-time-icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
 }
 
 .event-booking-price-summary {

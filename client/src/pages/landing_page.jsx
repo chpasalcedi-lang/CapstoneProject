@@ -13,6 +13,12 @@ import LandingUpdate from "../Modals/landingUpdate.jsx";
 import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
 import "../pagescss/landing_page.css";
 
+const resortSlides = [
+  { image: pool1, tint: '#e0714a', label: 'POOLSIDE DINING', title: 'Under the Palms' },
+  { image: pool2, tint: '#1f7a70', label: 'INFINITY EDGE', title: 'Where Kids Pool' },
+  { image: pool3, tint: '#c96a2e', label: 'GOLDEN HOUR', title: 'Sunset by the Water' },
+  { image: waterpool, tint: '#2f6fa8', label: 'MIRROR WATER', title: 'Still Water, Open Sky' },
+];
 
 function LandingPage() {
   const location = useLocation();
@@ -26,6 +32,7 @@ function LandingPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [loadingReservations, setLoadingReservations] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [activeResortSlide, setActiveResortSlide] = useState(0);
   const menuButtonRef = useRef(null);
   const [userEmail, setUserEmail] = useState(() => {
     // The public profile belongs only to customer sessions.
@@ -195,6 +202,20 @@ function LandingPage() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleSliderKeyDown = (event) => {
+      if (event.key === 'ArrowLeft') {
+        setActiveResortSlide((current) => (current - 1 + resortSlides.length) % resortSlides.length);
+      }
+      if (event.key === 'ArrowRight') {
+        setActiveResortSlide((current) => (current + 1) % resortSlides.length);
+      }
+    };
+
+    document.addEventListener('keydown', handleSliderKeyDown);
+    return () => document.removeEventListener('keydown', handleSliderKeyDown);
   }, []);
 
   return (
@@ -416,53 +437,68 @@ function LandingPage() {
 
 
 
-      <section className="about-pool" id="about-pool">
-          <div className="about-pool-content">
-              <div id="carouselExampleDark" className="carousel carousel-dark slide" data-bs-ride="carousel" data-bs-interval="4000">
-                  <div className="carousel-indicators">
-                      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" className="active" aria-current="true" aria-label="Slide 1"></button>
-                      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
-                      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
+      <section className="about-pool resort-slider" id="about-pool">
+        <h2 className="resort-slider-heading">MESSIAH INLAND RESORT</h2>
+        <div className="resort-slider-stage">
+          <button
+            className="resort-slider-arrow resort-slider-arrow--previous"
+            type="button"
+            onClick={() => setActiveResortSlide((current) => (current - 1 + resortSlides.length) % resortSlides.length)}
+            aria-label="Previous resort image"
+          >
+            <span aria-hidden="true">&#8249;</span>
+          </button>
+
+          {resortSlides.map((slide, index) => {
+            const delta = (index - activeResortSlide + resortSlides.length) % resortSlides.length;
+            const position = delta === 0 ? 'center' : delta === 1 ? 'next' : delta === resortSlides.length - 1 ? 'previous' : 'hidden';
+
+            return (
+              <article
+                className={`resort-slider-card resort-slider-card--${position}`}
+                key={slide.title}
+                onClick={() => setActiveResortSlide(index)}
+                aria-hidden={position === 'hidden'}
+              >
+                <img src={slide.image} alt={slide.title} />
+                <span className="resort-slider-tint" style={{ backgroundColor: slide.tint }} />
+                <span className="resort-slider-shade" />
+                <div className="resort-slider-actions">
+                  <button type="button" aria-label={`Save ${slide.title}`}>&#9825;</button>
+                  <button type="button" aria-label={`Share ${slide.title}`}>&#8599;</button>
+                </div>
+                <div className="resort-slider-info">
+                  <span className="resort-slider-label">{slide.label}</span>
+                  <div>
+                    <h3>{slide.title}</h3>
+                    <span>{String(index + 1).padStart(2, '0')} / {String(resortSlides.length).padStart(2, '0')}</span>
                   </div>
-                  <div className="carousel-inner">
-                      <div className="carousel-item active" data-bs-interval="10000">
-                          <img src={pool1} className="d-block w-100" alt="Pool 1" />
-                      <div className="carousel-caption d-none d-md-block">
-                      </div>
-                      </div>
-                      <div className="carousel-item" data-bs-interval="2000">
-                          <img src={pool2} className="d-block w-100" alt="Pool 2"/>
-                      <div className="carousel-caption d-none d-md-block">
-                      </div>
-                      </div>
-                      <div className="carousel-item">
-                          <img src={pool3} className="d-block w-100" alt="Pool 3"/>
-                      <div className="carousel-caption d-none d-md-block">
-                      </div>
-                      </div>
-                      <div className="carousel-item">
-                          <img src={waterpool} className="d-block w-100" alt="Pool 4"/>
-                      <div className="carousel-caption d-none d-md-block">
-                      </div>
-                      </div>
-                  </div>
-                  <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
-                      <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-                  </button>
-                  <button className="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
-                      <span className="carousel-control-next-icon" aria-hidden="true"></span>
-                  </button>
-              </div>
-              <div className="about-pool-text">
-                  <h1>MESSIAH POOL RESORT</h1>
-                  <p>Experience our premium infinity pool with elegant ambiance, breathtaking views, and world-class comfort designed for your perfect stay.
-                  </p>
-                  <Link to="/Reservation">
-                      <button className="about-btn-pool">Book Events</button>
-                  </Link>
-              </div>
-          </div>
+                </div>
+              </article>
+            );
+          })}
+
+          <button
+            className="resort-slider-arrow resort-slider-arrow--next"
+            type="button"
+            onClick={() => setActiveResortSlide((current) => (current + 1) % resortSlides.length)}
+            aria-label="Next resort image"
+          >
+            <span aria-hidden="true">&#8250;</span>
+          </button>
+        </div>
+        <div className="resort-slider-dots" aria-label="Choose resort image">
+          {resortSlides.map((slide, index) => (
+            <button
+              type="button"
+              key={slide.title}
+              className={index === activeResortSlide ? 'is-active' : ''}
+              onClick={() => setActiveResortSlide(index)}
+              aria-label={`Go to ${slide.title}`}
+              aria-current={index === activeResortSlide ? 'true' : undefined}
+            />
+          ))}
+        </div>
       </section>
 
       

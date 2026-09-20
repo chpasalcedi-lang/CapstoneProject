@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../Modalscss/view_booking_modal.css';
 
 function formatDate(dateValue) {
@@ -12,10 +12,19 @@ function formatDate(dateValue) {
     });
 }
 
+function formatCurrency(value) {
+    const amount = Number(value) || 0;
+    return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function ViewEventModal({ show, onClose, booking }) {
+    const [showReceipt, setShowReceipt] = useState(false);
+
     if (!show || !booking) return null;
 
     const status = String(booking.status || 'pending').toLowerCase();
+    const totalPrice = Number(booking.total_price) || 0;
+    const discount = Number(booking.discount) || 0;
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -82,6 +91,36 @@ function ViewEventModal({ show, onClose, booking }) {
                         </div>
                     )}
                 </div>
+                <div className="modal-footer">
+                    <button type="button" className="btn-secondary" onClick={onClose}>Close</button>
+                    <button type="button" className="btn-primary" onClick={() => setShowReceipt(true)}>
+                        <i className="fa-solid fa-receipt" aria-hidden="true" /> View Receipt
+                    </button>
+                </div>
+                {showReceipt && (
+                    <div className="receipt-overlay" onClick={() => setShowReceipt(false)}>
+                        <div className="receipt-modal" onClick={(event) => event.stopPropagation()}>
+                            <div className="receipt-header">
+                                <div>
+                                    <p className="receipt-kicker">Event booking receipt</p>
+                                    <h3>{booking.event_name || 'Event booking'}</h3>
+                                </div>
+                                <button type="button" className="close-btn" onClick={() => setShowReceipt(false)} aria-label="Close receipt">
+                                    <i className="fa-solid fa-xmark" />
+                                </button>
+                            </div>
+                            <div className="receipt-details">
+                                <div><span>Guest</span><strong>{booking.guest_name || '\u2014'}</strong></div>
+                                <div><span>Event date</span><strong>{formatDate(booking.start_date)}</strong></div>
+                                <div><span>Room</span><strong>{booking.room_number || booking.room_name || booking.rooms || '\u2014'}</strong></div>
+                                <div><span>Guests</span><strong>{booking.guest_number ?? '\u2014'}</strong></div>
+                            </div>
+                            <div className="receipt-line"><span>Subtotal</span><strong>₱{formatCurrency(totalPrice + discount)}</strong></div>
+                            <div className="receipt-line"><span>Discount</span><strong>- ₱{formatCurrency(discount)}</strong></div>
+                            <div className="receipt-total"><span>Total</span><strong>₱{formatCurrency(totalPrice)}</strong></div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

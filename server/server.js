@@ -12,6 +12,24 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+function getManilaTimestamp() {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Manila',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23',
+    }).formatToParts(new Date()).reduce((values, part) => {
+        if (part.type !== 'literal') values[part.type] = part.value;
+        return values;
+    }, {});
+
+    return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
+}
+
 const DEFAULT_SECRET_KEY = 'uV9_7lXJ_v_N9Z9pL5mGk1m8n8-v7Z7r9R_vP8N7X2s=';
 
 class CryptoService {
@@ -1016,7 +1034,7 @@ class GuestArrivalController {
                 corkage,
                 totalPrice,
                 discount,
-                req.body.created_at || new Date()
+                getManilaTimestamp()
             ];
             const result = await this.db.query(sql, values);
             return res.status(200).json({ message: 'Guest arrival recorded successfully!', guestId: result.insertId });

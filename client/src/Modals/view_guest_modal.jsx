@@ -46,7 +46,7 @@ function ViewGuestModal({ show, onClose, guest }) {
         )}
         <div className="guest-receipt-section-title">Corkage</div>
         {corkageItems.length === 0 ? <div className="guest-receipt-row"><span>No corkage</span><strong>₱0</strong></div> : corkageItems.map((item) => (
-          <div className="guest-receipt-row" key={item}><span>{item} {item === 'Food' ? '(per group)' : item === 'Beer' ? '(/case)' : '(/bottle)'}</span><strong>₱{CORKAGE_PRICES[item] || 0}</strong></div>
+          <div className="guest-receipt-row" key={item}><span>{item}</span><strong> {item === 'Food' ? 'per group' : item === 'Beer' ? 'case' : 'bottle'} / ₱{CORKAGE_PRICES[item] || 0}</strong></div>
         ))}
         <div className="guest-receipt-total"><span>Total price</span><strong>₱{Number(guest.total_price || 0).toLocaleString('en-PH')}</strong></div>
         <p className="guest-receipt-date">{guest.created_at ? new Date(guest.created_at).toLocaleString() : ''}</p>

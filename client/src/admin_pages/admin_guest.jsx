@@ -6,6 +6,7 @@ import "../admincss/admin_guest.css";
 import EditBookingModal from '../Modals/Edit_booking_modal';
 import EditEventModal from '../Modals/edit_event_modal';
 import ViewBookingModal from '../Modals/view_booking_modal';
+import ViewEventModal from '../Modals/view_event_modal';
 import FeedbackModal from '../Modals/feedback._modal';
 import ViewGuestModal from '../Modals/view_guest_modal';
 import EditGuestModal from '../Modals/edit_guest_modal';
@@ -21,6 +22,7 @@ function AdminGuest() {
     const [loadingEvents, setLoadingEvents] = useState(true);
     const [loadingGuests, setLoadingGuests] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [eventSearchTerm, setEventSearchTerm] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
     const [selectedMonthGuest, setSelectedMonthGuest] = useState("");
     const [selectedMonthFeedback, setSelectedMonthFeedback] = useState("");
@@ -28,6 +30,8 @@ function AdminGuest() {
     const [loadingFeedback, setLoadingFeedback] = useState(true);
     const [viewModal, setViewModal] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
+    const [viewEventModal, setViewEventModal] = useState(false);
+    const [selectedEventBooking, setSelectedEventBooking] = useState(null);
     const [editModal, setEditModal] = useState(false);
     const [editEventModal, setEditEventModal] = useState(false);
     const [selectedEditBooking, setSelectedEditBooking] = useState(null);
@@ -70,6 +74,11 @@ function AdminGuest() {
     const handleView = (booking) => {
         setSelectedBooking(booking);
         setViewModal(true);
+    };
+
+    const handleViewEvent = (booking) => {
+        setSelectedEventBooking(booking);
+        setViewEventModal(true);
     };
 
     const handleEdit = (booking) => {
@@ -235,7 +244,7 @@ function AdminGuest() {
         const isVisible = status === 'confirmed' || status === 'complete';
         if (!isVisible) return false;
 
-        const query = searchTerm.toLowerCase();
+        const query = searchTerm.toLowerCase().trim();
         const searchMatch = (
             booking.first_name?.toLowerCase().includes(query) ||
             booking.last_name?.toLowerCase().includes(query) ||
@@ -255,7 +264,7 @@ function AdminGuest() {
         const status = String(booking.status || 'pending').toLowerCase();
         if (status !== 'confirmed' && status !== 'complete') return false;
 
-        const query = searchTerm.toLowerCase();
+        const query = eventSearchTerm.toLowerCase().trim();
         const searchMatch = [
             booking.event_name,
             booking.guest_name,
@@ -272,11 +281,19 @@ function AdminGuest() {
     });
 
     const filteredGuestArrivals = guestArrivals.filter((guest) => {
-        if (!selectedMonthGuest) return true;
+        const query = searchTerm.toLowerCase().trim();
+        const searchMatch = [
+            guest.group_name,
+            guest.number_of_guests,
+            guest.corkage,
+            guest.total_price,
+        ].some((value) => String(value || '').toLowerCase().includes(query));
+
+        if (!selectedMonthGuest) return searchMatch;
 
         const guestDate = new Date(guest.created_at);
         const guestMonth = guestDate.getMonth() + 1;
-        return guestMonth === parseInt(selectedMonthGuest);
+        return searchMatch && guestMonth === parseInt(selectedMonthGuest);
     });
 
     const filteredFeedback = feedbackList.filter((feedback) => {
@@ -469,7 +486,7 @@ function AdminGuest() {
     useEffect(() => {
         setCurrentBookingPage(1);
         setCurrentEventPage(1);
-    }, [searchTerm, selectedMonth]);
+    }, [searchTerm, eventSearchTerm, selectedMonth]);
 
     useEffect(() => {
         setCurrentGuestPage(1);
@@ -734,7 +751,7 @@ function AdminGuest() {
                         </div>
                         <p className="event-list-label" id="event-list">Event list</p>
                         <div className="event-list-filters">
-                            <input type="text" className="search-input" placeholder="Search by guest, room, phone, or email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+                            <input type="text" className="search-input" placeholder="Search by guest, room, phone, or email..." value={eventSearchTerm} onChange={(e) => setEventSearchTerm(e.target.value)}/>
                             <select className="search-options" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
                                 <option value="">All Months</option>
                                 <option value="1">January</option>
@@ -791,7 +808,7 @@ function AdminGuest() {
                                                 <td>{booking.time_in || '-'} - {booking.time_out || '-'}</td>
                                                 <td>{booking.status || 'pending'}</td>
                                                 <td className="actions-cell">
-                                                    <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                    <button className="btn guest btn-primary" onClick={() => handleViewEvent(booking)}>
                                                         view
                                                     </button>
                                                     <button className="btn guest btn-primary" onClick={() => handleEditEvent(booking)}>
@@ -856,6 +873,7 @@ function AdminGuest() {
                     
                         <p className="Guest-section-label" id="guest-list"> Guest list </p>
                         <div className="guests-booking-headers">
+                            <input type="text" className="search-input" placeholder="Search by guest, group name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
                             <select className="search-options" value={selectedMonthGuest} onChange={(e) => setSelectedMonthGuest(e.target.value)}>
                                 <option value="">All Months</option>
                                 <option value="1">January</option>
@@ -1080,7 +1098,12 @@ function AdminGuest() {
                 onUpdated={refreshEventBookings}
             />
             <ViewBookingModal 
-                show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking} />
+                show={viewModal} onClose={() => setViewModal(false)} booking={selectedBooking} onEdit={handleEdit}/>
+            <ViewEventModal
+                show={viewEventModal}
+                onClose={() => setViewEventModal(false)}
+                booking={selectedEventBooking}
+            />
             <FeedbackModal show={feedbackModal} onClose={() => setFeedbackModal(false)} feedback={selectedFeedback} />
             <ViewGuestModal show={viewGuestModal} onClose={() => setViewGuestModal(false)} guest={selectedGuest} />
             <EditGuestModal show={editGuestModal} onClose={() => setEditGuestModal(false)} guest={selectedGuest} onUpdate={handleUpdateGuest} />

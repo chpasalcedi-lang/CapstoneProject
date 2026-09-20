@@ -23,7 +23,9 @@ function AdminGuest() {
     const [loadingGuests, setLoadingGuests] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [eventSearchTerm, setEventSearchTerm] = useState("");
+    const [guestSearchTerm, setGuestSearchTerm] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
+    const [selectedEventMonth, setSelectedEventMonth] = useState("");
     const [selectedMonthGuest, setSelectedMonthGuest] = useState("");
     const [selectedMonthFeedback, setSelectedMonthFeedback] = useState("");
     const [feedbackList, setFeedbackList] = useState([]);
@@ -274,14 +276,14 @@ function AdminGuest() {
             booking.email,
         ].some((value) => String(value || '').toLowerCase().includes(query));
 
-        if (!selectedMonth) return searchMatch;
+        if (!selectedEventMonth) return searchMatch;
 
         const eventMonth = new Date(booking.start_date).getMonth() + 1;
-        return searchMatch && eventMonth === parseInt(selectedMonth, 10);
+        return searchMatch && eventMonth === parseInt(selectedEventMonth, 10);
     });
 
     const filteredGuestArrivals = guestArrivals.filter((guest) => {
-        const query = searchTerm.toLowerCase().trim();
+        const query = guestSearchTerm.toLowerCase().trim();
         const searchMatch = [
             guest.group_name,
             guest.number_of_guests,
@@ -485,12 +487,15 @@ function AdminGuest() {
 
     useEffect(() => {
         setCurrentBookingPage(1);
+    }, [searchTerm, selectedMonth]);
+
+    useEffect(() => {
         setCurrentEventPage(1);
-    }, [searchTerm, eventSearchTerm, selectedMonth]);
+    }, [eventSearchTerm, selectedEventMonth]);
 
     useEffect(() => {
         setCurrentGuestPage(1);
-    }, [selectedMonthGuest]);
+    }, [guestSearchTerm, selectedMonthGuest]);
 
     useEffect(() => {
         setCurrentFeedbackPage(1);
@@ -752,7 +757,7 @@ function AdminGuest() {
                         <p className="event-list-label" id="event-list">Event list</p>
                         <div className="event-list-filters">
                             <input type="text" className="search-input" placeholder="Search by guest, room, phone, or email..." value={eventSearchTerm} onChange={(e) => setEventSearchTerm(e.target.value)}/>
-                            <select className="search-options" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                            <select className="search-options" value={selectedEventMonth} onChange={(e) => setSelectedEventMonth(e.target.value)}>
                                 <option value="">All Months</option>
                                 <option value="1">January</option>
                                 <option value="2">February</option>
@@ -873,7 +878,7 @@ function AdminGuest() {
                     
                         <p className="Guest-section-label" id="guest-list"> Guest list </p>
                         <div className="guests-booking-headers">
-                            <input type="text" className="search-input" placeholder="Search by guest, group name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+                            <input type="text" className="search-input" placeholder="Search by guest, group name..." value={guestSearchTerm} onChange={(e) => setGuestSearchTerm(e.target.value)}/>
                             <select className="search-options" value={selectedMonthGuest} onChange={(e) => setSelectedMonthGuest(e.target.value)}>
                                 <option value="">All Months</option>
                                 <option value="1">January</option>
@@ -910,7 +915,7 @@ function AdminGuest() {
                                                     Loading guest arrivals...
                                                 </td>
                                             </tr>
-                                        ) : guestArrivals.length === 0 ? (
+                                        ) : filteredGuestArrivals.length === 0 ? (
                                             <tr>
                                                 <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
                                                     No guest records found.

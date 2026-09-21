@@ -76,8 +76,23 @@
 
 .sales-stats-grid {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(12, 1fr);
 	gap: 14px;
+}
+
+.sales-stats-grid > :nth-child(-n + 3) {
+	grid-row: 1;
+	grid-column: span 4;
+}
+
+.sales-stats-grid > :nth-child(4) {
+	grid-row: 2;
+	grid-column: span 3;
+}
+
+.sales-stats-grid > :nth-child(n + 5) {
+	grid-row: 2;
+	grid-column: span 3;
 }
 
 .sales-stat-card {
@@ -421,15 +436,17 @@
 
 .admin-sales-chart-card-box {
 	display: flex;
-	gap: 18px;
-	align-items: flex-start;
+	gap: 16px;
+	align-items: stretch;
 }
 
 .admin-sales-chart-card-stats {
-	flex: 1 1 auto;
+	flex: 0 0 360px;
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 8px;
+	justify-content: center;
+	min-height: 220px;
 }
 
 .admin-sales-chart-card-stats label {
@@ -447,7 +464,7 @@
 .admin-sales-chart-card-stats {
 	background: #0d0d0d;
 	border: 1px solid rgba(255,255,255,0.04);
-	padding: 18px;
+	padding: 10px 14px;
 	border-radius: 12px;
 	width: 100%;
 	max-width: 360px;
@@ -458,8 +475,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
-	padding: 8px 0;
+	gap: 8px;
+	padding: 4px 0;
 	border-bottom: 1px dashed rgba(255,255,255,0.03);
 }
 .admin-sales-chart-card-labels:last-child {
@@ -467,16 +484,17 @@
 }
 .admin-sales-chart-card-labels label {
 	color: #bdbdbd;
-	font-size: 0.85rem;
+	font-size: 0.68rem;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
 }
 .admin-sales-chart-card-labels h1 {
 	margin: 0;
-	font-size: 1.45rem;
+	font-size: 0.95rem;
 	color: #f0ede8;
 	font-weight: 700;
+	line-height: 1.2;
 }
 
 /* Center pie chart and make it responsive */
@@ -485,14 +503,16 @@
 	align-items: center;
 	justify-content: center;
 	padding: 18px;
-	min-height: 220px;
+	height: 100%;
+	min-height: 260px;
 }
 
 /* Specific pie container height */
 .admin-sales-pie {
-	min-height: 320px;
-	height: 350px;
+	min-height: 260px;
+	height: 100%;
 	max-height: 480px;
+	width: 100%;
 }
 
 
@@ -502,7 +522,7 @@
 
 @media (max-width: 1100px) {
 	.sales-stats-grid { 
-		grid-template-columns: repeat(2,1fr); 
+		grid-template-columns: repeat(12,1fr); 
 		gap:12px; 
 	}
 }
@@ -559,6 +579,11 @@
   }
   .sales-stats-grid { 
 	grid-template-columns: 1fr; 
+	}
+
+	.sales-stats-grid > :nth-child(n) {
+		grid-column: auto;
+		grid-row: auto;
   }
   .admin-sales-topbar { 
 	flex-direction: column; 

@@ -53,7 +53,7 @@
     border: none;
     border-radius: 50%;
     background: #ffffff;
-    color: #6b7280;
+    color: #374151;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -117,7 +117,7 @@
 .landing-booking-detail label {
     font-size: 11px;
     font-weight: 600;
-    color: #666;
+    color: #374151;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
@@ -136,7 +136,7 @@
 }
 
 .landing-notes-text {
-    color: #6b7280 !important;
+    color: #4b5563 !important;
     line-height: 1.65 !important;
 }
 
@@ -212,8 +212,8 @@
     padding: 10px 16px;
     border-radius: 10px;
     border: none;
-    background: #c8a96e;
-    color: #111827;
+    background: #1d1d1e;
+    color: #ececec;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -221,7 +221,7 @@
 }
 
 .landing-btn-primary:hover {
-    background: #d4b97e;
+    background: #2d2d2e;
 }
 
 .landing-btn-primary:active {

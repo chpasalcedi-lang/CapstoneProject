@@ -115,6 +115,12 @@
   font-weight: 600;
 }
 
+.event-booking-field-label .optional {
+  color: #6b7280;
+  font-size: 0.74rem;
+  font-weight: 400;
+}
+
 .event-booking-room-toggle {
   display: flex;
   align-items: center;
@@ -231,6 +237,105 @@
   font-weight: 400;
 }
 
+.event-booking-discount-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 9px 10px;
+  border: 1px solid #e9d7a6;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+}
+
+.event-booking-discount-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.event-booking-discount-header h3 {
+  margin: 0 0 2px;
+  color: #1f2937;
+  font-size: 0.85rem;
+}
+
+.event-booking-discount-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.68rem;
+}
+
+.event-booking-discount-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #374151;
+  font-size: 0.72rem;
+}
+
+.event-booking-discount-toggle input {
+  width: auto;
+  margin: 0;
+}
+
+.event-booking-discount-details {
+  display: grid;
+  gap: 7px;
+}
+
+.event-booking-discount-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #374151;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.event-booking-discount-input input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-weight: 400;
+}
+
+.event-booking-discount-results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.event-booking-discount-results > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 3px 10px;
+  min-height: 46px;
+  padding: 7px 12px;
+  border: 1px solid rgba(120, 119, 109, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.event-booking-discount-results span {
+  color: #4b5563;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.event-booking-discount-results strong {
+  color: #8a6b2d;
+  font-size: 0.86rem;
+  text-align: right;
+}
+
 .event-booking-grid input,
 .event-booking-grid select,
 .event-booking-grid textarea {
@@ -288,9 +393,10 @@
 .event-booking-price-summary {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
   margin: 0;
-  padding: 12px 14px;
+  padding: 12px 48px 12px 14px;
   background: #ffffff;
   border: 0.5px solid #e5e7eb;
   width: 100%;
@@ -302,7 +408,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 1;
+  flex: 0 0 auto;
   min-width: 0;
 }
 
@@ -419,5 +525,9 @@
 
   .event-booking-price-item {
     min-width: 0;
+  }
+
+  .event-booking-discount-results {
+    grid-template-columns: 1fr;
   }
 }

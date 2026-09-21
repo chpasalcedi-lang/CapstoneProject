@@ -1,0 +1,367 @@
+.walkin-event-booking-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.walkin-event-booking-overlay .event-booking-modal {
+  width: 520px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.walkin-event-booking-overlay .event-booking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.walkin-event-booking-overlay .event-booking-eyebrow {
+  margin: 0 0 3px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.walkin-event-booking-overlay .event-booking-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 1.22rem;
+}
+
+.walkin-event-booking-overlay .event-booking-close {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.walkin-event-booking-overlay .event-booking-close:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.walkin-event-booking-overlay .event-booking-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.walkin-event-booking-overlay .event-booking-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 12px;
+}
+
+.walkin-event-booking-overlay .event-booking-grid > label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.walkin-event-booking-overlay .event-booking-full {
+  grid-column: 1 / -1;
+}
+
+.walkin-event-booking-overlay .event-booking-field-label {
+  color: #374151;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.walkin-event-booking-overlay .event-booking-field-label .optional {
+  display: inline;
+  margin-left: 4px;
+  color: #6b7280;
+  font-size: 0.74rem;
+  font-weight: 400;
+}
+
+.walkin-event-booking-overlay .event-booking-grid input,
+.walkin-event-booking-overlay .event-booking-grid select,
+.walkin-event-booking-overlay .event-booking-grid textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-weight: 400;
+}
+
+.walkin-event-booking-overlay .event-booking-grid input:focus,
+.walkin-event-booking-overlay .event-booking-grid select:focus,
+.walkin-event-booking-overlay .event-booking-grid textarea:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.07);
+}
+
+.walkin-event-booking-overlay .event-booking-date-time-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.walkin-event-booking-overlay .event-booking-date-time-wrap input {
+  padding-right: 42px;
+  cursor: pointer;
+}
+
+.walkin-event-booking-overlay .event-booking-date-time-wrap input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}
+
+.walkin-event-booking-overlay .event-booking-date-time-icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.walkin-event-booking-overlay .event-booking-room-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.walkin-event-booking-overlay .event-booking-room-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.walkin-event-booking-overlay .event-booking-room-toggle.is-open {
+  border-color: #315f3a;
+  color: #315f3a;
+}
+
+.walkin-event-booking-overlay .event-booking-room-list {
+  display: grid;
+  max-height: 172px;
+  overflow-y: auto;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.walkin-event-booking-overlay .event-booking-room-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #eef0f2;
+  color: #111827;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.walkin-event-booking-overlay .event-booking-room-option input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: #315f3a;
+  cursor: pointer;
+}
+
+.walkin-event-booking-overlay .event-booking-room-option-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.walkin-event-booking-overlay .event-booking-room-option-copy strong {
+  overflow: hidden;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.walkin-event-booking-overlay .event-booking-room-option-copy small,
+.walkin-event-booking-overlay .event-booking-room-number {
+  color: #6b7280;
+  font-size: 0.72rem;
+}
+
+.walkin-event-booking-overlay .event-booking-room-number,
+.walkin-event-booking-overlay .event-booking-room-option-price {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.walkin-event-booking-overlay .event-booking-room-option-price {
+  color: #374151;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.walkin-event-booking-overlay .event-booking-room-empty {
+  margin: 0;
+  padding: 14px 12px;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.walkin-event-booking-overlay .event-booking-discount-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 9px 10px;
+  border: 1px solid #e9d7a6;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+}
+
+.walkin-event-booking-overlay .event-booking-discount-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.walkin-event-booking-overlay .event-booking-discount-header h3 {
+  margin: 0 0 2px;
+  color: #1f2937;
+  font-size: 0.85rem;
+}
+
+.walkin-event-booking-overlay .event-booking-discount-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.68rem;
+}
+
+.walkin-event-booking-overlay .event-booking-discount-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #374151;
+  font-size: 0.72rem;
+}
+
+.walkin-event-booking-overlay .event-booking-discount-toggle input {
+  width: auto;
+  margin: 0;
+}
+
+.walkin-event-booking-overlay .event-booking-discount-details {
+  display: grid;
+  gap: 7px;
+}
+
+.walkin-event-booking-overlay .event-booking-discount-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #374151;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.walkin-event-booking-overlay .event-booking-discount-input input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+}
+
+.walkin-event-booking-overlay .event-booking-price-summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 48px 12px 14px;
+  border: 0.5px solid #e5e7eb;
+  background: #fff;
+}
+
+.walkin-event-booking-overlay .event-booking-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.walkin-event-booking-overlay .event-booking-cancel,
+.walkin-event-booking-overlay .event-booking-submit {
+  padding: 9px 18px;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.walkin-event-booking-overlay .event-booking-cancel {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+}
+
+.walkin-event-booking-overlay .event-booking-submit {
+  border: 0;
+  background: #1d1d1e;
+  color: #ececec;
+}
+
+@media (max-width: 560px) {
+  .walkin-event-booking-overlay .event-booking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .walkin-event-booking-overlay .event-booking-full {
+    grid-column: auto;
+  }
+}

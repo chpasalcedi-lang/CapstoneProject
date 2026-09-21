@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import apiClient from '../api';
 import '../Modalscss/view_booking_modal.css';
 
 function formatDate(dateValue) {
@@ -14,17 +15,42 @@ function formatDate(dateValue) {
 
 function formatCurrency(value) {
     const amount = Number(value) || 0;
-    return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return amount.toLocaleString('en-PH', { maximumFractionDigits: 0 });
+}
+
+function normalizeRoomIds(roomIds, fallbackRooms) {
+    const source = Array.isArray(roomIds) ? roomIds : [roomIds || fallbackRooms];
+    return source
+        .flatMap((value) => String(value || '').split(','))
+        .map((roomId) => roomId.trim())
+        .filter(Boolean);
 }
 
 function ViewEventModal({ show, onClose, booking }) {
     const [showReceipt, setShowReceipt] = useState(false);
+    const [rooms, setRooms] = useState([]);
+
+    useEffect(() => {
+        if (!show || !booking) return;
+        apiClient.get('/get_rooms')
+            .then((response) => setRooms(response.data || []))
+            .catch(() => setRooms([]));
+    }, [show, booking]);
 
     if (!show || !booking) return null;
 
     const status = String(booking.status || 'pending').toLowerCase();
     const totalPrice = Number(booking.total_price) || 0;
     const discount = Number(booking.discount) || 0;
+    const selectedRoomIds = normalizeRoomIds(booking.room_ids, booking.rooms).map(String);
+    const selectedRooms = rooms.filter((room) => selectedRoomIds.includes(String(room.id)));
+    const roomOptions = selectedRooms.length > 0
+        ? selectedRooms
+        : [{ id: booking.rooms, room_number: booking.room_number, room_name: booking.room_name }];
+
+    const roomLabel = (room) => [room.room_number && `Room ${room.room_number}`, room.room_name || room.room_label]
+        .filter(Boolean)
+        .join(' - ') || room.id || '\u2014';
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -50,8 +76,13 @@ function ViewEventModal({ show, onClose, booking }) {
                             <p>{booking.guest_number ?? '\u2014'}</p>
                         </div>
                         <div className="booking-field">
-                            <label>Room</label>
-                            <p>{booking.room_number || booking.room_name || booking.rooms || '\u2014'}</p>
+                            <label>Rooms ({roomOptions.length} selected)</label>
+                            <select className="view-event-rooms-select" value={selectedRoomIds[0] || ''} onChange={() => {}} aria-label="Rooms booked for this event">
+                                <option value="" disabled>Select a room</option>
+                                {roomOptions.map((room) => (
+                                    <option key={room.id || room.room_number} value={String(room.id || '')}>{roomLabel(room)}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="booking-field">
                             <label>Phone</label>
@@ -66,16 +97,16 @@ function ViewEventModal({ show, onClose, booking }) {
                             <p className="date-value">{formatDate(booking.start_date)}</p>
                         </div>
                         <div className="booking-field">
+                            <label>Extend Date</label>
+                            <p>{formatDate(booking.extend_date) || '\u2014'}</p>
+                        </div>
+                        <div className="booking-field">
                             <label>Time</label>
                             <p>{booking.time_in || '\u2014'} - {booking.time_out || '\u2014'}</p>
                         </div>
                         <div className="booking-field">
-                            <label>Discount</label>
-                            <p>₱{booking.discount ?? '0'}</p>
-                        </div>
-                        <div className="booking-field">
                             <label>Total Price</label>
-                            <p>₱{booking.total_price ?? '0'}</p>
+                            <p>₱{formatCurrency(totalPrice)}</p>
                         </div>
                     </div>
                     <div className="booking-detail status-row">
@@ -111,12 +142,22 @@ function ViewEventModal({ show, onClose, booking }) {
                             </div>
                             <div className="receipt-details">
                                 <div><span>Guest</span><strong>{booking.guest_name || '\u2014'}</strong></div>
-                                <div><span>Event date</span><strong>{formatDate(booking.start_date)}</strong></div>
-                                <div><span>Room</span><strong>{booking.room_number || booking.room_name || booking.rooms || '\u2014'}</strong></div>
+                                <div><span>Event date</span><strong>{formatDate(booking.start_date)} - {formatDate(booking.end_date)}</strong></div>
+                                <div>
+                                    <span>Rooms ({roomOptions.length} selected)</span>
+                                    <select className="receipt-rooms-select" value={selectedRoomIds[0] || ''} onChange={() => {}} aria-label="Rooms booked for this event receipt">
+                                        <option value="" disabled>Select a room</option>
+                                        {roomOptions.map((room) => (
+                                            <option key={room.id || room.room_number} value={String(room.id || '')}>{roomLabel(room)}</option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <div><span>Guests</span><strong>{booking.guest_number ?? '\u2014'}</strong></div>
                             </div>
                             <div className="receipt-line"><span>Subtotal</span><strong>₱{formatCurrency(totalPrice + discount)}</strong></div>
-                            <div className="receipt-line"><span>Discount</span><strong>- ₱{formatCurrency(discount)}</strong></div>
+                            {discount > 0 && (
+                                <div className="receipt-line"><span>Discount</span><strong>- ₱{formatCurrency(discount)}</strong></div>
+                            )}
                             <div className="receipt-total"><span>Total</span><strong>₱{formatCurrency(totalPrice)}</strong></div>
                         </div>
                     </div>

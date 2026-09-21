@@ -33,7 +33,7 @@
 }
 
 .walkin-form-card {
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   width: 520px;
   max-width: 100%;
   max-height: 80vh;
@@ -54,7 +54,7 @@
   justify-content: space-between;
   border-bottom: 1px solid #e5e7eb;
   flex: 0 0 auto;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
 }
 
 .walkin-reservation-modal-title {
@@ -70,7 +70,7 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   color: #374151;
   display: inline-flex;
   align-items: center;
@@ -80,7 +80,7 @@
 }
 
 .walkin-reservation-modal-close:hover {
-  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
+  background: #f3f4f6;
   transform: scale(1.03);
   color: #111827;
 }
@@ -91,7 +91,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: 20px 30px;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
 }
 
 .walkin-reservation-modal-body::-webkit-scrollbar {
@@ -128,6 +128,14 @@
   color: #374151;
 }
 
+.walkin-reservation-form-group label .optional {
+  display: inline;
+  margin-left: 4px;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
 .walkin-date-input-wrap {
   position: relative;
   width: 100%;
@@ -154,7 +162,7 @@
 }
 
 .walkin-date-input-wrap .walkin-input.has-value {
-  color: #f5f3ee;
+  color: #111827;
 }
 
 .walkin-date-placeholder {
@@ -162,7 +170,7 @@
   top: 50%;
   left: 12px;
   transform: translateY(-50%);
-  color: #f5f3ee;
+  color: #4b5563;
   font-size: 0.9rem;
   pointer-events: none;
 }
@@ -177,7 +185,7 @@
   top: 50%;
   right: 14px;
   transform: translateY(-50%);
-  color: #f5f3ee;
+  color: #4b5563;
   pointer-events: none;
 }
 
@@ -208,7 +216,7 @@
   gap: 10px;
   padding: 20px;
   border-top: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
 }
 
 .walkin-reservation-btn-cancel,
@@ -232,14 +240,14 @@
 }
 
 .walkin-reservation-btn-save {
-  background: #c8a96e;
+  background: #1d1d1e;
   border: none;
-  color: #111111;
+  color: #ececec;
 }
 
 .walkin-reservation-btn-save:hover {
-  background: #b8995f;
-  box-shadow: 0 4px 14px rgba(200, 169, 110, 0.3);
+  background: #2d2d2e;
+  box-shadow: none;
 }
 
 .walkin-reservation-form-price {
@@ -248,12 +256,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  width: 96%;
-  max-width: 460px;
-  padding: 12px 14px;
-  margin: 14px auto 0;
+  width: 100%;
+  max-width: none;
+  padding: 5px 10px;
+  margin: 4px 0 0;
   border: 1px solid #e5e7eb;
-  background: rgba(255, 255, 255, 0.45);
+  background: #ffffff;
   border-radius: 8px;
   box-sizing: border-box;
 }
@@ -262,9 +270,9 @@
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
-  border: 1px solid #e9d7a6;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: none;
 }
 
 .discount-section-header {
@@ -331,7 +339,7 @@
   gap: 12px;
   flex: 1;
   min-width: 220px;
-  min-height: 48px;
+  min-height: 34px;
 }
 
 .walkin-reservation-price-item > div:last-child {
@@ -342,18 +350,18 @@
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #f5f3ee;
+  color: #6b7280;
   font-size: 17px;
   flex-shrink: 0;
 }
 
 .walkin-reservation-price-icon.total {
-  background: rgba(200, 169, 110, 0.18);
-  color: #c8a96e;
+  background: #eaf3de;
+  color: #3b6d11;
 }
 
 .walkin-reservation-price-label {
@@ -374,13 +382,13 @@
 }
 
 .walkin-reservation-price-value.total {
-  color: #8a6b2d;
+  color: #3b6d11;
 }
 
 .walkin-reservation-price-divider {
   width: 1px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 30px;
+  background: #e5e7eb;
   flex-shrink: 0;
   align-self: center;
 }

@@ -77,7 +77,7 @@
   border: none;
   border-radius: 50%;
   background: #ffffff;
-  color: #6b7280;
+  color: #374151;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -139,7 +139,7 @@
 
 .landing-edit-booking-form-group label .optional {
   font-weight: 400;
-  color: #9ca3af;
+  color: #6b7280;
   font-size: 0.74rem;
 }
 
@@ -162,7 +162,7 @@
 
 .landing-edit-booking-form-group input::placeholder,
 .landing-edit-booking-form-group textarea::placeholder {
-  color: #c4c9d4;
+  color: #6b7280;
 }
 
 .landing-edit-booking-form-group input:hover,

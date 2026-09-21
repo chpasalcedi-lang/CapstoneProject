@@ -4,6 +4,7 @@ import apiClient from '../api';
 import Swal from 'sweetalert2';
 import "../admincss/admin_addguest.css";
 import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
+import WalkinEventModal from '../Modals/walkin_event_modal';
 
 
 const PRICE_PER_CHILD = 150;
@@ -52,6 +53,7 @@ function AdminAddGuest() {
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
+  const [showWalkinEventModal, setShowWalkinEventModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [adminData] = useState(() => {
     const storedUser = localStorage.getItem('adminUser');
@@ -248,6 +250,7 @@ function AdminAddGuest() {
             <h1>Dashboard</h1>
             <div className="add-guest-topbar-btns">
                 <button className="add-guest-topbar-btn1" onClick={() => setShowWalkinModal(true)}>Walk in</button>
+              <button className="add-guest-topbar-btn1" onClick={() => setShowWalkinEventModal(true)}>Walk in event</button>
                 <Link className="add-guest-topbar-btn1" to="/AddGuest">Add Guest</Link>
             </div>
           </div>
@@ -337,6 +340,7 @@ function AdminAddGuest() {
         </div>
       </section>
       <AdminWalkinModal show={showWalkinModal} onClose={() => setShowWalkinModal(false)} />
+      <WalkinEventModal show={showWalkinEventModal} onClose={() => setShowWalkinEventModal(false)} />
     </div>
   );
 }

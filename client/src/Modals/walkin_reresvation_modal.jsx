@@ -56,9 +56,43 @@ function AdminWalkinModal({ show, onClose }) {
     const discountPercent = totalPrice > 0 ? (discountSaved / totalPrice) * 100 : 0;
 
     useEffect(() => {
-        apiClient.get("/get_rooms")
-        .then((res) => {
-            const sortedRooms = [...res.data].sort((a, b) => {
+        Promise.all([
+            apiClient.get('/get_rooms'),
+            apiClient.get('/get_reservations'),
+            apiClient.get('/get_event_bookings'),
+        ])
+        .then(([roomsResponse, reservationsResponse, eventsResponse]) => {
+            const today = new Date();
+            const occupiedRoomIds = new Set();
+            const isActiveStatus = (status) => ['confirmed', 'pending', 'occupied'].includes(String(status || '').trim().toLowerCase());
+
+            (reservationsResponse.data || []).forEach((reservation) => {
+                if (!reservation.room_id || !isActiveStatus(reservation.res_status)) return;
+                const checkIn = new Date(reservation.check_in_date);
+                const checkOut = new Date(reservation.check_out_date);
+                if (!Number.isNaN(checkIn.getTime()) && !Number.isNaN(checkOut.getTime()) && today >= checkIn && today < checkOut) {
+                    occupiedRoomIds.add(Number(reservation.room_id));
+                }
+            });
+
+            (eventsResponse.data || []).forEach((eventBooking) => {
+                if (!isActiveStatus(eventBooking.status)) return;
+                const startDate = new Date(`${eventBooking.start_date}T00:00:00`);
+                const endDate = new Date(`${eventBooking.end_date}T23:59:59`);
+                if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || today < startDate || today > endDate) return;
+                String(eventBooking.room_ids || eventBooking.rooms || '')
+                    .split(',')
+                    .map((roomId) => Number(roomId.trim()))
+                    .filter((roomId) => Number.isInteger(roomId) && roomId > 0)
+                    .forEach((roomId) => occupiedRoomIds.add(roomId));
+            });
+
+            const sortedRooms = (roomsResponse.data || [])
+            .filter((room) => (
+                String(room.room_status || '').trim().toLowerCase() === 'available'
+                && !occupiedRoomIds.has(Number(room.id))
+            ))
+            .sort((a, b) => {
             const roomA = parseInt(a.room_number, 10);
             const roomB = parseInt(b.room_number, 10);
 
@@ -123,8 +157,6 @@ function AdminWalkinModal({ show, onClose }) {
             'phone_number',
             'email',
             'check_in_date',
-            'check_out_date',
-            'room_number'
         ];
 
         const missingField = requiredFields.some((field) => {
@@ -138,19 +170,19 @@ function AdminWalkinModal({ show, onClose }) {
         }
 
         const selectedRoom = rooms.find(room => String(room.room_number) === String(values.room_number));
-        if (!selectedRoom) {
+        if (values.room_number && !selectedRoom) {
             Swal.fire({ icon: 'error', title: 'Invalid room', text: 'Please select a valid room.' });
             return;
         }
 
         const checkIn = new Date(values.check_in_date);
-        const checkOut = new Date(values.check_out_date);
-        if (Number.isNaN(checkIn.getTime()) || Number.isNaN(checkOut.getTime())) {
+        const checkOut = values.check_out_date ? new Date(values.check_out_date) : null;
+        if (Number.isNaN(checkIn.getTime()) || (checkOut && Number.isNaN(checkOut.getTime()))) {
             Swal.fire({ icon: 'error', title: 'Invalid dates', text: 'Please choose valid check-in and check-out dates.' });
             return;
         }
 
-        if (checkOut < checkIn) {
+        if (checkOut && checkOut < checkIn) {
             Swal.fire({ icon: 'error', title: 'Invalid dates', text: 'Check-out cannot be earlier than check-in.' });
             return;
         }
@@ -161,7 +193,7 @@ function AdminWalkinModal({ show, onClose }) {
         try {
             await apiClient.post('/add_reservation', {
             ...values,
-            room_id: selectedRoom.id,
+            room_id: selectedRoom?.id || null,
             room_price: roomPrice,
             total_price: finalPrice,
             discount: discountValue,
@@ -212,8 +244,8 @@ function AdminWalkinModal({ show, onClose }) {
                                     <input type="number" name="num_guests" required value={values.num_guests} onChange={handleChange} placeholder="e.g. 2" />
                                 </div>
                                 <div className="walkin-reservation-form-group">
-                                    <label>Room Number</label>
-                                    <select name="room_number" required value={values.room_number} onChange={handleChange}>
+                                    <label>Room Number <span className="optional">Optional</span></label>
+                                    <select name="room_number" value={values.room_number} onChange={handleChange}>
                                     <option value="">Select Room</option>
                                     {rooms.map(room => (
                                         <option key={room.id} value={String(room.room_number)}>
@@ -241,9 +273,9 @@ function AdminWalkinModal({ show, onClose }) {
                                 </div>
                                 </div>
                                 <div className="walkin-reservation-form-group">
-                                    <label>Check-out Date</label>
+                                    <label>Check-out Date <span className="optional">Optional</span></label>
                                     <div className="walkin-date-input-wrap">
-                                        <input type="date" name="check_out_date" required value={values.check_out_date} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} className={`walkin-input ${values.check_out_date ? 'has-value' : ''}`} />
+                                        <input type="date" name="check_out_date" value={values.check_out_date} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} className={`walkin-input ${values.check_out_date ? 'has-value' : ''}`} />
                                         {!values.check_out_date && <span className="walkin-date-placeholder">dd/mm/yyyy</span>}
                                         <i className="fa-regular fa-calendar-days walkin-date-icon" aria-hidden="true"></i>
                                     </div>
@@ -253,33 +285,8 @@ function AdminWalkinModal({ show, onClose }) {
                                 <label>Notes <span className="optional">Optional</span></label>
                                 <textarea name="notes" rows="3" value={values.notes} onChange={handleChange} placeholder="..."></textarea>
                             </div>
-                        </form>
-                    
-                    <div className="walkin-reservation-form-price">
-                        <div className="walkin-reservation-price-item">
-                            <div>
-                                <p className="walkin-reservation-price-label">Room price / night</p>
-                                <p className="walkin-reservation-price-value">
-                                    {roomPrice ? `₱${formatRoomPrice(roomPrice)}` : "0"}
-                                </p>
-                            </div>
-                        </div>
 
-                        <div className="walkin-reservation-price-divider" />
-                        <div className="walkin-reservation-price-item">
-                            <div>
-                                <p className="walkin-reservation-price-label">
-                                    Total {nights > 0 ? `(${nights} ${nights === 1 ? 'night' : 'nights'})` : "0"}
-                                </p>
-                                <p className="walkin-reservation-price-value">
-                                    {totalPrice ? `₱${formatRoomPrice(totalPrice)}` : "0"}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    
-
-                    <div className="walkin-reservation-form-price discount-section">
+                             <div className="walkin-reservation-form-price discount-section">
                         <div className="discount-section-header">
                             <div>
                                 <h3>Discount</h3>
@@ -339,6 +346,38 @@ function AdminWalkinModal({ show, onClose }) {
                             </>
                         )}
                     </div>
+                        </form>
+                    
+                   
+                    
+
+                    
+
+                    
+
+                    </div>
+
+                    <div className="walkin-reservation-form-price">
+                        <div className="walkin-reservation-price-item">
+                            <div>
+                                <p className="walkin-reservation-price-label">Room price / night</p>
+                                <p className="walkin-reservation-price-value">
+                                    {roomPrice ? `₱${formatRoomPrice(roomPrice)}` : "0"}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="walkin-reservation-price-divider" />
+                        <div className="walkin-reservation-price-item">
+                            <div>
+                                <p className="walkin-reservation-price-label">
+                                    Total {nights > 0 ? `(${nights} ${nights === 1 ? 'night' : 'nights'})` : "0"}
+                                </p>
+                                <p className="walkin-reservation-price-value">
+                                    {totalPrice ? `₱${formatRoomPrice(totalPrice)}` : "0"}
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="walkin-reservation-modal-footer">

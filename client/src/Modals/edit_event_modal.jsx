@@ -3,6 +3,14 @@ import Swal from 'sweetalert2';
 import apiClient from '../api';
 import '../Modalscss/edit_event_modal.css';
 
+function normalizeRoomIds(roomIds, fallbackRooms) {
+    const source = Array.isArray(roomIds) ? roomIds : [roomIds || fallbackRooms];
+    return source
+        .flatMap((value) => String(value || '').split(','))
+        .map((roomId) => roomId.trim())
+        .filter(Boolean);
+}
+
 function EditEventModal({ show, onClose, booking, onUpdated }) {
     const [form, setForm] = useState({
         event_name: '',
@@ -20,6 +28,26 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
     const [isSaving, setIsSaving] = useState(false);
     const [discountEnabled, setDiscountEnabled] = useState(false);
     const [lastPrice, setLastPrice] = useState('');
+    const [eventRooms, setEventRooms] = useState([]);
+    const [selectedRoomIds, setSelectedRoomIds] = useState([]);
+    const [roomsOpen, setRoomsOpen] = useState(false);
+    const [functionRoomsOpen, setFunctionRoomsOpen] = useState(false);
+
+    useEffect(() => {
+        if (!show) return;
+        apiClient.get('/get_rooms')
+            .then((response) => {
+                const savedRoomIds = normalizeRoomIds(booking?.room_ids, booking?.rooms);
+                const availableRooms = (response.data || []).filter((room) => (
+                    String(room.room_status || '').toLowerCase() === 'available'
+                    || savedRoomIds.includes(String(room.id))
+                ));
+                setEventRooms(availableRooms);
+            })
+            .catch(() => {
+                Swal.fire({ icon: 'error', title: 'Unable to load rooms', text: 'Please try again later.' });
+            });
+    }, [show, booking]);
 
     useEffect(() => {
         if (!booking) return;
@@ -29,6 +57,10 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
         const hasSavedDiscount = savedDiscount > 0 || (savedTotal > 0 && savedTotal < baseTotal);
         setDiscountEnabled(hasSavedDiscount);
         setLastPrice(hasSavedDiscount && savedTotal > 0 ? String(savedTotal) : '');
+        const savedRoomIds = normalizeRoomIds(booking.room_ids, booking.rooms);
+        setSelectedRoomIds(savedRoomIds);
+        setRoomsOpen(false);
+        setFunctionRoomsOpen(false);
         setForm({
             event_name: booking.event_name || '',
             guest_name: booking.guest_name || '',
@@ -63,6 +95,38 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
     const discountPercent = hasDiscountValue && totalPrice > 0
         ? (discountSaved / totalPrice) * 100
         : 0;
+    const selectedRooms = eventRooms.filter((room) => selectedRoomIds.includes(String(room.id)));
+    const regularRooms = eventRooms.filter((room) => String(room.room_type || '').toLowerCase() !== 'event');
+    const functionRooms = eventRooms.filter((room) => String(room.room_type || '').toLowerCase() === 'event');
+
+    const toggleRoom = (room, checked) => {
+        const roomId = String(room.id);
+        setSelectedRoomIds((current) => checked
+            ? [...new Set([...current, roomId])]
+            : current.filter((id) => id !== roomId));
+    };
+
+    const renderRoomOptions = (rooms, emptyText) => rooms.length === 0 ? (
+        <p className="edit-event-room-empty">{emptyText}</p>
+    ) : rooms.map((room) => (
+        <label className="edit-event-room-option" key={room.id}>
+            <input
+                type="checkbox"
+                checked={selectedRoomIds.includes(String(room.id))}
+                onChange={(event) => toggleRoom(room, event.target.checked)}
+            />
+            <span className="edit-event-room-option-copy">
+                <strong>{room.room_name || room.room_label || 'Unnamed room'}</strong>
+                <small>{String(room.room_type || '').toLowerCase() === 'event' ? 'Function room' : `${room.room_type || 'Room'} available`}</small>
+            </span>
+            {String(room.room_type || '').toLowerCase() !== 'event' && (
+                <span className="edit-event-room-number">Room {room.room_number || room.id}</span>
+            )}
+            <span className="edit-event-room-option-price">
+                {Number(room.room_price) > 0 ? `PHP ${Number(room.room_price).toLocaleString('en-PH')}` : 'Price unavailable'}
+            </span>
+        </label>
+    ));
 
     const formatRoomPrice = (price) => {
         const numeric = Number(String(price || '').replace(/,/g, ''));
@@ -131,6 +195,8 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
                 notes: form.notes,
                 guest_number: Number(form.guest_number),
                 discount: Number(discountSaved.toFixed(2)),
+                room_id: selectedRoomIds[0] || null,
+                room_ids: selectedRoomIds,
             });
             Swal.fire({ icon: 'success', title: 'Updated', text: `Event booking updated successfully. Final total: ₱${formatRoomPrice(finalPrice)}` });
             onClose();
@@ -157,10 +223,9 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
                     <button type="button" className="edit-event-modal-close" onClick={onClose} disabled={isSaving} aria-label="Close edit event form"><i className="fa-solid fa-xmark" /></button>
                 </div>
                 <form id="editEventForm" className="edit-event-modal-body" onSubmit={submit}>
-                     <div className="edit-event-modal-form-group"><label>Event Name</label><input name="event_name" required maxLength="120" value={form.event_name} onChange={handleChange} /></div>
                     <div className="edit-event-modal-form-row">
                         <div className="edit-event-modal-form-group"><label>Guest Name</label><input name="guest_name" required maxLength="120" value={form.guest_name} onChange={handleChange} /></div>
-                        <div className="edit-event-modal-form-group"><label>Room</label><input value={booking.room_number || booking.room_name || booking.rooms || '-'} readOnly /></div>
+                        <div className="edit-event-modal-form-group"><label>Event Name</label><input name="event_name" required maxLength="120" value={form.event_name} onChange={handleChange} /></div>
                     </div>
                     <div className="edit-event-modal-form-row">
                         <div className="edit-event-modal-form-group"><label>Phone Number</label><input name="phone_number" required pattern="09[0-9]{9}" maxLength="11" value={form.phone_number} onChange={handleChange} /></div>
@@ -175,6 +240,22 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
                         <div className="edit-event-modal-form-group"><label>Time In</label><div className="edit-event-date-time-wrap"><input className={form.time_in ? 'has-value' : ''} name="time_in" required type="time" value={form.time_in} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} /><i className="fa-regular fa-clock edit-event-date-time-icon" aria-hidden="true" /></div></div>
                         <div className="edit-event-modal-form-group"><label>Time Out</label><div className="edit-event-date-time-wrap"><input className={form.time_out ? 'has-value' : ''} name="time_out" required type="time" value={form.time_out} onChange={handleChange} onClick={(event) => event.currentTarget.showPicker?.()} /><i className="fa-regular fa-clock edit-event-date-time-icon" aria-hidden="true" /></div></div>
                     </div>
+                    <div className="edit-event-room-full edit-event-room-picker">
+                        <button type="button" className={`edit-event-room-toggle ${roomsOpen ? 'is-open' : ''}`} onClick={() => setRoomsOpen((open) => !open)} aria-expanded={roomsOpen}>
+                            <span>Rooms{selectedRooms.some((item) => String(item.room_type || '').toLowerCase() !== 'event') ? ' selected' : ''}</span>
+                            <i className={`fa-solid fa-chevron-${roomsOpen ? 'up' : 'down'}`} aria-hidden="true" />
+                        </button>
+                        {roomsOpen && <div className="edit-event-room-list">{renderRoomOptions(regularRooms, 'No available rooms found.')}</div>}
+                    </div>
+
+                    <div className="edit-event-room-full edit-event-room-picker">
+                        <button type="button" className={`edit-event-room-toggle ${functionRoomsOpen ? 'is-open' : ''}`} onClick={() => setFunctionRoomsOpen((open) => !open)} aria-expanded={functionRoomsOpen}>
+                            <span>Function rooms{selectedRooms.some((item) => String(item.room_type || '').toLowerCase() === 'event') ? ' selected' : ''}</span>
+                            <i className={`fa-solid fa-chevron-${functionRoomsOpen ? 'up' : 'down'}`} aria-hidden="true" />
+                        </button>
+                        {functionRoomsOpen && <div className="edit-event-room-list">{renderRoomOptions(functionRooms, 'No available function rooms found.')}</div>}
+                    </div>
+
                     <div className="edit-event-modal-form-group"><label>Status</label><input value={booking.status || 'pending'} readOnly /></div>
                     <div className="edit-event-modal-form-group"><label>Notes <span className="optional">Optional</span></label><textarea name="notes" rows="3" maxLength="2000" value={form.notes} onChange={handleChange} /></div>
                     <div className="edit-event-modal-form-price discount-section">

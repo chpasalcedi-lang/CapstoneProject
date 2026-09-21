@@ -546,6 +546,9 @@ class ReservationController {
             const roomPrice = this.parsePrice(req.body.room_price);
             const totalPrice = this.parsePrice(req.body.total_price);
             const bookingSource = req.body.source === 'walkin' ? 'walkin' : 'online';
+            const reservationStatus = bookingSource === 'walkin'
+                ? 'confirmed'
+                : (req.body.status || 'pending');
             const values = [
                 this.crypto.encrypt(req.body.last_name || ''),
                 this.crypto.encrypt(req.body.first_name || ''),
@@ -555,7 +558,7 @@ class ReservationController {
                 checkIn || null,
                 checkOut || null,
                 this.crypto.encrypt(req.body.notes || ''),
-                req.body.status || 'pending',
+                reservationStatus,
                 roomId || null,
                 roomPrice,
                 totalPrice,
@@ -598,7 +601,13 @@ class ReservationController {
                 email,
                 room_id: roomId,
                 room_ids: roomIds,
+                source,
+                status,
             } = body;
+
+            const bookingSource = source === 'walkin' ? 'walkin' : 'online';
+            const bookingStatus = bookingSource === 'walkin' ? 'confirmed' : (status || 'pending');
+            const effectiveEndDate = endDate || startDate;
 
             const cleanEventName = this.normalizeEventText(eventName, 120);
             const cleanGuestName = this.normalizeEventText(guestName, 120);
@@ -610,7 +619,7 @@ class ReservationController {
             const requestedRoomIds = Array.isArray(roomIds) ? roomIds : (roomId ? [roomId] : []);
             const numericRoomIds = [...new Set(requestedRoomIds.map(Number).filter((id) => Number.isInteger(id) && id > 0))];
 
-            if (!cleanEventName || !cleanGuestName || !cleanPhone || !cleanEmail || !this.isValidDate(startDate) || !this.isValidDate(endDate) || !this.isValidTime(timeIn) || !this.isValidTime(timeOut)) {
+            if (!cleanEventName || !cleanGuestName || !cleanPhone || !cleanEmail || !this.isValidDate(startDate) || !this.isValidDate(effectiveEndDate) || !this.isValidTime(timeIn) || !this.isValidTime(timeOut)) {
                 return res.status(400).json({ error: 'Please provide valid event, contact, date, and time details.' });
             }
 
@@ -641,7 +650,7 @@ class ReservationController {
 
             const today = new Date();
             const todayValue = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-            if (startDate < todayValue || endDate < startDate || (startDate === endDate && timeOut <= timeIn)) {
+            if (startDate < todayValue || effectiveEndDate < startDate || (startDate === effectiveEndDate && timeOut <= timeIn)) {
                 return res.status(400).json({ error: 'Event dates and times must be valid and cannot be in the past.' });
             }
 
@@ -675,7 +684,7 @@ class ReservationController {
                      AND (rooms IN (${placeholders}) OR EXISTS (
                        SELECT 1 FROM event_booking_rooms ebr WHERE ebr.event_id = events.id AND ebr.room_id IN (${placeholders})
                      )) LIMIT 1`,
-                    [startDate, endDate, ...numericRoomIds, ...numericRoomIds]
+                    [startDate, effectiveEndDate, ...numericRoomIds, ...numericRoomIds]
                 );
                 if (activeBooking.length) {
                     return res.status(409).json({ error: 'One or more selected rooms are already booked for those dates.' });
@@ -684,7 +693,7 @@ class ReservationController {
                 dailyPrice = numericGuestNumber * 175;
             }
 
-            const eventDays = Math.max(1, Math.round((new Date(`${endDate}T00:00:00`) - new Date(`${startDate}T00:00:00`)) / 86400000) + 1);
+            const eventDays = Math.max(1, Math.round((new Date(`${effectiveEndDate}T00:00:00`) - new Date(`${startDate}T00:00:00`)) / 86400000) + 1);
             const savedDiscount = this.parseStrictMoney(discount || '0');
             if (savedDiscount === null || savedDiscount > dailyPrice * eventDays) {
                 return res.status(400).json({ error: 'Discount must be a valid amount within the booking total.' });
@@ -699,7 +708,7 @@ class ReservationController {
                 cleanGuestName,
                 cleanPhone,
                 startDate,
-                endDate,
+                effectiveEndDate,
                 timeIn,
                 timeOut,
                 cleanNotes,
@@ -709,7 +718,7 @@ class ReservationController {
                 numericRoomIds[0] || null,
                 numericGuestNumber,
                 cleanEmail,
-                'pending',
+                bookingStatus,
             ]);
 
             if (numericRoomIds.length) {
@@ -755,7 +764,9 @@ class ReservationController {
                 DATE_FORMAT(e.start_date, '%Y-%m-%d') AS start_date,
                 DATE_FORMAT(e.end_date, '%Y-%m-%d') AS end_date,
                 e.time_in, e.time_out, e.notes, e.discount, e.price, e.total_price,
-                e.rooms, e.guest_number, e.status, rm.room_number, rm.room_name, rm.room_label
+                e.rooms, e.guest_number, e.status, rm.room_number, rm.room_name, rm.room_label,
+                (SELECT GROUP_CONCAT(ebr.room_id ORDER BY ebr.room_id)
+                 FROM event_booking_rooms ebr WHERE ebr.event_id = e.id) AS room_ids
                 FROM events e
                 LEFT JOIN rooms rm ON e.rooms = rm.id
                 ORDER BY e.id DESC`);
@@ -778,6 +789,25 @@ class ReservationController {
             }
 
             const updates = {};
+            const hasRoomSelection = Array.isArray(req.body?.room_ids) || req.body?.room_id !== undefined;
+            const requestedRoomIds = Array.isArray(req.body?.room_ids)
+                ? req.body.room_ids
+                : (req.body?.room_id ? [req.body.room_id] : []);
+            const numericRoomIds = [...new Set(requestedRoomIds.map(Number).filter((roomId) => Number.isInteger(roomId) && roomId > 0))];
+
+            if (hasRoomSelection && requestedRoomIds.length !== numericRoomIds.length) {
+                return res.status(400).json({ error: 'Please provide valid room selections.' });
+            }
+
+            if (hasRoomSelection && numericRoomIds.length) {
+                const placeholders = numericRoomIds.map(() => '?').join(', ');
+                const roomRows = await this.db.query(`SELECT id FROM rooms WHERE id IN (${placeholders})`, numericRoomIds);
+                if (roomRows.length !== numericRoomIds.length) {
+                    return res.status(400).json({ error: 'One or more selected rooms could not be found.' });
+                }
+            }
+
+            if (hasRoomSelection) updates.rooms = numericRoomIds[0] || null;
             if (status) {
                 if (!allowedStatuses.includes(status)) {
                     return res.status(400).json({ error: 'Invalid event booking status.' });
@@ -838,6 +868,17 @@ class ReservationController {
             const result = await this.db.query(sql, [...Object.values(updates), eventId]);
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Event booking not found.' });
+            }
+
+            if (hasRoomSelection) {
+                await this.eventBookingRoomsReady;
+                await this.db.query('DELETE FROM event_booking_rooms WHERE event_id = ?', [eventId]);
+                if (numericRoomIds.length) {
+                    await this.db.query(
+                        `INSERT INTO event_booking_rooms (event_id, room_id) VALUES ${numericRoomIds.map(() => '(?, ?)').join(', ')}`,
+                        numericRoomIds.flatMap((roomId) => [eventId, roomId])
+                    );
+                }
             }
 
             return res.status(200).json({ message: 'Event booking status updated successfully.' });

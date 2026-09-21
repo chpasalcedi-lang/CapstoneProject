@@ -13,8 +13,8 @@
   position: relative;
   width: min(100%, 480px);
   padding: 32px;
-  background: #f7f4ed;
-  color: #252525;
+  background: #ffffff;
+  color: #111827;
   border-radius: 10px;
   box-shadow: 0 24px 70px rgba(0,0,0,.35);
 }
@@ -25,14 +25,14 @@
   right: 16px;
   border: 0;
   background: none;
-  color: #777;
+  color: #374151;
   font-size: 28px;
   cursor: pointer;
 }
 
 .guest-receipt-kicker {
   margin: 0 0 8px;
-  color: #92733c;
+  color: #374151;
   font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -46,7 +46,7 @@
 
 .guest-receipt-divider {
   margin: 20px 0 14px;
-  border-top: 1px dashed #cfc7b8;
+  border-top: 1px dashed #d1d5db;
 }
 
 .guest-receipt-row {
@@ -60,7 +60,7 @@
 
 .guest-receipt-row > span {
   flex: 1;
-  color: #716d65;
+  color: #4b5563;
 }
 
 .guest-receipt-row strong {
@@ -71,7 +71,7 @@
 
 .guest-receipt-section-title {
   margin-top: 18px;
-  color: #92733c;
+  color: #374151;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .1em;
@@ -90,7 +90,7 @@
 
 .guest-receipt-date {
   margin: 18px 0 0;
-  color: #8b877e;
+  color: #4b5563;
   font-size: 11px;
   text-align: right;
 }
@@ -103,7 +103,7 @@
 
 .guest-edit-modal label,
 .guest-edit-modal legend {
-  color: #716d65;
+  color: #374151;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -117,15 +117,15 @@
   width: 100%;
   margin-top: 6px;
   padding: 11px 12px;
-  border: 1px solid #d4ccbf;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
-  background: #fffdf9;
-  color: #252525;
+  background: #ffffff;
+  color: #111827;
 }
 
 .guest-edit-modal fieldset {
   padding: 10px 12px;
-  border: 1px solid #d4ccbf;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
 }
 
@@ -154,8 +154,8 @@
   padding: 12px;
   border: 0;
   border-radius: 6px;
-  background: #b89455;
-  color: #fff;
+  background: #1d1d1e;
+  color: #ececec;
   font-weight: 700;
   cursor: pointer;
 }

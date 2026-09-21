@@ -11,6 +11,13 @@ import FeedbackModal from '../Modals/feedback._modal';
 import ViewGuestModal from '../Modals/view_guest_modal';
 import EditGuestModal from '../Modals/edit_guest_modal';
 
+function getEventRoomCount(booking) {
+    const roomIds = Array.isArray(booking.room_ids)
+        ? booking.room_ids
+        : String(booking.room_ids || '').split(',');
+    const count = roomIds.map((roomId) => String(roomId).trim()).filter(Boolean).length;
+    return count || (booking.room_number || booking.room_name || booking.rooms ? 1 : 0);
+}
 
 function AdminGuest() {
     const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('adminTheme') === 'light');
@@ -808,7 +815,7 @@ function AdminGuest() {
                                                 <td>{booking.guest_name || '-'}</td>
                                                 <td>{booking.phone_number || '-'}</td>
                                                 <td>{booking.email}</td>
-                                                <td>{booking.room_number || booking.room_name || booking.rooms || '-'}</td>
+                                                <td>{getEventRoomCount(booking) || '-'}</td>
                                                 <td>{formatBookingDate(booking.start_date)}</td>
                                                 <td>{booking.time_in || '-'} - {booking.time_out || '-'}</td>
                                                 <td>{booking.status || 'pending'}</td>

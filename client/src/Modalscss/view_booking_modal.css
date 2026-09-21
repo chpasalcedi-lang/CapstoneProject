@@ -12,7 +12,7 @@
 
 
 .modal-content {
-    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+    background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 20px;
     width: 100%;
@@ -28,7 +28,7 @@
 .modal-header {
     position: sticky;
     top: 0;
-    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+    background: #ffffff;
     z-index: 2;
     display: flex;
     justify-content: space-between;
@@ -52,7 +52,7 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+    background: #ffffff;
     color: #111827;
     display: inline-flex;
     align-items: center;
@@ -63,7 +63,7 @@
 }
 
 .close-btn:hover {
-    background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
+    background: #f3f4f6;
     transform: scale(1.03);
     color: #111827;
 }
@@ -83,7 +83,7 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+    background: #ffffff;
 }
 
 
@@ -186,7 +186,7 @@
     gap: 10px;
     padding: 16px 24px 20px;
     border-top: 1px solid #e5e7eb;
-    background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+    background: #ffffff;
 }
 
 .btn-secondary {
@@ -212,8 +212,8 @@
     padding: 10px 16px;
     border-radius: 10px;
     border: none;
-    background: #d8c18b;
-    color: #111111;
+    background: #1d1d1e;
+    color: #ececec;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -221,7 +221,7 @@
 }
 
 .btn-primary:hover {
-    background: #e5d7ae;
+    background: #2d2d2e;
 }
 
 .btn-primary:active {
@@ -244,12 +244,23 @@
 }
 
 .receipt-modal {
-    width: min(100%, 390px);
-    padding: 24px;
+    width: min(100%, 480px);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 32px;
     border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    background: #fffdf8;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+}
+
+.receipt-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.receipt-modal::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 4px;
 }
 
 .receipt-header {
@@ -263,7 +274,7 @@
 
 .receipt-kicker {
     margin: 0 0 5px;
-    color: #927a3b !important;
+    color: #374151 !important;
     font-size: 11px !important;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -273,14 +284,15 @@
 .receipt-header h3 {
     margin: 0;
     color: #111827;
-    font-size: 20px;
+    font-size: 30px;
+    font-weight: 400;
 }
 
 .receipt-details {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 18px;
-    padding: 18px 0;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 18px 0 10px;
 }
 
 .receipt-details div,
@@ -291,19 +303,34 @@
     gap: 12px;
 }
 
+.receipt-details div {
+    padding: 9px 0;
+}
+
 .receipt-details span,
 .receipt-line span,
 .receipt-total span {
-    color: #6b7280;
-    font-size: 12px;
+    color: #4b5563;
+    font-size: 14px;
 }
 
 .receipt-details strong,
 .receipt-line strong,
 .receipt-total strong {
     color: #111827;
-    font-size: 13px;
+    font-size: 14px;
     text-align: right;
+}
+
+.receipt-rooms-select {
+    max-width: 65%;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font: inherit;
+    font-size: 13px;
 }
 
 .receipt-line {
@@ -318,8 +345,8 @@
 
 .receipt-total span,
 .receipt-total strong {
-    color: #927a3b;
-    font-size: 16px;
+    color: #374151;
+    font-size: 20px;
     font-weight: 700;
 }
 
@@ -334,4 +361,21 @@
 .modal-content::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
+}
+
+.view-event-rooms-select {
+    width: 100%;
+    min-height: 38px;
+    padding: 7px 9px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #111827;
+    font: inherit;
+    font-size: 13px;
+}
+
+.view-event-rooms-select option:checked {
+    background: #e5d7ae;
+    color: #111827;
 }

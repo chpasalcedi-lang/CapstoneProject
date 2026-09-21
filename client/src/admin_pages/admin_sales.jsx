@@ -18,8 +18,10 @@ function AdminSales() {
     const [bookingCanceledLoss, setBookingCanceledLoss] = useState(0);
     const [totalonlineBooking, setTotalOnlineBooking] = useState(0);
     const [totalWalkInBooking, setTotalWalkInBooking] = useState(0);
+    const [eventSales, setEventSales] = useState(0);
     const [guestArrivals, setGuestArrivals] = useState([]);
     const [bookings, setBookings] = useState([]);
+    const [eventBookings, setEventBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [chartMode, setChartMode] = useState('month');
     const now = new Date();
@@ -53,13 +55,15 @@ function AdminSales() {
     useEffect(() => {
         const fetchSales = async () => {
             try {
-                const [guestRes, bookingRes] = await Promise.all([
+                const [guestRes, bookingRes, eventRes] = await Promise.all([
                     apiClient.get("/get_guest_arrivals"),
-                    apiClient.get("/get_reservations")
+                    apiClient.get("/get_reservations"),
+                    apiClient.get("/get_event_bookings")
                 ]);
 
                 const guestData = guestRes.data || [];
                 const bookingData = bookingRes.data || [];
+                const eventData = eventRes.data || [];
 
                 const guestTotal = guestData.reduce((sum, guest) => {
                     const value = Number(guest.total_price || 0);
@@ -70,6 +74,7 @@ function AdminSales() {
                 let canceledTotal = 0;
                 let onlineBookingTotal = 0;
                 let walkInBookingTotal = 0;
+                let eventBookingTotal = 0;
 
                 bookingData.forEach((booking) => {
                     const status = (booking.res_status || '').toLowerCase();
@@ -97,13 +102,23 @@ function AdminSales() {
                     }
                 });
 
+                eventData.forEach((eventBooking) => {
+                    const status = String(eventBooking.status || '').toLowerCase();
+                    if (status === 'confirmed' || status === 'complete') {
+                        const value = Number(eventBooking.total_price || 0);
+                        eventBookingTotal += Number.isNaN(value) ? 0 : value;
+                    }
+                });
+
                 setGuestArrivals(guestData);
                 setBookings(bookingData);
+                setEventBookings(eventData);
                 setGuestSales(guestTotal);
                 setBookingConfirmedSales(confirmedTotal);
                 setBookingCanceledLoss(canceledTotal);
                 setTotalOnlineBooking(onlineBookingTotal);
                 setTotalWalkInBooking(walkInBookingTotal);
+                setEventSales(eventBookingTotal);
             } catch (err) {
                 console.error("Error fetching sales stats:", err);
                 Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to fetch sales statistics.' });
@@ -124,7 +139,7 @@ function AdminSales() {
         return () => window.removeEventListener('storage', handleThemeChange);
     }, []);
 
-    const totalRevenue = guestSales + bookingConfirmedSales;
+    const totalRevenue = guestSales + bookingConfirmedSales + eventSales;
 
 
     const yearLabels = useMemo(() => {
@@ -173,7 +188,7 @@ function AdminSales() {
                 ? Array.from({ length: new Date(selectedYear, selectedMonthIndex + 1, 0).getDate() }, (_, idx) => String(idx + 1))
                 : MONTH_LABELS;
 
-        const stats = labels.map(() => ({ guest: 0, confirmed: 0, canceled: 0 }));
+        const stats = labels.map(() => ({ guest: 0, confirmed: 0, events: 0, canceled: 0 }));
 
         const addGuestRevenue = (date, value) => {
             if (!date || Number.isNaN(value)) return;
@@ -217,6 +232,19 @@ function AdminSales() {
             }
         };
 
+        const addEventRevenue = (date, status, value) => {
+            if (!date || Number.isNaN(value) || status !== 'confirmed') return;
+            let idx = -1;
+            if (chartMode === 'year') {
+                idx = yearLabels.indexOf(String(date.getFullYear()));
+            } else if (chartMode === 'month') {
+                idx = date.getFullYear() === selectedYear ? date.getMonth() : -1;
+            } else {
+                idx = date.getFullYear() === selectedYear && date.getMonth() === selectedMonthIndex ? date.getDate() - 1 : -1;
+            }
+            if (idx >= 0 && idx < stats.length) stats[idx].events += value;
+        };
+
         guestArrivals.forEach((guest) => {
             const date = parseDate(guest.created_at);
             addGuestRevenue(date, Number(guest.total_price || 0));
@@ -235,12 +263,17 @@ function AdminSales() {
             addBookingRevenue(date, (booking.res_status || '').toLowerCase(), revenue, hasCancelRequest);
         });
 
+        eventBookings.forEach((eventBooking) => {
+            const date = parseDate(eventBooking.created_at || eventBooking.start_date);
+            addEventRevenue(date, String(eventBooking.status || '').toLowerCase(), Number(eventBooking.total_price || 0));
+        });
+
         return {
             labels,
             datasets: [
                 {
                     label: 'Total revenue',
-                    data: stats.map((item) => Math.round(item.guest + item.confirmed)),
+                    data: stats.map((item) => Math.round(item.guest + item.confirmed + item.events)),
                     backgroundColor: 'rgba(11, 178, 50, 0.6)',
                     borderColor: 'rgb(11, 178, 50)',
                     borderWidth: 1
@@ -250,6 +283,13 @@ function AdminSales() {
                     data: stats.map((item) => Math.round(item.confirmed)),
                     backgroundColor: 'rgba(54, 162, 235, 0.6)',
                     borderColor: 'rgb(54, 162, 235)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Confirmed Event Sales',
+                    data: stats.map((item) => Math.round(item.events)),
+                    backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                    borderColor: 'rgb(255, 159, 64)',
                     borderWidth: 1
                 },
                 {
@@ -301,6 +341,7 @@ function AdminSales() {
         }, 0);
 
         let confirmedTotal = 0;
+        let eventTotal = 0;
         let canceledTotal = 0;
 
         // Filter by pie mode selection so the pie updates independently
@@ -337,22 +378,35 @@ function AdminSales() {
             }
         });
 
-        const totalRevenue = guestTotal + confirmedTotal;
+        (eventBookings || []).forEach((eventBooking) => {
+            const eventDate = parseDate(eventBooking.created_at || eventBooking.start_date);
+            const status = String(eventBooking.status || '').toLowerCase();
+            const include = pieChartMode === 'year'
+                ? eventDate && eventDate.getFullYear() === pieSelectedYear
+                : pieChartMode === 'month'
+                    ? eventDate && eventDate.getFullYear() === pieSelectedYear && eventDate.getMonth() === pieSelectedMonthIndex
+                    : eventDate && eventDate.getFullYear() === pieSelectedYear && eventDate.getMonth() === pieSelectedMonthIndex && eventDate.getDate() === pieSelectedDay;
+            if (include && status === 'confirmed') eventTotal += Number(eventBooking.total_price || 0);
+        });
+
+        const totalRevenue = guestTotal + confirmedTotal + eventTotal;
 
         const metricsPieData = {
-            labels: ['Guest Arrivals', 'Confirmed Reservations', 'Cancellation Loss'],
+            labels: ['Guest Arrivals', 'Confirmed Reservations', 'Confirmed Event Sales', 'Cancellation Loss'],
             datasets: [
                 {
                     label: 'Metrics',
-                    data: [guestTotal, confirmedTotal, canceledTotal],
+                    data: [guestTotal, confirmedTotal, eventTotal, canceledTotal],
                     backgroundColor: [
                         'rgba(75, 192, 192, 0.6)',
                         'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 159, 64, 0.6)',
                         'rgba(255, 99, 132, 0.6)'
                     ],
                     borderColor: [
                         'rgb(75, 192, 192)',
                         'rgb(54, 162, 235)',
+                        'rgb(255, 159, 64)',
                         'rgb(255, 99, 132)'
                     ],
                     borderWidth: 1
@@ -364,10 +418,11 @@ function AdminSales() {
             totalRevenue,
             guestTotal,
             confirmedTotal,
+            eventTotal,
             canceledTotal,
             pieData: metricsPieData
         };
-    }, [pieChartMode, pieSelectedYear, pieSelectedMonthIndex, pieSelectedDay, guestArrivals, bookings, parseDate]);
+    }, [pieChartMode, pieSelectedYear, pieSelectedMonthIndex, pieSelectedDay, guestArrivals, bookings, eventBookings, parseDate]);
 
     const barChartOptions = {
         responsive: true,
@@ -596,20 +651,6 @@ function AdminSales() {
                         </div>
                         </div>
 
-                        <div className="sales-stat-card soft-red">
-                        <div className="sales-stat-icon-row">
-                            <span className="sales-stat-icon soft-red">
-                            <i className="fa-solid fa-ban"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h2 className="sales-stat-title">
-                            {loading ? "..." : formatCurrency(bookingCanceledLoss)}
-                            </h2>
-                            <p className="sales-stat-eyebrow">Canceled reservation loss</p>
-                        </div>
-                        </div>
-
                         <div className="sales-stat-card soft-green">
                         <div className="sales-stat-icon-row">
                             <span className="sales-stat-icon soft-green">
@@ -635,6 +676,34 @@ function AdminSales() {
                             {loading ? "..." : formatCurrency(totalWalkInBooking)}
                             </h2>
                             <p className="sales-stat-eyebrow">walk-in revenue</p>
+                        </div>
+                        </div>
+
+                        <div className="sales-stat-card soft-amber">
+                        <div className="sales-stat-icon-row">
+                            <span className="sales-stat-icon soft-amber">
+                            <i className="fa-solid fa-champagne-glasses"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <h2 className="sales-stat-title">
+                            {loading ? "..." : formatCurrency(eventSales)}
+                            </h2>
+                            <p className="sales-stat-eyebrow">event revenue</p>
+                        </div>
+                        </div>
+
+                        <div className="sales-stat-card soft-red">
+                        <div className="sales-stat-icon-row">
+                            <span className="sales-stat-icon soft-red">
+                            <i className="fa-solid fa-ban"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <h2 className="sales-stat-title">
+                            {loading ? "..." : formatCurrency(bookingCanceledLoss)}
+                            </h2>
+                            <p className="sales-stat-eyebrow">Canceled reservation loss</p>
                         </div>
                         </div>
 
@@ -894,6 +963,10 @@ function AdminSales() {
                                         <div className="admin-sales-chart-card-labels">
                                             <label>Booking Sales</label>
                                             <h1>{loading ? "..." : formatCurrency(salesMetrics.confirmedTotal)}</h1>
+                                        </div>
+                                        <div className="admin-sales-chart-card-labels">
+                                            <label>Event Sales</label>
+                                            <h1>{loading ? "..." : formatCurrency(salesMetrics.eventTotal)}</h1>
                                         </div>
                                         <div className="admin-sales-chart-card-labels">
                                             <label>Sales loss</label>

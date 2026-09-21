@@ -4,6 +4,7 @@ import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../admincss/admin_dashboard.css";
 import AdminWalkinModal from '../Modals/walkin_reresvation_modal';
+import WalkinEventModal from '../Modals/walkin_event_modal';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
@@ -18,6 +19,7 @@ function AdminDashboard() {
     todays_lost_sales: 0,
     todays_online_sales: 0,
     todays_walkin_sales: 0,
+    todays_event_sales: 0,
     todays_guest_sales: 0,
     total_rooms: 0,
     todays_checkins: 0,
@@ -27,8 +29,10 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
+  const [showWalkinEventModal, setShowWalkinEventModal] = useState(false);
   const [guestArrivals, setGuestArrivals] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [eventBookings, setEventBookings] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [adminData] = useState(() => {
       const storedUser = localStorage.getItem('adminUser');
@@ -46,18 +50,21 @@ function AdminDashboard() {
     setLoading(true);
 
     try {
-      const [guestRes, bookingRes, roomRes] = await Promise.all([
+      const [guestRes, bookingRes, roomRes, eventRes] = await Promise.all([
         apiClient.get("/get_guest_arrivals"),
         apiClient.get("/get_reservations"),
-        apiClient.get("/get_rooms")
+        apiClient.get("/get_rooms"),
+        apiClient.get("/get_event_bookings")
       ]);
 
       const guestData = guestRes.data || [];
       const bookingData = bookingRes.data || [];
       const roomData = roomRes.data || [];
+      const eventData = eventRes.data || [];
 
       setGuestArrivals(guestData);
       setReservations(bookingData);
+      setEventBookings(eventData);
       setRooms(roomData);
 
       const toLocalDate = (value) => {
@@ -85,6 +92,8 @@ function AdminDashboard() {
       let todaysLostSales = 0;
       let todaysOnlineSales = 0;
       let todaysWalkinSales = 0;
+      let eventRevenue = 0;
+      let todaysEventSales = 0;
 
       bookingData.forEach((booking) => {
         const status = (booking.res_status || "").toLowerCase();
@@ -129,6 +138,15 @@ function AdminDashboard() {
         }
       });
 
+      eventData.forEach((eventBooking) => {
+        const status = String(eventBooking.status || '').toLowerCase();
+        if (status !== 'confirmed' && status !== 'complete') return;
+        const revenue = Number(eventBooking.total_price || 0);
+        eventRevenue += Number.isNaN(revenue) ? 0 : revenue;
+        const saleDate = eventBooking.created_at ? toLocalDate(eventBooking.created_at) : toLocalDate(eventBooking.start_date);
+        if (saleDate === today) todaysEventSales += Number.isNaN(revenue) ? 0 : revenue;
+      });
+
       const todaysCheckins = guestData.filter((guest) => {
         const checkinDate = guest.check_in_date ? toLocalDate(guest.check_in_date) : null;
 
@@ -170,12 +188,13 @@ function AdminDashboard() {
       }, 0);
 
       setStats({
-        total_revenue: guestRevenue + bookingRevenue,
-        todays_sales: todaysSales + todaysOnlineSales + todaysWalkinSales,
-        booking_sales: bookingRevenue,
+        total_revenue: guestRevenue + bookingRevenue + eventRevenue,
+        todays_sales: todaysSales + todaysOnlineSales + todaysWalkinSales + todaysEventSales,
+        booking_sales: bookingRevenue + eventRevenue,
         todays_lost_sales: todaysLostSales,
         todays_online_sales: todaysOnlineSales,
         todays_walkin_sales: todaysWalkinSales,
+        todays_event_sales: todaysEventSales,
         todays_guest_sales: todaysSales,
         total_rooms: roomData.length,
         todays_checkins: todaysCheckins,
@@ -260,6 +279,14 @@ function AdminDashboard() {
       monthlyTotals[checkIn.getMonth()] += revenue;
     });
 
+    eventBookings.forEach((eventBooking) => {
+      const status = String(eventBooking.status || '').toLowerCase();
+      if (status !== 'confirmed') return;
+      const eventDate = parseDateValue(eventBooking.created_at || eventBooking.start_date);
+      if (!eventDate || eventDate.getFullYear() !== currentYear) return;
+      monthlyTotals[eventDate.getMonth()] += Number(eventBooking.total_price || 0);
+    });
+
     return {
       labels: monthLabels,
       datasets: [
@@ -274,7 +301,7 @@ function AdminDashboard() {
         }
       ]
     };
-  }, [guestArrivals, reservations, parseDateValue]);
+  }, [guestArrivals, reservations, eventBookings, parseDateValue]);
 
   const revenueTrendPct = useMemo(() => {
     const values = revenueChartData.datasets[0].data;
@@ -462,12 +489,13 @@ function AdminDashboard() {
               <h1>Dashboard</h1>
               <div className="dashboard-topbar-btns">
                   <button className="dashboard-topbar-btn1" onClick={() => setShowWalkinModal(true)}>Walk in</button>
+                  <button className="dashboard-topbar-btn1" onClick={() => setShowWalkinEventModal(true)}>Walk in event</button>
                   <Link className="dashboard-topbar-btn1" to="/AddGuest">Add Guest</Link>
               </div>
             </div>
 
             <p className="section-label">Revenue overview</p>
-            <div className="dashboard-stats-grid">
+            <div className="dashboard-stats-grid dashboard-stats-grid--three">
               <div className="dashboard-stat-card soft-gold">
                 <div className="dashboard-stat-icon-row">
                   <span className="dashboard-stat-icon soft-gold">
@@ -537,6 +565,20 @@ function AdminDashboard() {
                     {loading ? "..." : formatCurrency(stats.todays_walkin_sales)}
                   </h2>
                   <p className="dashboard-stat-eyebrow">Today Walk-in revenue</p>
+                </div>
+              </div>
+
+              <div className="dashboard-stat-card soft-amber">
+                <div className="dashboard-stat-icon-row">
+                  <span className="dashboard-stat-icon soft-amber">
+                    <i className="fa-solid fa-champagne-glasses"></i>
+                  </span>
+                </div>
+                <div>
+                  <h2 className="dashboard-stat-title">
+                    {loading ? "..." : formatCurrency(stats.todays_event_sales)}
+                  </h2>
+                  <p className="dashboard-stat-eyebrow">Today event revenue</p>
                 </div>
               </div>
 
@@ -665,6 +707,7 @@ function AdminDashboard() {
           </div>
         </section>
       <AdminWalkinModal show={showWalkinModal} onClose={() => setShowWalkinModal(false)} />
+      <WalkinEventModal show={showWalkinEventModal} onClose={() => setShowWalkinEventModal(false)} />
     </div>
   );
 }

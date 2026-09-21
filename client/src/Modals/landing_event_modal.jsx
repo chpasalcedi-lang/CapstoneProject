@@ -23,6 +23,7 @@ function LandingEventModal({ show, onClose, room, onSaved }) {
   const [eventRooms, setEventRooms] = useState([]);
   const [selectedRoomIds, setSelectedRoomIds] = useState([]);
   const [roomPickerOpen, setRoomPickerOpen] = useState(false);
+  const [functionRoomPickerOpen, setFunctionRoomPickerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const userEmail = localStorage.getItem('userEmail') || '';
 
@@ -43,6 +44,7 @@ function LandingEventModal({ show, onClose, room, onSaved }) {
   useEffect(() => {
     setSelectedRoomIds(room?.id != null ? [String(room.id)] : []);
     setRoomPickerOpen(room?.id != null);
+    setFunctionRoomPickerOpen(String(room?.room_type || '').toLowerCase() === 'event');
     setForm({
       ...initialForm,
       rooms: room?.room_name || room?.room_label || '',
@@ -87,8 +89,45 @@ function LandingEventModal({ show, onClose, room, onSaved }) {
   const closeModal = () => {
     setSelectedRoomIds([]);
     setRoomPickerOpen(false);
+    setFunctionRoomPickerOpen(false);
     onClose();
   };
+
+  const regularRooms = eventRooms.filter((item) => String(item.room_type || '').toLowerCase() !== 'event');
+  const functionRooms = eventRooms.filter((item) => String(item.room_type || '').toLowerCase() === 'event');
+
+  const renderRoomOptions = (rooms, emptyText) => (
+    rooms.length === 0 ? (
+      <p className="event-booking-room-empty">{emptyText}</p>
+    ) : rooms.map((eventRoom) => {
+      const roomType = String(eventRoom.room_type || '').toLowerCase();
+      const roomName = eventRoom.room_name || eventRoom.room_label || 'Unnamed room';
+      const roomPrice = Number(eventRoom.room_price);
+      const roomDescription = roomType === 'event' ? 'Function room' : `${eventRoom.room_type || 'Room'} available`;
+
+      return (
+        <label className="event-booking-room-option" key={eventRoom.id}>
+          <input
+            type="checkbox"
+            checked={selectedRoomIds.includes(String(eventRoom.id))}
+            onChange={(event) => handleRoomCheckboxChange(eventRoom, event.target.checked)}
+          />
+          <span className="event-booking-room-option-copy">
+            <strong>{roomName}</strong>
+            <small>{roomDescription}</small>
+          </span>
+          {roomType !== 'event' && (
+            <span className="event-booking-room-number">
+              Room {eventRoom.room_number || eventRoom.id}
+            </span>
+          )}
+          <span className="event-booking-room-option-price">
+            {roomPrice > 0 ? `₱${roomPrice.toLocaleString('en-PH')}` : 'Price unavailable'}
+          </span>
+        </label>
+      );
+    })
+  );
 
   const submit = async (event) => {
     event.preventDefault();
@@ -123,6 +162,7 @@ function LandingEventModal({ show, onClose, room, onSaved }) {
       Swal.fire({ icon: 'success', title: 'Booking submitted', text: 'Your event booking request has been saved.' });
       setSelectedRoomIds([]);
       setRoomPickerOpen(false);
+      setFunctionRoomPickerOpen(false);
       if (onSaved) onSaved();
     } catch (error) {
       Swal.fire({
@@ -166,59 +206,34 @@ function LandingEventModal({ show, onClose, room, onSaved }) {
                   setRoomPickerOpen((isOpen) => !isOpen);
                 }}
                 aria-expanded={roomPickerOpen}
+                aria-controls="event-booking-rooms-list"
               >
-                <span>{roomPickerOpen ? 'Rooms selected' : 'Select rooms or function rooms'}</span>
+                <span>Rooms{selectedRooms.some((item) => String(item.room_type || '').toLowerCase() !== 'event') ? ' selected' : ''}</span>
                 <i className={`fa-solid fa-chevron-${roomPickerOpen ? 'up' : 'down'}`} aria-hidden="true" />
               </button>
-              {roomPickerOpen && <div className="event-booking-room-list">
-                {eventRooms.length === 0 ? (
-                  <p className="event-booking-room-empty">No available rooms found.</p>
-                ) : eventRooms.map((eventRoom) => {
-                  const roomType = String(eventRoom.room_type || '').toLowerCase();
-                  const roomName = eventRoom.room_name || eventRoom.room_label || 'Unnamed room';
-                  const roomPrice = Number(eventRoom.room_price);
-                  const roomDescription = roomType === 'event' ? 'Event room' : `${eventRoom.room_type || 'Room'} available`;
-
-                  return (
-                    <label className="event-booking-room-option" key={eventRoom.id}>
-                      <input
-                        type="checkbox"
-                        checked={selectedRoomIds.includes(String(eventRoom.id))}
-                        onChange={(event) => handleRoomCheckboxChange(eventRoom, event.target.checked)}
-                      />
-                      <span className="event-booking-room-option-copy">
-                        <strong>{roomName}</strong>
-                        <small>{roomDescription}</small>
-                      </span>
-                      {roomType !== 'event' && (
-                        <span className="event-booking-room-number">
-                          Room {eventRoom.room_number || eventRoom.id}
-                        </span>
-                      )}
-                      <span className="event-booking-room-option-price">
-                        {roomPrice > 0 ? `₱${roomPrice.toLocaleString('en-PH')}` : 'Price unavailable'}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>}
+              {roomPickerOpen && <div id="event-booking-rooms-list" className="event-booking-room-list">{renderRoomOptions(regularRooms, 'No available rooms found.')}</div>}
+            </div>
+            <div className="event-booking-full event-booking-room-picker">
+              <button
+                type="button"
+                className={`event-booking-room-toggle ${functionRoomPickerOpen ? 'is-open' : ''}`}
+                onClick={() => {
+                  setFunctionRoomPickerOpen((isOpen) => !isOpen);
+                }}
+                aria-expanded={functionRoomPickerOpen}
+                aria-controls="event-booking-function-rooms-list"
+              >
+                <span>Function rooms{selectedRooms.some((item) => String(item.room_type || '').toLowerCase() === 'event') ? ' selected' : ''}</span>
+                <i className={`fa-solid fa-chevron-${functionRoomPickerOpen ? 'up' : 'down'}`} aria-hidden="true" />
+              </button>
+              {functionRoomPickerOpen && <div id="event-booking-function-rooms-list" className="event-booking-room-list">{renderRoomOptions(functionRooms, 'No available function rooms found.')}</div>}
             </div>
             <label className="event-booking-full">Notes<textarea name="notes" rows="3" maxLength="2000" value={form.notes} onChange={updateField} placeholder="Additional event details" /></label>
           </div>
 
         </form>
 
-        <div className="event-booking-price-summary" aria-label="Event booking price summary">
-              <div className="event-booking-price-item">
-                <div className="event-booking-price-icon">
-                  <i className="fa-solid fa-building" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="event-booking-price-label">{selectedRooms.length ? 'Room and entrance price' : 'Pool entrance price'}</p>
-                  <p className="event-booking-price-value">₱{eventPrice.toLocaleString('en-PH')}</p>
-                </div>
-              </div>
-              <div className="event-booking-price-divider" aria-hidden="true" />
+        <div className="event-booking-price-summary" aria-label="Event booking total price">
               <div className="event-booking-price-item">
                 <div className="event-booking-price-icon total">
                   <i className="fa-solid fa-receipt" aria-hidden="true" />

@@ -35,7 +35,7 @@
 
 /* CARD */
 .add-room-form-card {
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   width: 520px;
   max-width: 100%;
   max-height: 85vh;
@@ -56,7 +56,7 @@
   align-items: center;
   border-bottom: 1px solid #e5e7eb;
   flex: 0 0 auto;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
 }
 
 .add-room-modal-title {
@@ -72,7 +72,7 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
   color: #374151;
   display: inline-flex;
   align-items: center;
@@ -83,7 +83,7 @@
 }
 
 .add-room-modal-close:hover {
-  background: linear-gradient(135deg, #fffaf0 0%, #fde68a 100%);
+  background: #f3f4f6;
   transform: scale(1.03);
   color: #111827;
 }
@@ -93,7 +93,7 @@
   overflow-y: auto;
   flex: 1;
   padding: 20px 30px;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
 }
 
 .add-room-modal-body::-webkit-scrollbar {
@@ -154,7 +154,7 @@
 
 .add-room-form-group input::placeholder,
 .add-room-form-group textarea::placeholder {
-  color: #c4c9d4;
+  color: #6b7280;
 }
 
 .add-room-form-group input:hover,
@@ -164,8 +164,8 @@
 .add-room-form-group select:focus,
 .add-room-form-group textarea:focus {
   border-color: #cbd5e1;
-  background: #f3efe6;
-  box-shadow: 0 0 0 3px rgba(200, 169, 110, 0.12);
+  background: #f8fafc;
+  box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.18);
   outline: none;
 }
 
@@ -188,7 +188,7 @@
   padding: 0 20px;
   border-top: 1px solid #e5e7eb;
   flex: 0 0 auto;
-  background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%);
+  background: #ffffff;
 }
 
 .add-room-btn-cancel,
@@ -213,14 +213,14 @@
 }
 
 .add-room-btn-save {
-  background: #c8a96e;
-  color: #111111;
+  background: #1d1d1e;
+  color: #ececec;
   border: none;
 }
 
 .add-room-btn-save:hover {
-  background: #b8995f;
-  box-shadow: 0 4px 14px rgba(200, 169, 110, 0.3);
+  background: #2d2d2e;
+  box-shadow: none;
 }
 
 @media (max-width: 600px) {

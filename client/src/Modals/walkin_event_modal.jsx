@@ -60,10 +60,11 @@ function WalkinEventModal({ show, onClose, onSaved }) {
           roomIds.forEach((roomId) => occupiedRoomIds.add(roomId));
         });
 
-        const availableRooms = (roomsResponse.data || []).filter((item) => (
-          String(item.room_status || '').trim().toLowerCase() === 'available'
-          && !occupiedRoomIds.has(Number(item.id))
-        ));
+        const availableRooms = (roomsResponse.data || []).filter((item) => {
+          const isAvailable = String(item.room_status || '').trim().toLowerCase() === 'available';
+          const isOccupied = occupiedRoomIds.has(Number(item.id));
+          return !isOccupied && isAvailable;
+        });
         setEventRooms(availableRooms);
       })
       .catch(() => {

@@ -29,16 +29,53 @@ function LandingEventModal({ show, onClose, room, onSaved }) {
 
   useEffect(() => {
     if (!show) return;
+
     const currentRoomId = room?.id;
-    apiClient.get('/get_rooms')
-      .then((response) => {
-        const availableRooms = (response.data || []).filter((item) => (
-          String(item.room_status || '').toLowerCase() === 'available'
-            || (currentRoomId != null && String(item.id) === String(currentRoomId))
-        ));
+
+    Promise.all([
+      apiClient.get('/get_rooms'),
+      apiClient.get('/get_reservations'),
+      apiClient.get('/get_event_bookings'),
+    ])
+      .then(([roomsResponse, reservationsResponse, eventsResponse]) => {
+        const today = new Date();
+        const occupiedRoomIds = new Set();
+        const isActiveStatus = (status) => ['confirmed', 'pending', 'occupied'].includes(String(status || '').trim().toLowerCase());
+
+        (reservationsResponse.data || []).forEach((reservation) => {
+          if (!reservation.room_id || !isActiveStatus(reservation.res_status)) return;
+          const checkIn = new Date(reservation.check_in_date);
+          const checkOut = new Date(reservation.check_out_date);
+          if (!Number.isNaN(checkIn.getTime()) && !Number.isNaN(checkOut.getTime()) && today >= checkIn && today < checkOut) {
+            occupiedRoomIds.add(Number(reservation.room_id));
+          }
+        });
+
+        (eventsResponse.data || []).forEach((eventBooking) => {
+          if (!isActiveStatus(eventBooking.status)) return;
+          const startDate = new Date(`${eventBooking.start_date}T00:00:00`);
+          const endDate = new Date(`${eventBooking.end_date}T23:59:59`);
+          if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || today < startDate || today > endDate) return;
+          const roomIds = String(eventBooking.room_ids || eventBooking.rooms || '')
+            .split(',')
+            .map((roomId) => Number(roomId.trim()))
+            .filter((roomId) => Number.isInteger(roomId) && roomId > 0);
+          roomIds.forEach((roomId) => occupiedRoomIds.add(roomId));
+        });
+
+        const availableRooms = (roomsResponse.data || []).filter((item) => {
+          const isCurrentRoom = currentRoomId != null && String(item.id) === String(currentRoomId);
+          const isAvailable = String(item.room_status || '').trim().toLowerCase() === 'available';
+          const isOccupied = occupiedRoomIds.has(Number(item.id));
+          return !isOccupied && (isAvailable || isCurrentRoom);
+        });
+
         setEventRooms(availableRooms);
       })
-      .catch((error) => console.error('Error fetching event rooms:', error));
+      .catch((error) => {
+        console.error('Error fetching event rooms:', error);
+        Swal.fire({ icon: 'error', title: 'Unable to load rooms', text: 'Please try again later.' });
+      });
   }, [show, room]);
 
   useEffect(() => {

@@ -104,6 +104,15 @@ function ResBook() {
     return startA < endB && startB < endA;
   }, []);
 
+  const getEventRoomIds = (booking) => {
+    const raw = booking?.room_ids ?? booking?.rooms ?? booking?.room_id ?? '';
+    if (Array.isArray(raw)) return raw.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0);
+    return String(raw)
+      .split(',')
+      .map((id) => Number(id.trim()))
+      .filter((id) => Number.isFinite(id) && id > 0);
+  };
+
   const isRoomUnavailableForRange = useCallback((room, startDate, endDate) => {
     if (!room?.id || !startDate || !endDate) return false;
     const rangeStart = new Date(startDate);
@@ -118,9 +127,10 @@ function ResBook() {
       return isDateOverlap(rangeStart, rangeEnd, reservationStart, reservationEnd);
     });
     const hasEventOverlap = eventBookings.some((booking) => {
-      if (Number(booking.rooms) !== Number(room.id)) return false;
-      const bookingStart = String(booking.start_date).slice(0, 10);
-      const bookingEnd = String(booking.end_date).slice(0, 10);
+      const roomIds = getEventRoomIds(booking);
+      if (!roomIds.includes(Number(room.id))) return false;
+      const bookingStart = String(booking.start_date || '').slice(0, 10);
+      const bookingEnd = String(booking.end_date || booking.start_date || '').slice(0, 10);
       return startDate <= bookingEnd && endDate >= bookingStart;
     });
     return hasReservationOverlap || hasEventOverlap;
@@ -147,13 +157,15 @@ function ResBook() {
       return today >= rStart && today < rEnd;
     });
     const todayValue = new Date().toISOString().slice(0, 10);
-    const hasEventBooking = eventBookings.some((booking) => (
-      Number(booking.rooms) === Number(room.id)
-      && todayValue >= String(booking.start_date).slice(0, 10)
-      && todayValue <= String(booking.end_date).slice(0, 10)
-    ));
+    const hasEventBooking = eventBookings.some((booking) => {
+      const roomIds = getEventRoomIds(booking);
+      if (!roomIds.includes(Number(room.id))) return false;
+      const bookingStart = String(booking.start_date || '').slice(0, 10);
+      const bookingEnd = String(booking.end_date || booking.start_date || '').slice(0, 10);
+      return todayValue >= bookingStart && todayValue <= bookingEnd;
+    });
     return hasReservation || hasEventBooking;
-  }, [reservations, eventBookings]);
+  }, [reservations, eventBookings, getEventRoomIds]);
 
   const formatRoomPrice = (price) => {
     const numeric = Number(String(price || '').replace(/,/g, ''));
@@ -270,6 +282,15 @@ function ResBook() {
             if (today >= rStart && today < rEnd) occupiedRoomIds.add(Number(r.room_id));
           });
 
+          (eventBookings || []).forEach((booking) => {
+            const roomIds = getEventRoomIds(booking);
+            const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
+            const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
+            if (!Number.isNaN(bookingStart.getTime()) && !Number.isNaN(bookingEnd.getTime()) && today >= bookingStart && today <= bookingEnd) {
+              roomIds.forEach((roomId) => occupiedRoomIds.add(Number(roomId)));
+            }
+          });
+
           // show cached rooms immediately, but mark as Occupied if reservations indicate so
           const cachedMapped = parsed.map((room) => {
             if (room.room_status?.toLowerCase() === 'maintenance') {
@@ -318,6 +339,15 @@ function ResBook() {
             if (today >= rStart && today < rEnd) occupiedRoomIdsNow.add(Number(r.room_id));
           });
 
+          (eventBookings || []).forEach((booking) => {
+            const roomIds = getEventRoomIds(booking);
+            const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
+            const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
+            if (!Number.isNaN(bookingStart.getTime()) && !Number.isNaN(bookingEnd.getTime()) && today >= bookingStart && today <= bookingEnd) {
+              roomIds.forEach((roomId) => occupiedRoomIdsNow.add(Number(roomId)));
+            }
+          });
+
           const initiallyMapped = mapped.map((room) => {
             if (room._isMaintenance) return room;
             return {
@@ -344,6 +374,15 @@ function ResBook() {
                 const rStart = new Date(r.check_in_date);
                 const rEnd = new Date(r.check_out_date);
                 if (today >= rStart && today < rEnd) occupiedRoomIds.add(Number(r.room_id));
+              });
+
+              (eventBookings || []).forEach((booking) => {
+                const roomIds = getEventRoomIds(booking);
+                const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
+                const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
+                if (!Number.isNaN(bookingStart.getTime()) && !Number.isNaN(bookingEnd.getTime()) && today >= bookingStart && today <= bookingEnd) {
+                  roomIds.forEach((roomId) => occupiedRoomIds.add(Number(roomId)));
+                }
               });
 
               const finalMapped = mapped.map((room) => {

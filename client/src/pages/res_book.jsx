@@ -104,14 +104,29 @@ function ResBook() {
     return startA < endB && startB < endA;
   }, []);
 
-  const getEventRoomIds = (booking) => {
+  const getEventRoomIds = useCallback((booking) => {
     const raw = booking?.room_ids ?? booking?.rooms ?? booking?.room_id ?? '';
-    if (Array.isArray(raw)) return raw.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0);
-    return String(raw)
-      .split(',')
-      .map((id) => Number(id.trim()))
+
+    const normalizeValues = (value) => {
+      if (value == null) return [];
+      if (Array.isArray(value)) return value.flatMap(normalizeValues);
+
+      if (typeof value === 'object') {
+        const nested = value.room_id ?? value.id ?? value.roomId ?? value.room_ids ?? value.rooms;
+        return normalizeValues(nested);
+      }
+
+      return String(value)
+        .replace(/\[|\]|\{|\}/g, '')
+        .split(/[\s,]+/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    };
+
+    return normalizeValues(raw)
+      .map((id) => Number(String(id).replace(/[^0-9.-]/g, '')))
       .filter((id) => Number.isFinite(id) && id > 0);
-  };
+  }, []);
 
   const isRoomUnavailableForRange = useCallback((room, startDate, endDate) => {
     if (!room?.id || !startDate || !endDate) return false;
@@ -134,7 +149,7 @@ function ResBook() {
       return startDate <= bookingEnd && endDate >= bookingStart;
     });
     return hasReservationOverlap || hasEventOverlap;
-  }, [reservations, eventBookings, isDateOverlap]);
+  }, [reservations, eventBookings, getEventRoomIds, isDateOverlap]);
 
   const getNextDayISO = (dateValue) => {
     if (!dateValue) return '';

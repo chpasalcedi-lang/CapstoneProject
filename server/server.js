@@ -782,7 +782,7 @@ class ReservationController {
             await this.eventStatusReady;
             const eventId = Number(req.params.id);
             const status = String(req.body?.status || '').toLowerCase();
-            const allowedStatuses = ['pending', 'confirmed', 'complete', 'cancelled'];
+            const allowedStatuses = ['pending', 'confirmed', 'complete', 'cancel_requested', 'cancelled'];
 
             if (!Number.isInteger(eventId) || eventId <= 0) {
                 return res.status(400).json({ error: 'Invalid event booking ID.' });

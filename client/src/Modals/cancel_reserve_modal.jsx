@@ -8,7 +8,6 @@ function CancelReserveModal({ show, onClose, booking, onConfirm }) {
 
   useEffect(() => {
     if (show) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setReason('');
     }
   }, [show]);
@@ -16,6 +15,8 @@ function CancelReserveModal({ show, onClose, booking, onConfirm }) {
   if (!show) {
     return null;
   }
+
+  const isEventBooking = Boolean(booking?.event_name);
 
   const handleOverlayClick = () => {
     if (isSubmitting) return;
@@ -57,15 +58,15 @@ function CancelReserveModal({ show, onClose, booking, onConfirm }) {
             </div>
             <div className="cancel-reservation-info-row">
               <span className="cancel-reservation-info-label">Reservation</span>
-              <span className="cancel-reservation-info-value">{booking?.room_name || 'Room Reservation'}</span>
+              <span className="cancel-reservation-info-value">{isEventBooking ? booking.event_name : (booking?.room_name || 'Room Reservation')}</span>
             </div>
             <div className="cancel-reservation-info-row">
-              <span className="cancel-reservation-info-label">Check-in</span>
-              <span className="cancel-reservation-info-value">{booking?.check_in_date ? new Date(booking.check_in_date).toLocaleDateString() : '—'}</span>
+              <span className="cancel-reservation-info-label">{isEventBooking ? 'Event date' : 'Check-in'}</span>
+              <span className="cancel-reservation-info-value">{(booking?.start_date || booking?.check_in_date) ? new Date(booking.start_date || booking.check_in_date).toLocaleDateString() : '—'}</span>
             </div>
             <div className="cancel-reservation-info-row">
-              <span className="cancel-reservation-info-label">Room</span>
-              <span className="cancel-reservation-info-value">{booking?.room_number || 'Unknown Room'}</span>
+              <span className="cancel-reservation-info-label">{isEventBooking ? 'Guests' : 'Room'}</span>
+              <span className="cancel-reservation-info-value">{isEventBooking ? (booking.guest_number || 'Unknown') : (booking?.room_number || 'Unknown Room')}</span>
             </div>
           </div>
 

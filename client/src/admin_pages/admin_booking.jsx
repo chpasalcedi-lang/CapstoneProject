@@ -240,7 +240,11 @@ function AdminBooking() {
 
     const handleEventConfirm = async (booking) => {
         const currentStatus = String(booking?.status || 'pending').toLowerCase();
-        const targetStatus = currentStatus === 'pending' ? 'confirmed' : currentStatus === 'confirmed' ? 'complete' : null;
+        const targetStatus = currentStatus === 'cancel_requested'
+            ? 'cancelled'
+            : currentStatus === 'pending'
+                ? 'confirmed'
+                : currentStatus === 'confirmed' ? 'complete' : null;
 
         if (!targetStatus) return;
 
@@ -249,8 +253,10 @@ function AdminBooking() {
             await refreshEventBookings();
             Swal.fire({
                 icon: 'success',
-                title: targetStatus === 'complete' ? 'Complete' : 'Confirmed',
-                text: `Event booking marked ${targetStatus}.`,
+                title: targetStatus === 'cancelled' ? 'Cancellation approved' : targetStatus === 'complete' ? 'Complete' : 'Confirmed',
+                text: targetStatus === 'cancelled'
+                    ? 'The event cancellation has been approved.'
+                    : `Event booking marked ${targetStatus}.`,
             });
         } catch (err) {
             console.error('Error updating event booking:', err);
@@ -259,21 +265,29 @@ function AdminBooking() {
     };
 
     const handleEventCancel = async (booking) => {
+        const currentStatus = String(booking?.status || 'pending').toLowerCase();
+        const rejectingRequest = currentStatus === 'cancel_requested';
         const result = await Swal.fire({
             icon: 'warning',
-            title: 'Cancel event booking',
-            text: 'Are you sure you want to cancel this event booking?',
+            title: rejectingRequest ? 'Reject cancellation request' : 'Cancel event booking',
+            text: rejectingRequest
+                ? 'Keep this event booking active and reject the guest cancellation request?'
+                : 'Are you sure you want to cancel this event booking?',
             showCancelButton: true,
-            confirmButtonText: 'Yes, cancel it',
-            cancelButtonText: 'Keep booking',
+            confirmButtonText: rejectingRequest ? 'Reject request' : 'Yes, cancel it',
+            cancelButtonText: rejectingRequest ? 'Keep request' : 'Keep booking',
         });
 
         if (!result.isConfirmed) return;
 
         try {
-            await apiClient.post(`/update_event_booking/${booking.id}`, { status: 'cancelled' });
+            await apiClient.post(`/update_event_booking/${booking.id}`, { status: rejectingRequest ? 'pending' : 'cancelled' });
             await refreshEventBookings();
-            Swal.fire({ icon: 'success', title: 'Cancelled', text: 'Event booking cancelled successfully.' });
+            Swal.fire({
+                icon: 'success',
+                title: rejectingRequest ? 'Request rejected' : 'Cancelled',
+                text: rejectingRequest ? 'The event booking remains active.' : 'Event booking cancelled successfully.',
+            });
         } catch (err) {
             console.error('Error cancelling event booking:', err);
             Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to cancel event booking.' });
@@ -666,11 +680,11 @@ function AdminBooking() {
                                             <td className="actions-cell">
                                                 <button className="btn guest btn-primary" onClick={() => handleEventView(booking)}>view</button>
                                                 <button className="btn guest btn-primary" onClick={() => handleEventConfirm(booking)}
-                                                        disabled={['cancelled', 'complete'].includes(eventStatus)}>
-                                                        {eventStatus === 'pending' ? 'Confirm' : 'Done'}
+                                                    disabled={['cancelled', 'complete'].includes(eventStatus)}>
+                                                    {eventStatus === 'cancel_requested' ? 'Approve cancel' : eventStatus === 'pending' ? 'Confirm' : 'Done'}
                                                 </button>
                                                 <button className="btn guest btn-danger" onClick={() => handleEventCancel(booking)}
-                                                    disabled={['cancelled', 'complete'].includes(eventStatus)}>cancel</button>
+                                                    disabled={['cancelled', 'complete'].includes(eventStatus)}>{eventStatus === 'cancel_requested' ? 'Reject request' : 'cancel'}</button>
                                             </td>
                                         </tr>
                                         );

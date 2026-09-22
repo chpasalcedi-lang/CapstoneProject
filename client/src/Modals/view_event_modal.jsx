@@ -26,7 +26,7 @@ function normalizeRoomIds(roomIds, fallbackRooms) {
         .filter(Boolean);
 }
 
-function ViewEventModal({ show, onClose, booking }) {
+function ViewEventModal({ show, onClose, booking, showReceiptButton = true }) {
     const [showReceipt, setShowReceipt] = useState(false);
     const [rooms, setRooms] = useState([]);
 
@@ -124,9 +124,11 @@ function ViewEventModal({ show, onClose, booking }) {
                 </div>
                 <div className="modal-footer">
                     <button type="button" className="btn-secondary" onClick={onClose}>Close</button>
-                    <button type="button" className="btn-primary" onClick={() => setShowReceipt(true)}>
-                        <i className="fa-solid fa-receipt" aria-hidden="true" /> View Receipt
-                    </button>
+                    {showReceiptButton && (
+                        <button type="button" className="btn-primary" onClick={() => setShowReceipt(true)}>
+                            <i className="fa-solid fa-receipt" aria-hidden="true" /> View Receipt
+                        </button>
+                    )}
                 </div>
                 {showReceipt && (
                     <div className="receipt-overlay" onClick={() => setShowReceipt(false)}>

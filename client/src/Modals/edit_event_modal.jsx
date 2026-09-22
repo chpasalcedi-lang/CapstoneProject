@@ -11,7 +11,7 @@ function normalizeRoomIds(roomIds, fallbackRooms) {
         .filter(Boolean);
 }
 
-function EditEventModal({ show, onClose, booking, onUpdated }) {
+function EditEventModal({ show, onClose, booking, onUpdated, allowDiscount = true }) {
     const [form, setForm] = useState({
         event_name: '',
         guest_name: '',
@@ -54,7 +54,7 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
         const savedDiscount = Number(booking.discount || 0);
         const baseTotal = Number(booking.total_price || booking.price || 0);
         const savedTotal = Number(booking.total_price || 0);
-        const hasSavedDiscount = savedDiscount > 0 || (savedTotal > 0 && savedTotal < baseTotal);
+        const hasSavedDiscount = allowDiscount && (savedDiscount > 0 || (savedTotal > 0 && savedTotal < baseTotal));
         setDiscountEnabled(hasSavedDiscount);
         setLastPrice(hasSavedDiscount && savedTotal > 0 ? String(savedTotal) : '');
         const savedRoomIds = normalizeRoomIds(booking.room_ids, booking.rooms);
@@ -74,7 +74,7 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
             discount: savedDiscount || '',
             notes: booking.notes || '',
         });
-    }, [booking]);
+    }, [booking, allowDiscount]);
 
     if (!show || !booking) return null;
 
@@ -85,7 +85,7 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
         : 1;
     const totalPrice = Number(booking?.price || 0) * eventDays;
     const lastPriceValue = Number(lastPrice || 0);
-    const hasDiscountValue = discountEnabled && lastPriceValue > 0;
+    const hasDiscountValue = allowDiscount && discountEnabled && lastPriceValue > 0;
     const discountSaved = hasDiscountValue
         ? Math.max(0, totalPrice - Math.min(totalPrice, lastPriceValue))
         : 0;
@@ -194,7 +194,7 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
                 time_out: form.time_out,
                 notes: form.notes,
                 guest_number: Number(form.guest_number),
-                discount: Number(discountSaved.toFixed(2)),
+                discount: allowDiscount ? Number(discountSaved.toFixed(2)) : 0,
                 room_id: selectedRoomIds[0] || null,
                 room_ids: selectedRoomIds,
             });
@@ -258,7 +258,7 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
 
                     <div className="edit-event-modal-form-group"><label>Status</label><input value={booking.status || 'pending'} readOnly /></div>
                     <div className="edit-event-modal-form-group"><label>Notes <span className="optional">Optional</span></label><textarea name="notes" rows="3" maxLength="2000" value={form.notes} onChange={handleChange} /></div>
-                    <div className="edit-event-modal-form-price discount-section">
+                    {allowDiscount && <div className="edit-event-modal-form-price discount-section">
                         <div className="discount-section-header">
                             <div>
                                 <h3>Discount</h3>
@@ -317,7 +317,7 @@ function EditEventModal({ show, onClose, booking, onUpdated }) {
                                 </div>
                             </>
                         )}
-                    </div>
+                    </div>}
                 </form>
                 <div className="edit-event-modal-footer">
                     <div className="edit-event-modal-total">Total price: ₱{formatRoomPrice(finalPrice)}</div>

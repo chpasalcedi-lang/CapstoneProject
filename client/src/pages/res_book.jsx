@@ -8,6 +8,8 @@ import EventBookingModal from "../Modals/event_booking_modal.jsx";
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
 import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
+import ViewEventModal from "../Modals/view_event_modal.jsx";
+import EditEventModal from "../Modals/edit_event_modal.jsx";
 import "../pagescss/landing_page.css";
 
 function ResBook() {
@@ -30,9 +32,13 @@ function ResBook() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [userReservations, setUserReservations] = useState([]);
+  const [userEventBookings, setUserEventBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedEventBooking, setSelectedEventBooking] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showEventViewModal, setShowEventViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditEventModal, setShowEditEventModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [loadingReservations, setLoadingReservations] = useState(false);
 
@@ -47,15 +53,25 @@ function ResBook() {
     if (!email) return;
     setLoadingReservations(true);
     try {
-      const res = await apiClient.get('/get_reservations');
-      const allReservations = res.data || [];
+      const [reservationResponse, eventResponse] = await Promise.all([
+        apiClient.get('/get_reservations'),
+        apiClient.get('/get_event_bookings'),
+      ]);
+      const allReservations = reservationResponse.data || [];
+      const allEventBookings = eventResponse.data || [];
+      const normalizedEmail = email.trim().toLowerCase();
       const userReservations = allReservations.filter(
-        (r) => r.email && r.email.toLowerCase() === email.toLowerCase()
+        (r) => r.email && r.email.toLowerCase() === normalizedEmail
+      );
+      const userEventBookings = allEventBookings.filter(
+        (booking) => String(booking.email || '').toLowerCase() === normalizedEmail
       );
       setUserReservations(userReservations);
+      setUserEventBookings(userEventBookings);
     } catch (error) {
       console.error('Error fetching reservations:', error);
       setUserReservations([]);
+      setUserEventBookings([]);
     } finally {
       setLoadingReservations(false);
     }
@@ -78,6 +94,11 @@ function ResBook() {
       return;
     }
 
+    if (booking.event_name) {
+      await handleCancelEventBooking(booking, reason);
+      return;
+    }
+
     try {
       await apiClient.post(`/cancel_reservation_request/${booking.id}`, {
         cancel_notes_request: reason?.trim() || '',
@@ -96,6 +117,29 @@ function ResBook() {
         icon: 'error',
         title: 'Error',
         text: err.response?.data?.error || err.response?.data?.message || 'Unable to cancel reservation.'
+      });
+    }
+  };
+
+  const handleCancelEventBooking = async (booking, reason) => {
+    try {
+      const cancelNote = reason?.trim() || '';
+      const cancellationNotes = [booking.notes, cancelNote ? `Cancellation reason: ${cancelNote}` : '']
+        .filter(Boolean)
+        .join('\n');
+      await apiClient.post(`/update_event_booking/${booking.id}`, {
+        status: 'cancel_requested',
+        notes: cancellationNotes,
+      });
+      Swal.fire({ icon: 'success', title: 'Cancellation requested', text: 'Your request was sent to the admin for approval.' });
+      setShowCancelModal(false);
+      setSelectedBooking(null);
+      if (userEmail) fetchUserReservations(userEmail);
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Cancellation failed',
+        text: error.response?.data?.error || 'Unable to cancel the event booking.',
       });
     }
   };
@@ -524,11 +568,12 @@ function ResBook() {
                       <div className="profile-dropdown-credentials">
                         {loadingReservations ? (
                           <p className="profile-credentials-loading">Loading reservations...</p>
-                        ) : userReservations.length === 0 ? (
+                        ) : userReservations.length === 0 && userEventBookings.length === 0 ? (
                           <p className="profile-credentials-empty">No reservations found</p>
                         ) : (
-                          userReservations.map((booking) => (
-                            <div className="profile-dropdown-credential-card" key={booking.id}>
+                          <>
+                            {userReservations.map((booking) => (
+                              <div className="profile-dropdown-credential-card" key={`reservation-${booking.id}`}>
                               <div className="profile-credential-header">
                                 <h4>{booking.room_name || 'Room Reservation'}</h4>
                                 <span className={`profile-credential-status ${(booking.res_status || 'pending').toLowerCase()}`}>
@@ -567,8 +612,45 @@ function ResBook() {
                                   )}
                                 </div>
                               </div>
-                            </div>
-                          ))
+                              </div>
+                            ))}
+                            {userEventBookings.map((booking) => (
+                              <div className="profile-dropdown-credential-card profile-dropdown-event-card" key={`event-${booking.id}`}>
+                                <div className="profile-credential-header">
+                                  <h4>{booking.event_name || 'Event Reservation'}</h4>
+                                  <span className={`profile-credential-status ${(booking.status || 'pending').toLowerCase()}`}>
+                                    {booking.status || 'Pending'}
+                                  </span>
+                                </div>
+                                <div className="profile-credential-dates">
+                                  <span className="profile-credential-date-label">Event date</span>
+                                  <span className="profile-credential-date-value">{new Date(booking.start_date).toLocaleDateString()}</span>
+                                  <span className="profile-credential-date-label">Time</span>
+                                  <span className="profile-credential-date-value">{booking.time_in || 'N/A'} - {booking.time_out || 'N/A'}</span>
+                                </div>
+                                <div className="profile-credential-info">
+                                  <span><strong>Guest:</strong> {booking.guest_name || 'N/A'}</span>
+                                  <span><strong>Guests:</strong> {booking.guest_number || 'N/A'}</span>
+                                  <span><strong>Total:</strong> ₱{booking.total_price || '0'}</span>
+                                </div>
+                                <div className="profile-credential-actions">
+                                  <button className="profile-credential-btn-view" onClick={() => { setSelectedEventBooking(booking); setShowEventViewModal(true); }}>
+                                    View Details
+                                  </button>
+                                  {String(booking.status || '').toLowerCase() === 'pending' && (
+                                    <div className="profile-credential-actions-icons">
+                                      <button className="profile-credential-btn-edit" onClick={() => { setSelectedEventBooking(booking); setShowEditEventModal(true); }} aria-label="Edit event reservation">
+                                        <i className="fa-solid fa-pen-to-square"></i>
+                                      </button>
+                                      <button className="profile-credential-btn-cancel" onClick={() => { setSelectedBooking(booking); setShowCancelModal(true); }} aria-label="Cancel event reservation">
+                                        <i className="fa-solid fa-trash-can"></i>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </>
                         )}
                       </div>
                       <div className="profile-dropdown-divider"></div>
@@ -728,6 +810,29 @@ function ResBook() {
         onClose={() => setShowCancelModal(false)}
         booking={selectedBooking}
         onConfirm={handleCancelReservation}
+      />
+      <ViewEventModal
+        show={showEventViewModal}
+        onClose={() => {
+          setShowEventViewModal(false);
+          setSelectedEventBooking(null);
+        }}
+        booking={selectedEventBooking}
+        showReceiptButton={false}
+      />
+      <EditEventModal
+        show={showEditEventModal}
+        onClose={() => {
+          setShowEditEventModal(false);
+          setSelectedEventBooking(null);
+        }}
+        booking={selectedEventBooking}
+        allowDiscount={false}
+        onUpdated={() => {
+          setShowEditEventModal(false);
+          setSelectedEventBooking(null);
+          if (userEmail) fetchUserReservations(userEmail);
+        }}
       />
     </div>
   );

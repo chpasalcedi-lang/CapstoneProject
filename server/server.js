@@ -680,7 +680,8 @@ class ReservationController {
                 }
 
                 const activeBooking = await this.db.query(
-                    `SELECT id FROM events WHERE NOT (end_date < ? OR start_date > ?)
+                    `SELECT id FROM events WHERE status <> 'cancelled'
+                     AND NOT (end_date < ? OR start_date > ?)
                      AND (rooms IN (${placeholders}) OR EXISTS (
                        SELECT 1 FROM event_booking_rooms ebr WHERE ebr.event_id = events.id AND ebr.room_id IN (${placeholders})
                      )) LIMIT 1`,
@@ -746,7 +747,7 @@ class ReservationController {
             }
 
             const activeBooking = await this.db.query(
-                'SELECT id FROM events WHERE rooms = ? AND NOT (end_date < ? OR start_date > ?) LIMIT 1',
+                "SELECT id FROM events WHERE status <> 'cancelled' AND rooms = ? AND NOT (end_date < ? OR start_date > ?) LIMIT 1",
                 [roomId, startDate, endDate]
             );
 

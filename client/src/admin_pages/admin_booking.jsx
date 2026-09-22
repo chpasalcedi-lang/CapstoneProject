@@ -54,6 +54,7 @@ function AdminBooking() {
         };
 
         fetchBookings();
+        const bookingRefresh = window.setInterval(fetchBookings, 10000);
 
         const handleReservationUpdate = () => {
             fetchBookings();
@@ -69,6 +70,7 @@ function AdminBooking() {
         window.addEventListener('storage', handleStorageRefresh);
 
         return () => {
+            window.clearInterval(bookingRefresh);
             window.removeEventListener('reservation-updated', handleReservationUpdate);
             window.removeEventListener('storage', handleStorageRefresh);
         };
@@ -231,6 +233,29 @@ function AdminBooking() {
         }
     };
 
+    const handleRejectCancellationRequest = async (booking) => {
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Reject cancellation request',
+            text: 'Keep this room booking active and reject the guest cancellation request?',
+            showCancelButton: true,
+            confirmButtonText: 'Reject',
+            cancelButtonText: 'Keep request',
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await apiClient.post(`/update_reservation/${booking.id}`, { cancel_notes_request: '' });
+            const response = await apiClient.get('/get_reservations');
+            setBookings(response.data || []);
+            Swal.fire({ icon: 'success', title: 'Request rejected', text: 'The room booking remains active.' });
+        } catch (err) {
+            console.error('Error rejecting cancellation request:', err);
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to reject cancellation request.' });
+        }
+    };
+
     const refreshEventBookings = async () => {
         const response = await apiClient.get('/get_event_bookings');
         setEventBookings(response.data || []);
@@ -351,10 +376,14 @@ function AdminBooking() {
 
     // Cancel requests list should show all bookings that submitted a cancel request
     // and should NOT be affected by the filter buttons or search box.
-    const cancelRequestBookings = bookings.filter((booking) => {
-        const note = String(booking.cancel_notes_request || '').trim();
-        return note.length > 0;
-    });
+    const cancelRequestBookings = [
+        ...bookings
+            .filter((booking) => String(booking.cancel_notes_request || '').trim().length > 0)
+            .map((booking) => ({ ...booking, _isEventCancellation: false })),
+        ...eventBookings
+            .filter((booking) => String(booking.status || '').toLowerCase() === 'cancel_requested')
+            .map((booking) => ({ ...booking, _isEventCancellation: true })),
+    ];
 
     const confirmedCount = bookings.filter((booking) => {
         return (booking.res_status || '').toLowerCase() === 'confirmed';
@@ -681,10 +710,10 @@ function AdminBooking() {
                                                 <button className="btn guest btn-primary" onClick={() => handleEventView(booking)}>view</button>
                                                 <button className="btn guest btn-primary" onClick={() => handleEventConfirm(booking)}
                                                     disabled={['cancelled', 'complete'].includes(eventStatus)}>
-                                                    {eventStatus === 'cancel_requested' ? 'Approve cancel' : eventStatus === 'pending' ? 'Confirm' : 'Done'}
+                                                        {eventStatus === 'pending' ? 'Confirm' : 'Done'}
                                                 </button>
                                                 <button className="btn guest btn-danger" onClick={() => handleEventCancel(booking)}
-                                                    disabled={['cancelled', 'complete'].includes(eventStatus)}>{eventStatus === 'cancel_requested' ? 'Reject request' : 'cancel'}</button>
+                                                    disabled={['cancelled', 'complete'].includes(eventStatus)}>cancel</button>
                                             </td>
                                         </tr>
                                         );
@@ -759,27 +788,43 @@ function AdminBooking() {
                                                     </td>
                                                 </tr>
                                             ) : paginatedCancelRequests.map((booking) => {
-                                                const status = (booking.res_status || 'pending').toLowerCase();
+                                                const isEventCancellation = booking._isEventCancellation;
+                                                const status = (isEventCancellation ? booking.status : booking.res_status || 'pending').toLowerCase();
+                                                const cancellationReason = isEventCancellation
+                                                    ? String(booking.notes || '').split('\n').find((note) => note.toLowerCase().startsWith('cancellation reason:'))?.replace(/^cancellation reason:\s*/i, '')
+                                                    : booking.cancel_notes_request;
                                                 return (
-                                                    <tr key={booking.id}>
-                                                        <td>{booking.first_name} {booking.last_name}</td>
+                                                    <tr key={`${isEventCancellation ? 'event' : 'room'}-${booking.id}`}>
+                                                        <td>{isEventCancellation ? booking.guest_name : `${booking.first_name || ''} ${booking.last_name || ''}`}</td>
                                                         <td>{booking.email}</td>
-                                                        <td>{booking.room_number}</td>
-                                                        <td>{formatBookingDate(booking.check_in_date)}</td>
+                                                        <td>{isEventCancellation ? (booking.room_name || 'Event booking') : booking.room_number}</td>
+                                                        <td>{formatBookingDate(isEventCancellation ? booking.start_date : booking.check_in_date)}</td>
                                                         <td>₱{formatCurrency(booking.total_price)}</td>
-                                                        <td>{booking.cancel_notes_request || 'No cancellation note provided.'}</td>
+                                                        <td>{cancellationReason || 'No cancellation note provided.'}</td>
                                                         
                                                         <td className="actions-cell">
-                                                            <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
+                                                            <button className="btn guest btn-primary" onClick={() => isEventCancellation ? handleEventView(booking) : handleView(booking)}>
                                                                 view
                                                             </button>
-                                                            <button
-                                                                className="btn guest btn-danger"
-                                                                onClick={() => handleCancel(booking)}
-                                                                disabled={['cancelled', 'complete'].includes(status)}
-                                                            >
-                                                                cancel
-                                                            </button>
+                                                            {isEventCancellation ? (
+                                                                <>
+                                                                    <button className="btn guest btn-primary" onClick={() => handleEventConfirm(booking)}>
+                                                                        Approve
+                                                                    </button>
+                                                                    <button className="btn guest btn-danger" onClick={() => handleEventCancel(booking)}>
+                                                                        Reject
+                                                                    </button>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <button className="btn guest btn-primary" onClick={() => handleCancel(booking)} disabled={['cancelled', 'complete'].includes(status)}>
+                                                                        Approve
+                                                                    </button>
+                                                                    <button className="btn guest btn-danger" onClick={() => handleRejectCancellationRequest(booking)} disabled={['cancelled', 'complete'].includes(status)}>
+                                                                        Reject
+                                                                    </button>
+                                                                </>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 );

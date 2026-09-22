@@ -42,6 +42,12 @@ function ResBook() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [loadingReservations, setLoadingReservations] = useState(false);
 
+  const getDisplayStatus = (status, hasCancellationRequest = false) => {
+    if (hasCancellationRequest) return 'Cancellation requested';
+    const normalizedStatus = String(status || 'pending').toLowerCase();
+    return normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1);
+  };
+
   const toggleProfile = () => {
     if (!profileOpen && userEmail) {
       fetchUserReservations(userEmail);
@@ -186,6 +192,8 @@ function ResBook() {
       return isDateOverlap(rangeStart, rangeEnd, reservationStart, reservationEnd);
     });
     const hasEventOverlap = eventBookings.some((booking) => {
+      const eventStatus = String(booking.status || 'pending').toLowerCase();
+      if (['cancelled', 'complete'].includes(eventStatus)) return false;
       const roomIds = getEventRoomIds(booking);
       if (!roomIds.includes(Number(room.id))) return false;
       const bookingStart = String(booking.start_date || '').slice(0, 10);
@@ -217,6 +225,8 @@ function ResBook() {
     });
     const todayValue = new Date().toISOString().slice(0, 10);
     const hasEventBooking = eventBookings.some((booking) => {
+      const eventStatus = String(booking.status || 'pending').toLowerCase();
+      if (['cancelled', 'complete'].includes(eventStatus)) return false;
       const roomIds = getEventRoomIds(booking);
       if (!roomIds.includes(Number(room.id))) return false;
       const bookingStart = String(booking.start_date || '').slice(0, 10);
@@ -307,8 +317,10 @@ function ResBook() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-    const fetchData = useCallback(() => {
-      setLoading(true);
+    const fetchData = useCallback((showLoading = true) => {
+      if (showLoading) {
+        setLoading(true);
+      }
 
       apiClient.get('/get_event_bookings')
         .then((eventRes) => setEventBookings(eventRes.data || []))
@@ -342,6 +354,8 @@ function ResBook() {
           });
 
           (eventBookings || []).forEach((booking) => {
+            const eventStatus = String(booking.status || 'pending').toLowerCase();
+            if (['cancelled', 'complete'].includes(eventStatus)) return;
             const roomIds = getEventRoomIds(booking);
             const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
             const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
@@ -399,6 +413,8 @@ function ResBook() {
           });
 
           (eventBookings || []).forEach((booking) => {
+            const eventStatus = String(booking.status || 'pending').toLowerCase();
+            if (['cancelled', 'complete'].includes(eventStatus)) return;
             const roomIds = getEventRoomIds(booking);
             const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
             const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
@@ -436,6 +452,8 @@ function ResBook() {
               });
 
               (eventBookings || []).forEach((booking) => {
+                const eventStatus = String(booking.status || 'pending').toLowerCase();
+                if (['cancelled', 'complete'].includes(eventStatus)) return;
                 const roomIds = getEventRoomIds(booking);
                 const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
                 const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
@@ -461,6 +479,14 @@ function ResBook() {
         .catch((err) => {
           console.error("Error sa pagkuha sang data: ", err);
           setLoading(false);
+          if (showLoading) {
+            Swal.close();
+            Swal.fire({
+              icon: 'error',
+              title: 'Unable to load rooms',
+              text: 'Please try again later.',
+            });
+          }
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -505,11 +531,21 @@ function ResBook() {
       return filtered;
     }, [roomType, checkIn, data, isRoomOccupiedNow, isRoomUnavailableForRange]);
 
+    useEffect(() => {
+      if (data.length > 0) setFilteredData(computedFiltered);
+    }, [computedFiltered, data.length]);
+
     const refreshAvailability = useCallback(() => {
       setFilteredData(computedFiltered);
     }, [computedFiltered]);
 
-    // Availability is updated only when the user clicks "check availability" (refreshAvailability)
+    const selectedDateLabel = checkIn
+      ? new Date(`${checkIn}T00:00:00`).toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        })
+      : '';
 
     const handleCheckInChange = (e) => {
       const val = e.target.value;
@@ -522,7 +558,10 @@ function ResBook() {
     };
 
     useEffect(() => {
-        fetchData();
+      fetchData(true);
+      const availabilityRefresh = window.setInterval(() => fetchData(false), 10000);
+
+      return () => window.clearInterval(availabilityRefresh);
     }, [fetchData]);
 
     // Close profile dropdown when clicking outside
@@ -574,10 +613,15 @@ function ResBook() {
                           <>
                             {userReservations.map((booking) => (
                               <div className="profile-dropdown-credential-card" key={`reservation-${booking.id}`}>
+                              {(() => {
+                                const hasCancellationRequest = Boolean(String(booking.cancel_notes_request || '').trim());
+                                const bookingStatus = String(booking.res_status || 'pending').toLowerCase();
+                                return (
+                                  <>
                               <div className="profile-credential-header">
                                 <h4>{booking.room_name || 'Room Reservation'}</h4>
-                                <span className={`profile-credential-status ${(booking.res_status || 'pending').toLowerCase()}`}>
-                                  {booking.res_status || 'Pending'}
+                                <span className={`profile-credential-status ${hasCancellationRequest ? 'cancel_requested' : bookingStatus}`}>
+                                  {getDisplayStatus(booking.res_status, hasCancellationRequest)}
                                 </span>
                               </div>
                               <div className="profile-credential-dates">
@@ -596,14 +640,14 @@ function ResBook() {
                                   View Details
                                 </button>
                                 <div className="profile-credential-actions-icons">
-                                  {(!['cancelled', 'complete'].includes(String(booking.res_status || '').toLowerCase())) && (
+                                  {(!hasCancellationRequest && !['cancelled', 'complete'].includes(bookingStatus)) && (
                                     <>
-                                      {((!booking.res_status) || (['confirmed'].indexOf(String(booking.res_status).toLowerCase()) === -1)) && (
+                                      {bookingStatus !== 'confirmed' && (
                                         <button className="profile-credential-btn-edit" onClick={() => {setSelectedBooking(booking); setShowEditModal(true);}} aria-label="Edit reservation">
                                           <i className="fa-solid fa-pen-to-square"></i>
                                         </button>
                                       )}
-                                      {String(booking.res_status).toLowerCase() !== 'complete' && (
+                                      {bookingStatus !== 'complete' && (
                                         <button className="profile-credential-btn-cancel" aria-label="Cancel reservation" onClick={() => { setSelectedBooking(booking); setShowCancelModal(true); }}>
                                           <i className="fa-solid fa-trash-can"></i>
                                         </button>
@@ -612,14 +656,21 @@ function ResBook() {
                                   )}
                                 </div>
                               </div>
+                                  </>
+                                );
+                              })()}
                               </div>
                             ))}
                             {userEventBookings.map((booking) => (
                               <div className="profile-dropdown-credential-card profile-dropdown-event-card" key={`event-${booking.id}`}>
+                                {(() => {
+                                  const eventStatus = String(booking.status || 'pending').toLowerCase();
+                                  return (
+                                    <>
                                 <div className="profile-credential-header">
                                   <h4>{booking.event_name || 'Event Reservation'}</h4>
-                                  <span className={`profile-credential-status ${(booking.status || 'pending').toLowerCase()}`}>
-                                    {booking.status || 'Pending'}
+                                  <span className={`profile-credential-status ${eventStatus}`}>
+                                    {getDisplayStatus(eventStatus)}
                                   </span>
                                 </div>
                                 <div className="profile-credential-dates">
@@ -637,7 +688,7 @@ function ResBook() {
                                   <button className="profile-credential-btn-view" onClick={() => { setSelectedEventBooking(booking); setShowEventViewModal(true); }}>
                                     View Details
                                   </button>
-                                  {String(booking.status || '').toLowerCase() === 'pending' && (
+                                  {eventStatus === 'pending' && (
                                     <div className="profile-credential-actions-icons">
                                       <button className="profile-credential-btn-edit" onClick={() => { setSelectedEventBooking(booking); setShowEditEventModal(true); }} aria-label="Edit event reservation">
                                         <i className="fa-solid fa-pen-to-square"></i>
@@ -648,6 +699,9 @@ function ResBook() {
                                     </div>
                                   )}
                                 </div>
+                                    </>
+                                  );
+                                })()}
                               </div>
                             ))}
                           </>
@@ -723,6 +777,11 @@ function ResBook() {
      
       <section className="booking-results-area">
         <div className="booking-results-content">
+          {selectedDateLabel && (
+            <div className="booking-selected-date-status" role="status">
+              Availability for <strong>{selectedDateLabel}</strong>
+            </div>
+          )}
           { loading ? (
             <div className="booking-loading">Loading rooms...</div>
           ) : filteredData.length === 0 ? (
@@ -742,7 +801,11 @@ function ResBook() {
                       <div className="booking-room-card-img">
                         <img src={room.room_image} alt={room.room_name} loading="lazy" />
                         <span className={`booking-room-status ${room.room_status === 'Occupied' ? 'occupied' : room.room_status === 'Maintenance' ? 'maintenance' : 'available'}`}>
-                          {room.room_status}
+                          {room.room_status === 'Maintenance'
+                            ? 'Maintenance'
+                            : selectedDateLabel
+                              ? `${room.room_status} on selected day`
+                              : room.room_status}
                         </span>
                         {room.room_type?.toLowerCase() !== 'event' && (
                             <span className="booking-room-rating">Room : {room.room_number}</span>

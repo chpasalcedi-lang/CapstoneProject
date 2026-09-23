@@ -7,11 +7,21 @@ const CORKAGE_OPTIONS = {
   Whiskey: { rate: 300, unit: 'bottle' },
 };
 const CORKAGE_KEYS = Object.keys(CORKAGE_OPTIONS);
+const EQUIPMENT_OPTIONS = {
+  'Life Vest': { rate: 100, unit: 'piece' },
+  Shorts: { rate: 100, unit: 'pair' },
+  Table: { rate: 25, unit: 'piece' },
+  Chair: { rate: 10, unit: 'piece' },
+};
+const EQUIPMENT_KEYS = Object.keys(EQUIPMENT_OPTIONS);
 const PRICE_PER_CHILD = 150;
 const PRICE_PER_ADULT = 175;
 
 const defaultCorkageState = Object.fromEntries(
   CORKAGE_KEYS.map((option) => [option, { enabled: false, price: '' }])
+);
+const defaultEquipmentState = Object.fromEntries(
+  EQUIPMENT_KEYS.map((option) => [option, { enabled: false, price: '' }])
 );
 
 const formatAmount = (value) => {
@@ -29,6 +39,46 @@ const getCorkagePrice = (option, config) => {
     return Number(CORKAGE_OPTIONS[option]?.rate) || 0;
   }
   return Math.max(0, Number(rawValue) || 0);
+};
+
+const getEquipmentPrice = (option, config) => {
+  if (!config?.enabled) return 0;
+  const rawValue = config.price;
+  if (rawValue === '' || rawValue === null || rawValue === undefined) {
+    return Number(EQUIPMENT_OPTIONS[option]?.rate) || 0;
+  }
+  return Math.max(0, Number(rawValue) || 0);
+};
+
+const parseEquipmentState = (value) => {
+  const parsed = { ...defaultEquipmentState };
+  if (!value || /no equipment/i.test(value)) return parsed;
+
+  EQUIPMENT_KEYS.forEach((option) => {
+    const optionText = String(value);
+    const escapedOption = option.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const exactMatch = optionText.match(new RegExp(`${escapedOption}\\s*-\\s*(?:₱\\s*)?([\\d,]+(?:\\.\\d+)?)`, 'i'));
+    const directMatch = optionText.match(new RegExp(`${escapedOption}\\s*[:=]\\s*(?:₱\\s*)?([\\d,]+(?:\\.\\d+)?)`, 'i'));
+    const bareOptionMatch = new RegExp(`\\b${escapedOption}\\b`, 'i').test(optionText);
+
+    if (exactMatch || directMatch) {
+      const rawPrice = (exactMatch?.[1] || directMatch?.[1] || '').replace(/,/g, '');
+      parsed[option] = {
+        enabled: true,
+        price: rawPrice || String(EQUIPMENT_OPTIONS[option].rate),
+      };
+      return;
+    }
+
+    if (bareOptionMatch) {
+      parsed[option] = {
+        enabled: true,
+        price: String(EQUIPMENT_OPTIONS[option].rate),
+      };
+    }
+  });
+
+  return parsed;
 };
 
 const parseCorkageState = (value) => {
@@ -76,22 +126,35 @@ function getLegacyBreakdown(guest, corkage) {
 }
 
 function EditGuestModal({ show, onClose, guest, onUpdate }) {
-  const [form, setForm] = useState({ group_name: '', number_of_children: 0, number_of_adults: 0, corkage: defaultCorkageState });
+  const [form, setForm] = useState({
+    group_name: '',
+    number_of_children: 0,
+    number_of_adults: 0,
+    corkage: defaultCorkageState,
+    equipment: defaultEquipmentState,
+  });
   const [discountEnabled, setDiscountEnabled] = useState(false);
   const [lastPrice, setLastPrice] = useState('');
 
   useEffect(() => {
     if (!guest) return;
     const rawCorkage = guest.corkage && guest.corkage !== 'No Corkage' ? guest.corkage : 'No Corkage';
+    const rawEquipment = guest.equipment && guest.equipment !== 'No Equipment' ? guest.equipment : 'No Equipment';
     const parsedCorkage = parseCorkageState(rawCorkage);
+    const parsedEquipment = parseEquipmentState(rawEquipment);
     const breakdown = getLegacyBreakdown(guest, rawCorkage === 'No Corkage' ? [] : rawCorkage.split(',').map((item) => item.trim()));
     const baseCorkageTotal = Object.entries(parsedCorkage).reduce(
       (sum, [option, config]) => sum + getCorkagePrice(option, config),
       0
     );
+    const baseEquipmentTotal = Object.entries(parsedEquipment).reduce(
+      (sum, [option, config]) => sum + getEquipmentPrice(option, config),
+      0
+    );
     const baseGuestTotal = (Number(breakdown.children || 0) * PRICE_PER_CHILD)
       + (Number(breakdown.adults || 0) * PRICE_PER_ADULT)
-      + baseCorkageTotal;
+      + baseCorkageTotal
+      + baseEquipmentTotal;
     const savedTotal = Number(guest.total_price || 0);
     const savedDiscount = Number(guest.discount || 0);
     const shouldRestoreDiscount = savedDiscount > 0 || (savedTotal > 0 && savedTotal < baseGuestTotal);
@@ -102,6 +165,7 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
       number_of_children: breakdown.children,
       number_of_adults: breakdown.adults,
       corkage: parsedCorkage,
+      equipment: parsedEquipment,
     });
     setDiscountEnabled(shouldRestoreDiscount);
     setLastPrice(shouldRestoreDiscount && savedTotal > 0 ? String(savedTotal) : '');
@@ -110,13 +174,17 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
   if (!show || !guest) return null;
 
   const corkageTotal = Object.entries(form.corkage).reduce((sum, [option, config]) => sum + getCorkagePrice(option, config), 0);
-  const baseTotalPrice = (Number(form.number_of_children || 0) * PRICE_PER_CHILD) + (Number(form.number_of_adults || 0) * PRICE_PER_ADULT) + corkageTotal;
+  const equipmentTotal = Object.entries(form.equipment).reduce((sum, [option, config]) => sum + getEquipmentPrice(option, config), 0);
+  const baseTotalPrice = (Number(form.number_of_children || 0) * PRICE_PER_CHILD) + (Number(form.number_of_adults || 0) * PRICE_PER_ADULT) + corkageTotal + equipmentTotal;
   const lastPriceValue = Number(lastPrice || 0);
   const hasDiscountValue = discountEnabled && lastPriceValue > 0;
   const discountSaved = hasDiscountValue ? Math.max(0, baseTotalPrice - Math.min(baseTotalPrice, lastPriceValue)) : 0;
   const finalPrice = hasDiscountValue ? Math.max(0, Math.min(baseTotalPrice, lastPriceValue)) : baseTotalPrice;
   const discountPercent = hasDiscountValue && baseTotalPrice > 0 ? (discountSaved / baseTotalPrice) * 100 : 0;
   const selectedCorkageList = Object.entries(form.corkage)
+    .filter(([, config]) => config?.enabled)
+    .map(([option]) => option);
+  const selectedEquipmentList = Object.entries(form.equipment)
     .filter(([, config]) => config?.enabled)
     .map(([option]) => option);
 
@@ -127,6 +195,17 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
       [option]: {
         enabled: !current.corkage[option]?.enabled,
         price: current.corkage[option]?.enabled ? '' : current.corkage[option]?.price || '',
+      },
+    },
+  }));
+
+  const toggleEquipment = (option) => setForm((current) => ({
+    ...current,
+    equipment: {
+      ...current.equipment,
+      [option]: {
+        enabled: !current.equipment[option]?.enabled,
+        price: current.equipment[option]?.enabled ? '' : current.equipment[option]?.price || '',
       },
     },
   }));
@@ -142,6 +221,17 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
     },
   }));
 
+  const updateEquipmentPrice = (option, nextValue) => setForm((current) => ({
+    ...current,
+    equipment: {
+      ...current.equipment,
+      [option]: {
+        ...current.equipment[option],
+        price: nextValue,
+      },
+    },
+  }));
+
   const submit = (event) => {
     event.preventDefault();
     onUpdate(guest.id, {
@@ -149,6 +239,7 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
       total_price: finalPrice,
       discount: discountEnabled && baseTotalPrice > 0 ? Number(discountPercent.toFixed(2)) : 0,
       corkage: selectedCorkageList.length ? selectedCorkageList.join(', ') : 'No Corkage',
+      equipment: selectedEquipmentList.length ? selectedEquipmentList.join(', ') : 'No Equipment',
     });
   };
 
@@ -205,9 +296,43 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
                   ))}
                 </div>
               </details>
-              </div>
+            </div>
 
-               <div className="edit-guest-discount-box">
+            <div className="edit-guest-corkage-fieldset">
+              <div className="edit-guest-corkage-header">Equipment</div>
+              <details className="edit-guest-corkage-dropdown" open>
+                <summary>
+                  {selectedEquipmentList.length > 0 ? selectedEquipmentList.join(', ') : 'Choose equipment'}
+                </summary>
+                <div className="edit-guest-corkage-list">
+                  {EQUIPMENT_KEYS.map((option) => (
+                    <div className="edit-guest-corkage-option" key={option}>
+                      <label className="edit-guest-corkage-option-label">
+                        <input
+                          type="checkbox"
+                          checked={!!form.equipment[option]?.enabled}
+                          onChange={() => toggleEquipment(option)}
+                        />
+                        <span>{option}</span>
+                      </label>
+                      <div className="edit-guest-corkage-price-wrap">
+                        <small>{EQUIPMENT_OPTIONS[option].unit}</small>
+                        <input
+                          type="number"
+                          min="0"
+                          value={form.equipment[option]?.enabled ? form.equipment[option]?.price ?? '' : ''}
+                          onChange={(event) => updateEquipmentPrice(option, event.target.value)}
+                          placeholder={String(EQUIPMENT_OPTIONS[option].rate)}
+                          disabled={!form.equipment[option]?.enabled}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            </div>
+
+            <div className="edit-guest-discount-box">
               <div className="edit-guest-discount-header">
                 <div>
                   <h3>Discount</h3>

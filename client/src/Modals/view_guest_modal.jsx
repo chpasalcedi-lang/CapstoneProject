@@ -23,11 +23,32 @@ function getGuestBreakdown(guest, corkageItems) {
   return { children: 0, adults: totalGuests };
 }
 
+function parseEquipmentItems(equipmentValue) {
+  const text = String(equipmentValue || '').trim();
+  if (!text || /no equipment/i.test(text)) return [];
+
+  const matches = [...text.matchAll(/([A-Za-z0-9][A-Za-z0-9&/()'\- ]*)\s*-\s*(?:₱\s*)?([\d,]+(?:\.\d+)?)/gi)];
+
+  if (matches.length > 0) {
+    return matches.map(([, label, amount]) => ({
+      label: label.trim(),
+      price: Number(String(amount).replace(/,/g, '')) || 0,
+    })).filter((item) => item.label && item.label.toLowerCase() !== 'no equipment');
+  }
+
+  return text
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => ({ label: item, price: 0 }));
+}
+
 function ViewGuestModal({ show, onClose, guest }) {
   if (!show || !guest) return null;
 
   const corkage = guest.corkage || 'No Corkage';
   const corkageItems = corkage === 'No Corkage' ? [] : corkage.split(',').map((item) => item.trim());
+  const equipmentItems = parseEquipmentItems(guest.equipment);
   const breakdown = getGuestBreakdown(guest, corkageItems);
 
   return (
@@ -47,6 +68,15 @@ function ViewGuestModal({ show, onClose, guest }) {
         <div className="guest-receipt-section-title">Corkage</div>
         {corkageItems.length === 0 ? <div className="guest-receipt-row"><span>No corkage</span><strong>₱0</strong></div> : corkageItems.map((item) => (
           <div className="guest-receipt-row" key={item}><span>{item}</span><strong> {item === 'Food' ? 'per group' : item === 'Beer' ? 'case' : 'bottle'} / ₱{CORKAGE_PRICES[item] || 0}</strong></div>
+        ))}
+        <div className="guest-receipt-section-title">Equipment</div>
+        {equipmentItems.length === 0 ? (
+          <div className="guest-receipt-row"><span>No equipment</span><strong>₱0</strong></div>
+        ) : equipmentItems.map((item) => (
+          <div className="guest-receipt-row" key={`${item.label}-${item.price}`}>
+            <span>{item.label}</span>
+            <strong>₱{Number(item.price || 0).toLocaleString('en-PH')}</strong>
+          </div>
         ))}
         <div className="guest-receipt-total"><span>Total price</span><strong>₱{Number(guest.total_price || 0).toLocaleString('en-PH')}</strong></div>
         <p className="guest-receipt-date">{guest.created_at ? new Date(guest.created_at).toLocaleString() : ''}</p>

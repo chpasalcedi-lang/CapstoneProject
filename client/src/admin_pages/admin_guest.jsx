@@ -910,6 +910,7 @@ function AdminGuest() {
                                             <th>Group Name</th>
                                             <th>Number of Guests</th>
                                             <th>Corkage</th>
+                                            <th>Equipment</th>
                                             <th>Total Price</th>
                                             <th>Time & Date</th>
                                             <th className="actions-header">Actions</th>
@@ -918,13 +919,13 @@ function AdminGuest() {
                                     <tbody>
                                         {loadingGuests ? (
                                             <tr>
-                                                <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+                                                <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
                                                     Loading guest arrivals...
                                                 </td>
                                             </tr>
                                         ) : filteredGuestArrivals.length === 0 ? (
                                             <tr>
-                                                <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+                                                <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
                                                     No guest records found.
                                                 </td>
                                             </tr>
@@ -934,6 +935,7 @@ function AdminGuest() {
                                                     <td>{guest.group_name || '-'}</td>
                                                     <td>{guest.number_of_guests}</td>
                                                     <td>{guest.corkage || 'No Corkage'}</td>
+                                                    <td>{guest.equipment || 'No Equipment'}</td>
                                                     <td>₱{formatCurrency(guest.total_price)}</td>
                                                     <td>{formatGuestDateTime(guest.created_at)}</td>
                                                     <td className="actions-cell">

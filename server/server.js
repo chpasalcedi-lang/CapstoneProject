@@ -175,6 +175,7 @@ class Server {
             "ALTER TABLE guest ADD COLUMN number_of_children INT NOT NULL DEFAULT 0",
             "ALTER TABLE guest ADD COLUMN number_of_adults INT NOT NULL DEFAULT 0",
             "ALTER TABLE guest ADD COLUMN discount DECIMAL(10,2) NOT NULL DEFAULT 0",
+            "ALTER TABLE guest ADD COLUMN equipment VARCHAR(255) NOT NULL DEFAULT 'No Equipment'",
         ];
 
         for (const sql of columns) {
@@ -1107,6 +1108,28 @@ class GuestArrivalController {
         app.delete('/delete_guest_arrival/:id', this.deleteGuestArrival.bind(this));
     }
 
+    normalizeEquipmentValue(value) {
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            return trimmed || 'No Equipment';
+        }
+
+        if (Array.isArray(value)) {
+            const joined = value.filter(Boolean).join(', ');
+            return joined || 'No Equipment';
+        }
+
+        if (value && typeof value === 'object') {
+            const selected = Object.entries(value)
+                .filter(([, config]) => config && config.enabled)
+                .map(([option]) => option)
+                .join(', ');
+            return selected || 'No Equipment';
+        }
+
+        return 'No Equipment';
+    }
+
     async addGuestArrival(req, res) {
         try {
             const groupName = typeof req.body.group_name === 'string' ? req.body.group_name.trim() : null;
@@ -1116,6 +1139,7 @@ class GuestArrivalController {
             const corkage = typeof req.body.corkage === 'string' && req.body.corkage.trim()
                 ? req.body.corkage.trim()
                 : 'No Corkage';
+            const equipmentValue = this.normalizeEquipmentValue(req.body.equipment ?? req.body.equiment);
             const totalPrice = Number(req.body.total_price);
             const discount = Number(req.body.discount) || 0;
 
@@ -1123,7 +1147,7 @@ class GuestArrivalController {
                 return res.status(400).json({ error: 'Invalid guest arrival values.' });
             }
 
-            const sql = 'INSERT INTO guest (group_name, number_of_children, number_of_adults, number_of_guests, corkage, total_price, discount, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+            const sql = 'INSERT INTO guest (group_name, number_of_children, number_of_adults, number_of_guests, corkage, total_price, discount, created_at, equipment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const values = [
                 groupName || null,
                 numberOfChildren,
@@ -1132,7 +1156,8 @@ class GuestArrivalController {
                 corkage,
                 totalPrice,
                 discount,
-                getManilaTimestamp()
+                getManilaTimestamp(),
+                equipmentValue
             ];
             const result = await this.db.query(sql, values);
             return res.status(200).json({ message: 'Guest arrival recorded successfully!', guestId: result.insertId });
@@ -1148,6 +1173,7 @@ class GuestArrivalController {
             const numberOfChildren = Number(req.body.number_of_children) || 0;
             const numberOfAdults = Number(req.body.number_of_adults) || 0;
             const numberOfGuests = numberOfChildren + numberOfAdults;
+            const equipmentValue = this.normalizeEquipmentValue(req.body.equipment ?? req.body.equiment);
             const totalPrice = Number(req.body.total_price);
             const discount = Number(req.body.discount) || 0;
             if (!Number.isInteger(guestId) || guestId <= 0 || numberOfGuests <= 0 || !Number.isFinite(totalPrice)) {
@@ -1155,8 +1181,8 @@ class GuestArrivalController {
             }
 
             const result = await this.db.query(
-                'UPDATE guest SET group_name = ?, number_of_children = ?, number_of_adults = ?, number_of_guests = ?, corkage = ?, total_price = ?, discount = ? WHERE id = ?',
-                [req.body.group_name?.trim() || null, numberOfChildren, numberOfAdults, numberOfGuests, req.body.corkage || 'No Corkage', totalPrice, discount, guestId]
+                'UPDATE guest SET group_name = ?, number_of_children = ?, number_of_adults = ?, number_of_guests = ?, corkage = ?, total_price = ?, discount = ?, equipment = ? WHERE id = ?',
+                [req.body.group_name?.trim() || null, numberOfChildren, numberOfAdults, numberOfGuests, req.body.corkage || 'No Corkage', totalPrice, discount, equipmentValue, guestId]
             );
             if (result.affectedRows === 0) return res.status(404).json({ error: 'Guest arrival not found' });
             return res.status(200).json({ message: 'Guest arrival updated successfully' });
@@ -1169,7 +1195,7 @@ class GuestArrivalController {
     async getGuestArrivals(req, res) {
         try {
             const rows = await this.db.query(`SELECT id, group_name, number_of_children,
-                number_of_adults, number_of_guests, corkage, total_price, discount,
+                number_of_adults, number_of_guests, corkage, total_price, discount, equipment,
                 DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
                 FROM guest ORDER BY created_at DESC`);
             return res.status(200).json(rows);

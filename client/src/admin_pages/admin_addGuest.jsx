@@ -16,8 +16,23 @@ const CORKAGE_OPTIONS = {
   Whiskey: { rate: 300, unit: "bottle" },
 };
 
+const EQUIPMENT_OPTIONS = {
+  'Life Vest': { rate: 100, unit: "piece" },
+  Shorts: { rate: 100, unit: "pair" },
+  'Flat Screen TV': { rate: 500, unit: "unit" },
+  Table: { rate: 25, unit: "piece" },
+  Chair: { rate: 10, unit: "piece" },
+};
+
 const defaultCorkageState = Object.fromEntries(
   Object.entries(CORKAGE_OPTIONS).map(([option]) => [
+    option,
+    { enabled: false, price: "" },
+  ])
+);
+
+const defaultEquipmentState = Object.fromEntries(
+  Object.entries(EQUIPMENT_OPTIONS).map(([option]) => [
     option,
     { enabled: false, price: "" },
   ])
@@ -50,6 +65,7 @@ function AdminAddGuest() {
     number_of_children: "",
     number_of_guests: "",
     corkage: defaultCorkageState,
+    equipment: defaultEquipmentState,
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showWalkinModal, setShowWalkinModal] = useState(false);
@@ -88,7 +104,15 @@ function AdminAddGuest() {
     const corkageTotal = Object.entries(values.corkage).reduce((total, [option, config]) => {
       return total + getCorkagePrice(option, config);
     }, 0);
-    return (guestTotal + corkageTotal).toFixed(2);
+    const equipmentTotal = Object.entries(values.equipment).reduce((total, [option, config]) => {
+      if (!config?.enabled) return total;
+      const rawPrice = config.price;
+      const price = rawPrice === "" || rawPrice === null || rawPrice === undefined
+        ? Number(EQUIPMENT_OPTIONS[option]?.rate) || 0
+        : Math.max(0, Number(rawPrice) || 0);
+      return total + price;
+    }, 0);
+    return (guestTotal + corkageTotal + equipmentTotal).toFixed(2);
   };
 
   const handleCorkageToggle = (option) => {
@@ -117,6 +141,32 @@ function AdminAddGuest() {
     }));
   };
 
+  const handleEquipmentToggle = (option) => {
+    setValues((prev) => ({
+      ...prev,
+      equipment: {
+        ...prev.equipment,
+        [option]: {
+          enabled: !prev.equipment[option]?.enabled,
+          price: prev.equipment[option]?.enabled ? "" : prev.equipment[option]?.price || "",
+        },
+      },
+    }));
+  };
+
+  const handleEquipmentPriceChange = (option, nextValue) => {
+    setValues((prev) => ({
+      ...prev,
+      equipment: {
+        ...prev.equipment,
+        [option]: {
+          ...prev.equipment[option],
+          price: nextValue,
+        },
+      },
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -139,12 +189,23 @@ function AdminAddGuest() {
       .map(([option, config]) => `${option} - ₱${formatCurrency(getCorkagePrice(option, config))}`)
       .join(", ") || "No Corkage";
 
+    const equipmentSummary = Object.entries(values.equipment)
+      .filter(([, config]) => config?.enabled)
+      .map(([option, config]) => {
+        const price = config?.price === "" || config?.price === null || config?.price === undefined
+          ? Number(EQUIPMENT_OPTIONS[option]?.rate) || 0
+          : Math.max(0, Number(config.price) || 0);
+        return `${option} - ₱${formatCurrency(price)}`;
+      })
+      .join(", ") || "No Equipment";
+
     const payload = {
       group_name: values.group_name.trim(),
       number_of_children: children,
       number_of_adults: adults,
       number_of_guests: totalGuests,
       corkage: corkageSummary,
+      equipment: equipmentSummary,
       total_price: parseFloat(totalPrice)
     };
 
@@ -161,6 +222,7 @@ function AdminAddGuest() {
         number_of_children: "",
         number_of_guests: "",
         corkage: defaultCorkageState,
+        equipment: defaultEquipmentState,
       });
     } catch (err) {
       console.error("Error: ", err);
@@ -314,6 +376,38 @@ function AdminAddGuest() {
                         </details>
                       </div>
 
+                      <div className="add-form-group">
+                        <label>Equipment</label>
+                        <details className="corkage-dropdown" open>
+                          <summary>{Object.entries(values.equipment).some(([, config]) => config?.enabled) ? Object.entries(values.equipment).filter(([, config]) => config?.enabled).map(([option]) => option).join(', ') : 'Choose equipment'}</summary>
+                          <div className="corkage-list">
+                            {Object.entries(EQUIPMENT_OPTIONS).map(([option, { unit }]) => (
+                              <div className="corkage-option" key={option}>
+                                <label className="corkage-option-label">
+                                  <input
+                                    type="checkbox"
+                                    checked={!!values.equipment[option]?.enabled}
+                                    onChange={() => handleEquipmentToggle(option)}
+                                  />
+                                  <span>{option}</span>
+                                </label>
+                                <div className="corkage-price-wrap">
+                                  <small>{unit} / {EQUIPMENT_OPTIONS[option].rate}</small>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={values.equipment[option]?.enabled ? values.equipment[option]?.price ?? '' : ''}
+                                    onChange={(e) => handleEquipmentPriceChange(option, e.target.value)}
+                                    placeholder="0"
+                                    disabled={!values.equipment[option]?.enabled}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      </div>
+
                       <div className="add-form-summary">
                         <div>
                           <p className="summary-label">Guest Total:</p>
@@ -323,6 +417,17 @@ function AdminAddGuest() {
                           <p className="summary-label">Corkage:</p>
                           <p className="summary-price">₱{formatCurrency(Object.entries(values.corkage).reduce((total, [option, config]) => {
                             return total + getCorkagePrice(option, config);
+                          }, 0))}</p>
+                        </div>
+                        <div>
+                          <p className="summary-label">Equipment:</p>
+                          <p className="summary-price">₱{formatCurrency(Object.entries(values.equipment).reduce((total, [option, config]) => {
+                            if (!config?.enabled) return total;
+                            const rawPrice = config.price;
+                            const price = rawPrice === '' || rawPrice === null || rawPrice === undefined
+                              ? Number(EQUIPMENT_OPTIONS[option]?.rate) || 0
+                              : Math.max(0, Number(rawPrice) || 0);
+                            return total + price;
                           }, 0))}</p>
                         </div>
                         <div>

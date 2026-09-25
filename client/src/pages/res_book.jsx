@@ -29,6 +29,7 @@ function ResBook() {
   const [loading, setLoading] = useState(true);
   const [checkIn, setCheckIn] = useState('');
   const [roomType, setRoomType] = useState('');
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [userReservations, setUserReservations] = useState([]);
@@ -150,8 +151,29 @@ function ResBook() {
     }
   };
 
-  const isDateOverlap = useCallback((startA, endA, startB, endB) => {
-    return startA < endB && startB < endA;
+  const toDateOnly = useCallback((value) => {
+    if (!value) return '';
+    const rawValue = String(value).trim();
+
+    // SQL DATE values are already calendar dates. Do not parse them as UTC.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) return rawValue;
+
+    // Timestamp values need local-calendar conversion. This prevents a UTC
+    // timestamp such as 2026-09-25T16:00:00.000Z from becoming September 25
+    // when the guest-facing date is September 26 in the local timezone.
+    const parsed = new Date(rawValue);
+    if (Number.isNaN(parsed.getTime())) return '';
+
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  const isActiveEventStatus = useCallback((status) => {
+    return ['pending', 'confirmed', 'cancel_requested'].includes(
+      String(status || 'pending').toLowerCase()
+    );
   }, []);
 
   const getEventRoomIds = useCallback((booking) => {
@@ -178,37 +200,33 @@ function ResBook() {
       .filter((id) => Number.isFinite(id) && id > 0);
   }, []);
 
-  const isRoomUnavailableForRange = useCallback((room, startDate, endDate) => {
-    if (!room?.id || !startDate || !endDate) return false;
-    const rangeStart = new Date(startDate);
-    const rangeEnd = new Date(endDate);
-    const hasReservationOverlap = reservations.some((r) => {
+  const isRoomUnavailableOnDate = useCallback((room, selectedDate) => {
+    if (!room?.id || !selectedDate) return false;
+    const date = toDateOnly(selectedDate);
+    if (!date) return false;
+
+    const hasReservation = reservations.some((r) => {
       if (!r.room_id) return false;
       if (Number(r.room_id) !== Number(room.id)) return false;
       const status = (r.res_status || '').toLowerCase();
       if (status !== 'confirmed' && status !== 'pending') return false;
-      const reservationStart = new Date(r.check_in_date);
-      const reservationEnd = new Date(r.check_out_date);
-      return isDateOverlap(rangeStart, rangeEnd, reservationStart, reservationEnd);
+      const reservationStart = toDateOnly(r.check_in_date);
+      const reservationEnd = toDateOnly(r.check_out_date);
+      if (!reservationStart || !reservationEnd) return false;
+      return date >= reservationStart && date <= reservationEnd;
     });
-    const hasEventOverlap = eventBookings.some((booking) => {
-      const eventStatus = String(booking.status || 'pending').toLowerCase();
-      if (['cancelled', 'complete'].includes(eventStatus)) return false;
+
+    const hasEvent = eventBookings.some((booking) => {
+      if (!isActiveEventStatus(booking.status)) return false;
       const roomIds = getEventRoomIds(booking);
       if (!roomIds.includes(Number(room.id))) return false;
-      const bookingStart = String(booking.start_date || '').slice(0, 10);
-      const bookingEnd = String(booking.end_date || booking.start_date || '').slice(0, 10);
-      return startDate <= bookingEnd && endDate >= bookingStart;
+      const bookingStart = toDateOnly(booking.start_date || booking.date);
+      const bookingEnd = toDateOnly(booking.end_date || booking.start_date || booking.date);
+      if (!bookingStart || !bookingEnd) return false;
+      return date >= bookingStart && date <= bookingEnd;
     });
-    return hasReservationOverlap || hasEventOverlap;
-  }, [reservations, eventBookings, getEventRoomIds, isDateOverlap]);
-
-  const getNextDayISO = (dateValue) => {
-    if (!dateValue) return '';
-    const nextDay = new Date(dateValue);
-    nextDay.setDate(nextDay.getDate() + 1);
-    return nextDay.toISOString().slice(0, 10);
-  };
+    return hasReservation || hasEvent;
+  }, [reservations, eventBookings, getEventRoomIds, toDateOnly, isActiveEventStatus]);
 
   // Check if a room is occupied right now based on reservations
   const isRoomOccupiedNow = useCallback((room) => {
@@ -225,8 +243,7 @@ function ResBook() {
     });
     const todayValue = new Date().toISOString().slice(0, 10);
     const hasEventBooking = eventBookings.some((booking) => {
-      const eventStatus = String(booking.status || 'pending').toLowerCase();
-      if (['cancelled', 'complete'].includes(eventStatus)) return false;
+      if (!isActiveEventStatus(booking.status)) return false;
       const roomIds = getEventRoomIds(booking);
       if (!roomIds.includes(Number(room.id))) return false;
       const bookingStart = String(booking.start_date || '').slice(0, 10);
@@ -234,7 +251,7 @@ function ResBook() {
       return todayValue >= bookingStart && todayValue <= bookingEnd;
     });
     return hasReservation || hasEventBooking;
-  }, [reservations, eventBookings, getEventRoomIds]);
+  }, [reservations, eventBookings, getEventRoomIds, isActiveEventStatus]);
 
   const formatRoomPrice = (price) => {
     const numeric = Number(String(price || '').replace(/,/g, ''));
@@ -295,7 +312,7 @@ function ResBook() {
       return;
     }
 
-    if (hasSelectedDates && isRoomUnavailableForRange(room, checkIn, getNextDayISO(checkIn))) {
+    if (hasSelectedDates && isRoomUnavailableOnDate(room, checkIn)) {
       Swal.fire({
         icon: 'warning',
         title: 'Room unavailable',
@@ -317,178 +334,72 @@ function ResBook() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-    const fetchData = useCallback((showLoading = true) => {
+    const fetchData = useCallback(async (showLoading = true) => {
+      if (showLoading) setLoading(true);
+
+      // Show cached room cards immediately while live availability loads.
       if (showLoading) {
-        setLoading(true);
-      }
-
-      apiClient.get('/get_event_bookings')
-        .then((eventRes) => setEventBookings(eventRes.data || []))
-        .catch((error) => console.error('Error fetching event bookings:', error));
-
-      // show cached data first to avoid empty results on refresh
-      const cached = localStorage.getItem('roomsCache');
-      if (cached) {
         try {
-          const parsed = JSON.parse(cached);
-          setData(parsed);
-          // attempt to read cached reservations so we can mark occupied rooms immediately
-          let cachedReservations = [];
-          try {
-            const rc = localStorage.getItem('reservationsCache');
-            if (rc) cachedReservations = JSON.parse(rc) || [];
-          } catch (e) {
-            console.warn('reservationsCache parse error', e);
+          const cachedRooms = localStorage.getItem('roomsCache');
+          const parsedRooms = cachedRooms ? JSON.parse(cachedRooms) : null;
+          if (Array.isArray(parsedRooms) && parsedRooms.length > 0) {
+            setData(parsedRooms);
+            setLoading(false);
           }
-          if (cachedReservations.length) setReservations(cachedReservations);
-
-          const today = new Date();
-          const occupiedRoomIds = new Set();
-          cachedReservations.forEach((r) => {
-            if (!r.room_id) return;
-            const status = (r.res_status || '').toLowerCase();
-            if (status !== 'confirmed' && status !== 'pending') return;
-            const rStart = new Date(r.check_in_date);
-            const rEnd = new Date(r.check_out_date);
-            if (today >= rStart && today < rEnd) occupiedRoomIds.add(Number(r.room_id));
-          });
-
-          (eventBookings || []).forEach((booking) => {
-            const eventStatus = String(booking.status || 'pending').toLowerCase();
-            if (['cancelled', 'complete'].includes(eventStatus)) return;
-            const roomIds = getEventRoomIds(booking);
-            const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
-            const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
-            if (!Number.isNaN(bookingStart.getTime()) && !Number.isNaN(bookingEnd.getTime()) && today >= bookingStart && today <= bookingEnd) {
-              roomIds.forEach((roomId) => occupiedRoomIds.add(Number(roomId)));
-            }
-          });
-
-          // show cached rooms immediately, but mark as Occupied if reservations indicate so
-          const cachedMapped = parsed.map((room) => {
-            if (room.room_status?.toLowerCase() === 'maintenance') {
-              return { ...room, room_status: 'Maintenance', _isMaintenance: true };
-            }
-            return {
-              ...room,
-              room_status: occupiedRoomIds.has(Number(room.id)) ? 'Occupied' : 'Available',
-              _isAvailable: !occupiedRoomIds.has(Number(room.id))
-            };
-          });
-          setFilteredData(cachedMapped);
-          setLoading(false);
-        } catch (e) {
-          console.warn('roomsCache parse error', e);
+        } catch (cacheError) {
+          console.warn('Unable to read room cache:', cacheError);
         }
       }
-      // Fetch fresh rooms, show them as soon as they're available, then fetch reservations
-      apiClient.get('/get_rooms')
-        .then((roomsRes) => {
-          const rooms = roomsRes.data || [];
-          setData(rooms);
-          try { localStorage.setItem('roomsCache', JSON.stringify(rooms)); } catch (e) { console.warn('roomsCache set error', e); }
 
-          const mapped = rooms.map((room) => {
-            if (room.room_status?.toLowerCase() === 'maintenance') {
-              return {
-                ...room,
-                room_status: 'Maintenance',
-                _isMaintenance: true
-              };
-            }
-            return { ...room };
+      const roomsRequest = apiClient.get('/get_rooms');
+      const bookingsRequest = Promise.all([
+        apiClient.get('/get_reservations'),
+        apiClient.get('/get_event_bookings'),
+      ]);
+
+      try {
+        // Render rooms as soon as their request finishes. Booking status
+        // continues loading in parallel and updates the cards afterward.
+        const roomsRes = await roomsRequest;
+        const rooms = roomsRes.data || [];
+        setData(rooms);
+        setLoading(false);
+
+        try {
+          localStorage.setItem('roomsCache', JSON.stringify(rooms));
+        } catch (cacheError) {
+          console.warn('Unable to update room cache:', cacheError);
+        }
+      } catch (error) {
+        console.error('Error fetching room availability:', error);
+        if (showLoading) {
+          Swal.close();
+          Swal.fire({
+            icon: 'error',
+            title: 'Unable to load rooms',
+            text: 'Please try again later.',
           });
+        }
+        setLoading(false);
+        return;
+      }
 
-          // Show rooms immediately without waiting for reservations
-          // compute occupancy using any already-known reservations (e.g., cached)
-          const today = new Date();
-          const occupiedRoomIdsNow = new Set();
-          (reservations || []).forEach((r) => {
-            if (!r.room_id) return;
-            const status = (r.res_status || '').toLowerCase();
-            if (status !== 'confirmed' && status !== 'pending') return;
-            const rStart = new Date(r.check_in_date);
-            const rEnd = new Date(r.check_out_date);
-            if (today >= rStart && today < rEnd) occupiedRoomIdsNow.add(Number(r.room_id));
-          });
+      try {
+        const [reservationsRes, eventsRes] = await bookingsRequest;
+        const reservationsList = reservationsRes.data || [];
+        const eventBookingsList = eventsRes.data || [];
+        setReservations(reservationsList);
+        setEventBookings(eventBookingsList);
 
-          (eventBookings || []).forEach((booking) => {
-            const eventStatus = String(booking.status || 'pending').toLowerCase();
-            if (['cancelled', 'complete'].includes(eventStatus)) return;
-            const roomIds = getEventRoomIds(booking);
-            const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
-            const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
-            if (!Number.isNaN(bookingStart.getTime()) && !Number.isNaN(bookingEnd.getTime()) && today >= bookingStart && today <= bookingEnd) {
-              roomIds.forEach((roomId) => occupiedRoomIdsNow.add(Number(roomId)));
-            }
-          });
-
-          const initiallyMapped = mapped.map((room) => {
-            if (room._isMaintenance) return room;
-            return {
-              ...room,
-              room_status: occupiedRoomIdsNow.has(Number(room.id)) ? 'Occupied' : (room.room_status || 'Available'),
-              _isAvailable: !occupiedRoomIdsNow.has(Number(room.id))
-            };
-          });
-          setFilteredData(initiallyMapped);
-          setLoading(false);
-
-          // Fetch reservations in background and update occupancy when available
-          apiClient.get('/get_reservations')
-            .then((rres) => {
-              const reservationsList = rres.data || [];
-              setReservations(reservationsList);
-              try { localStorage.setItem('reservationsCache', JSON.stringify(reservationsList)); } catch (e) { console.warn('reservationsCache set error', e); }
-              const today = new Date();
-              const occupiedRoomIds = new Set();
-              reservationsList.forEach((r) => {
-                if (!r.room_id) return;
-                const status = (r.res_status || '').toLowerCase();
-                if (status !== 'confirmed' && status !== 'pending') return;
-                const rStart = new Date(r.check_in_date);
-                const rEnd = new Date(r.check_out_date);
-                if (today >= rStart && today < rEnd) occupiedRoomIds.add(Number(r.room_id));
-              });
-
-              (eventBookings || []).forEach((booking) => {
-                const eventStatus = String(booking.status || 'pending').toLowerCase();
-                if (['cancelled', 'complete'].includes(eventStatus)) return;
-                const roomIds = getEventRoomIds(booking);
-                const bookingStart = new Date(`${booking.start_date || booking.date || ''}T00:00:00`);
-                const bookingEnd = new Date(`${booking.end_date || booking.start_date || ''}T23:59:59`);
-                if (!Number.isNaN(bookingStart.getTime()) && !Number.isNaN(bookingEnd.getTime()) && today >= bookingStart && today <= bookingEnd) {
-                  roomIds.forEach((roomId) => occupiedRoomIds.add(Number(roomId)));
-                }
-              });
-
-              const finalMapped = mapped.map((room) => {
-                if (room._isMaintenance) return room;
-                return {
-                  ...room,
-                  room_status: occupiedRoomIds.has(Number(room.id)) ? 'Occupied' : 'Available',
-                  _isAvailable: !occupiedRoomIds.has(Number(room.id))
-                };
-              });
-              setFilteredData(finalMapped);
-            })
-            .catch((err) => {
-              console.error('Error fetching reservations for occupancy update:', err);
-            });
-        })
-        .catch((err) => {
-          console.error("Error sa pagkuha sang data: ", err);
-          setLoading(false);
-          if (showLoading) {
-            Swal.close();
-            Swal.fire({
-              icon: 'error',
-              title: 'Unable to load rooms',
-              text: 'Please try again later.',
-            });
-          }
-        });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        try {
+          localStorage.setItem('reservationsCache', JSON.stringify(reservationsList));
+          localStorage.setItem('eventBookingsCache', JSON.stringify(eventBookingsList));
+        } catch (cacheError) {
+          console.warn('Unable to update reservation cache:', cacheError);
+        }
+      } catch (error) {
+        console.error('Error fetching reservation or event status:', error);
+      }
     }, []);
 
     const computedFiltered = useMemo(() => {
@@ -506,7 +417,7 @@ function ResBook() {
 
           // If user provided a date range, mark Occupied when overlapping reservations exist
           if (hasDateRange) {
-            if (isRoomUnavailableForRange(normalizedRoom, checkIn, getNextDayISO(checkIn))) {
+            if (isRoomUnavailableOnDate(normalizedRoom, checkIn)) {
               return { ...normalizedRoom, room_status: 'Occupied' };
             }
             // No overlap for provided range -> Available (unless maintenance)
@@ -529,15 +440,29 @@ function ResBook() {
         : updated;
 
       return filtered;
-    }, [roomType, checkIn, data, isRoomOccupiedNow, isRoomUnavailableForRange]);
+    }, [roomType, checkIn, data, isRoomOccupiedNow, isRoomUnavailableOnDate]);
 
     useEffect(() => {
       if (data.length > 0) setFilteredData(computedFiltered);
     }, [computedFiltered, data.length]);
 
-    const refreshAvailability = useCallback(() => {
-      setFilteredData(computedFiltered);
-    }, [computedFiltered]);
+    const refreshAvailability = useCallback(async () => {
+      if (!checkIn) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Select a date',
+          text: 'Please select a check-in date before checking availability.',
+        });
+        return;
+      }
+
+      setCheckingAvailability(true);
+      try {
+        await fetchData(false);
+      } finally {
+        setCheckingAvailability(false);
+      }
+    }, [checkIn, fetchData]);
 
     const selectedDateLabel = checkIn
       ? new Date(`${checkIn}T00:00:00`).toLocaleDateString('en-US', {
@@ -766,8 +691,13 @@ function ResBook() {
                 </select>
               </div>
               <div className="booking-field">
-                <button className="booking-btn" onClick={refreshAvailability}>
-                  check availability
+                <button
+                  type="button"
+                  className="booking-btn"
+                  onClick={refreshAvailability}
+                  disabled={checkingAvailability}
+                >
+                  {checkingAvailability ? 'checking...' : 'check availability'}
                 </button>
               </div>
             </div>
@@ -804,7 +734,7 @@ function ResBook() {
                           {room.room_status === 'Maintenance'
                             ? 'Maintenance'
                             : selectedDateLabel
-                              ? `${room.room_status} on selected day`
+                              ? `${room.room_status}`
                               : room.room_status}
                         </span>
                         {room.room_type?.toLowerCase() !== 'event' && (

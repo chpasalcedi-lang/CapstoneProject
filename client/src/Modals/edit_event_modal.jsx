@@ -35,17 +35,38 @@ function EditEventModal({ show, onClose, booking, onUpdated, allowDiscount = tru
 
     useEffect(() => {
         if (!show) return;
+        const showRooms = (rooms) => {
+            const availableRooms = (rooms || []).filter((room) => (
+                String(room.room_status || '').toLowerCase() === 'available'
+            ));
+            setEventRooms(availableRooms);
+        };
+
+        // Display the last known room list immediately, then replace it with
+        // the latest server data when the request completes.
+        try {
+            const cachedRooms = JSON.parse(localStorage.getItem('roomsCache') || 'null');
+            if (Array.isArray(cachedRooms) && cachedRooms.length > 0) {
+                showRooms(cachedRooms);
+            }
+        } catch (cacheError) {
+            console.warn('Unable to read room cache:', cacheError);
+        }
+
         apiClient.get('/get_rooms')
             .then((response) => {
-                const savedRoomIds = normalizeRoomIds(booking?.room_ids, booking?.rooms);
-                const availableRooms = (response.data || []).filter((room) => (
-                    String(room.room_status || '').toLowerCase() === 'available'
-                    || savedRoomIds.includes(String(room.id))
-                ));
-                setEventRooms(availableRooms);
+                showRooms(response.data || []);
+                try {
+                    localStorage.setItem('roomsCache', JSON.stringify(response.data || []));
+                } catch (cacheError) {
+                    console.warn('Unable to update room cache:', cacheError);
+                }
             })
-            .catch(() => {
-                Swal.fire({ icon: 'error', title: 'Unable to load rooms', text: 'Please try again later.' });
+            .catch((error) => {
+                console.error('Error fetching rooms for edit event:', error);
+                if (!localStorage.getItem('roomsCache')) {
+                    Swal.fire({ icon: 'error', title: 'Unable to load rooms', text: 'Please try again later.' });
+                }
             });
     }, [show, booking]);
 

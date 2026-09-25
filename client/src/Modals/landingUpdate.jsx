@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import apiClient from '../api';
 import '../Modalscss/landingUpdate.css';

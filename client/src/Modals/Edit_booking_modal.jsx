@@ -72,6 +72,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         check_in_date: '',
         check_out_date: '',
         notes: '',
+        overtime_hours: '',
         room_number: '',
     });
     const [rooms, setRooms] = useState([]);
@@ -92,6 +93,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                 check_in_date: formatDateForInput(booking.check_in_date) || '',
                 check_out_date: formatDateForInput(booking.check_out_date) || '',
                 notes: booking.notes || '',
+                overtime_hours: booking.overtime_hours !== undefined && booking.overtime_hours !== null ? String(booking.overtime_hours) : '',
                 room_number: booking.room_number || '',
             });
             setDiscountEnabled(hasSavedDiscount);
@@ -156,10 +158,16 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
     };
 
     const roomPrice = selectedRoom?.room_price ?? booking?.room_price ?? null;
+    const overtimeRate = 150;
+    const overtimeHours = Number(values.overtime_hours || 0);
+    const overtimeCharge = Number.isFinite(overtimeHours) ? Math.max(0, overtimeHours) * overtimeRate : 0;
 
     const totalPrice = useMemo(
-        () => calculateTotalPrice(values.check_in_date, values.check_out_date, roomPrice),
-        [values.check_in_date, values.check_out_date, roomPrice]
+        () => {
+            const baseTotal = calculateTotalPrice(values.check_in_date, values.check_out_date, roomPrice);
+            return baseTotal === null ? null : baseTotal + overtimeCharge;
+        },
+        [values.check_in_date, values.check_out_date, roomPrice, overtimeCharge]
     );
 
     const lastPriceValue = Number(lastPrice || 0);
@@ -194,6 +202,12 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
             } else {
                 setDiscountEnabled(true);
             }
+            return;
+        }
+
+        if (name === 'overtime_hours') {
+            const sanitizedValue = value === '' ? '' : String(value).replace(/[^\d.]/g, '');
+            setValues((prev) => ({ ...prev, overtime_hours: sanitizedValue }));
             return;
         }
 
@@ -298,6 +312,7 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
         if (values.check_in_date !== formatDateForInput(booking.check_in_date)) updateData.check_in_date = values.check_in_date;
         if (values.check_out_date !== formatDateForInput(booking.check_out_date)) updateData.check_out_date = values.check_out_date;
         if (values.notes !== (booking.notes || '')) updateData.notes = values.notes;
+        if (String(values.overtime_hours || '') !== String(booking.overtime_hours !== undefined && booking.overtime_hours !== null ? booking.overtime_hours : '')) updateData.overtime_hours = Number(values.overtime_hours || 0);
         if (roomId && String(roomId) !== String(booking.room_id)) updateData.room_id = roomId;
 
         const baseTotal = Number(totalPrice || 0);
@@ -426,6 +441,25 @@ function EditBookingModal({ show, onClose, booking, onUpdate }) {
                                 {!values.check_out_date && <span className="book-date-placeholder">dd/mm/yyyy</span>}
                                 <i className="fa-regular fa-calendar-days book-date-icon" aria-hidden="true"></i>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="book-reservation-form-row">
+                        <div className="book-reservation-form-group">
+                            <label>Overtime Hours</label>
+                            <input
+                                type="number"
+                                name="overtime_hours"
+                                min="0"
+                                step="0.5"
+                                value={values.overtime_hours}
+                                onChange={handleChange}
+                                placeholder="e.g. 2"
+                            />
+                        </div>
+                        <div className="book-reservation-form-group">
+                            <label>Overtime Rate</label>
+                            <input type="text" value={'₱150 / hour'} readOnly aria-readonly="true" />
                         </div>
                     </div>
 

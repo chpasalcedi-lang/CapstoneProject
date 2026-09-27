@@ -49,7 +49,7 @@ function AdminWalkinModal({ show, onClose }) {
         return diff > 0 ? diff : 0;
     }, [values.check_in_date, values.check_out_date]);
 
-    const totalPrice = roomPrice && nights > 0 ? roomPrice * nights : 0;
+    const totalPrice = (roomPrice && nights > 0 ? roomPrice * nights : 0);
     const lastPriceValue = Number(values.last_price || 0);
     const discountSaved = discountEnabled ? Math.max(0, totalPrice - Math.min(totalPrice, lastPriceValue)) : 0;
     const finalPrice = discountEnabled ? Math.max(0, Math.min(totalPrice, lastPriceValue)) : totalPrice;

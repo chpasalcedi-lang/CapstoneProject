@@ -102,39 +102,24 @@ function AdminDashboard() {
         const bookingSource = String(booking.booking_source || 'online').toLowerCase();
         const hasCancelRequest = Object.prototype.hasOwnProperty.call(booking, 'cancel_notes_request')
           && String(booking.cancel_notes_request || '').trim() !== '';
+        const bookingTotal = Number(booking.total_price || 0);
+
         if (status === "confirmed" || status === "complete") {
-          const checkIn = new Date(booking.check_in_date);
-          const checkOut = new Date(booking.check_out_date);
-
-          const nights =
-            checkOut > checkIn
-              ? Math.max(
-                  1,
-                  Math.ceil((checkOut - checkIn) / 86400000)
-                )
-              : 1;
-
-          bookingRevenue += Number(booking.room_price || 0) * nights;
+          bookingRevenue += Number.isNaN(bookingTotal) ? 0 : bookingTotal;
 
           if (saleDate === today && bookingSource === 'online') {
-            todaysOnlineSales += Number(booking.total_price || (Number(booking.room_price || 0) * nights));
+            todaysOnlineSales += Number.isNaN(bookingTotal) ? 0 : bookingTotal;
           }
 
           if (saleDate === today && bookingSource === 'walkin') {
-            todaysWalkinSales += Number(booking.total_price || (Number(booking.room_price || 0) * nights));
+            todaysWalkinSales += Number.isNaN(bookingTotal) ? 0 : bookingTotal;
           }
 
           if (checkInDate === today && hasCancelRequest) {
-            todaysLostSales += Number(booking.room_price || 0) * nights;
+            todaysLostSales += Number.isNaN(bookingTotal) ? 0 : bookingTotal;
           }
         } else if (checkInDate === today && hasCancelRequest) {
-          const checkIn = new Date(booking.check_in_date);
-          const checkOut = new Date(booking.check_out_date);
-          const nights = checkOut > checkIn
-            ? Math.max(1, Math.ceil((checkOut - checkIn) / 86400000))
-            : 1;
-
-          todaysLostSales += Number(booking.room_price || 0) * nights;
+          todaysLostSales += Number.isNaN(bookingTotal) ? 0 : bookingTotal;
         }
       });
 

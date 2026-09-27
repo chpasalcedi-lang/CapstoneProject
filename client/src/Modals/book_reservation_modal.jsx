@@ -138,7 +138,9 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
         });
     };
 
-    const totalPrice = useMemo(() => calculateTotalPrice(values.check_in_date, values.check_out_date, roomPrice), [values.check_in_date, values.check_out_date, roomPrice]);
+    const totalPrice = useMemo(() => {
+        return calculateTotalPrice(values.check_in_date, values.check_out_date, roomPrice);
+    }, [values.check_in_date, values.check_out_date, roomPrice]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -338,7 +340,7 @@ function BookReservationModal({ showModal, setShowModal, refreshData, roomId, ro
                             : ""}
                         </p>
                         <p className="book-reservation-price-value total">
-                          {totalPrice ? `₱${totalPrice.toLocaleString()}` : "₱0"}
+                          {totalPrice !== null ? `₱${totalPrice.toLocaleString()}` : "₱0"}
                         </p>
                       </div>
                     </div>

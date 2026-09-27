@@ -139,6 +139,7 @@ class Server {
         this.setupMiddleware();
         this.setupRoutes();
         this.reservationSourceReady = this.ensureReservationSourceColumn();
+        this.reservationOvertimeReady = this.ensureReservationOvertimeColumn();
         this.guestColumnsReady = this.ensureGuestColumns();
         this.eventBookingRoomsReady = this.ensureEventBookingRoomsTable();
         this.db.verifyConnection();
@@ -166,6 +167,16 @@ class Server {
         } catch (error) {
             if (!String(error.message || '').includes('Duplicate column')) {
                 console.error('Unable to prepare reservation source column:', error.message);
+            }
+        }
+    }
+
+    async ensureReservationOvertimeColumn() {
+        try {
+            await this.db.query("ALTER TABLE reservations ADD COLUMN overtime_hours DECIMAL(10,2) NOT NULL DEFAULT 0");
+        } catch (error) {
+            if (!String(error.message || '').includes('Duplicate column')) {
+                console.error('Unable to prepare reservation overtime column:', error.message);
             }
         }
     }
@@ -541,11 +552,13 @@ class ReservationController {
     async addReservation(req, res) {
         try {
             await this.reservationSourceReady;
+            await this.reservationOvertimeReady;
             const roomId = req.body.room_id;
             const checkIn = req.body.check_in_date;
             const checkOut = req.body.check_out_date;
             const roomPrice = this.parsePrice(req.body.room_price);
             const totalPrice = this.parsePrice(req.body.total_price);
+            const overtimeHours = Number(req.body.overtime_hours || 0);
             const bookingSource = req.body.source === 'walkin' ? 'walkin' : 'online';
             const reservationStatus = bookingSource === 'walkin'
                 ? 'confirmed'
@@ -563,7 +576,8 @@ class ReservationController {
                 roomId || null,
                 roomPrice,
                 totalPrice,
-                Number(req.body.discount) || 0
+                Number(req.body.discount) || 0,
+                Number.isFinite(overtimeHours) && overtimeHours >= 0 ? overtimeHours : 0
             ];
 
             if (roomId && checkIn && checkOut) {
@@ -575,7 +589,7 @@ class ReservationController {
                 }
             }
 
-            const insertSql = 'INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price, total_price, discount, booking_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const insertSql = 'INSERT INTO reservations (last_name, first_name, num_guests, phone_number, email, check_in_date, check_out_date, notes, res_status, room_id, room_price, total_price, discount, overtime_hours, booking_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const result = await this.db.query(insertSql, [...values, bookingSource]);
             return res.status(200).json({ message: 'Reservation saved successfully!', reservationId: result.insertId });
         } catch (error) {
@@ -913,7 +927,7 @@ class ReservationController {
     async getReservations(req, res) {
         try {
             await this.db.query("UPDATE reservations SET res_status = 'complete' WHERE res_status = 'confirmed' AND DATE(check_out_date) < CURDATE()");
-            const sql = `SELECT r.*, COALESCE(r.room_price, rm.room_price) AS room_price, COALESCE(rm.room_number, 'N/A') AS room_number, rm.room_name, rm.room_label, rm.room_type, GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS nights, COALESCE(r.total_price, COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)) AS total_price, COALESCE(r.discount, 0) AS discount FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id ORDER BY r.id DESC`;
+            const sql = `SELECT r.*, COALESCE(r.room_price, rm.room_price) AS room_price, COALESCE(rm.room_number, 'N/A') AS room_number, rm.room_name, rm.room_label, rm.room_type, GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1) AS nights, COALESCE(r.total_price, COALESCE(r.room_price, rm.room_price) * GREATEST(DATEDIFF(r.check_out_date, r.check_in_date), 1)) AS total_price, COALESCE(r.discount, 0) AS discount, COALESCE(r.overtime_hours, 0) AS overtime_hours FROM reservations r LEFT JOIN rooms rm ON r.room_id = rm.id ORDER BY r.id DESC`;
             const rows = await this.db.query(sql);
             const reservations = rows.map((row) => {
                 const first = this.crypto.decrypt(row.first_name);
@@ -965,6 +979,10 @@ class ReservationController {
             if (Object.prototype.hasOwnProperty.call(req.body, 'discount')) {
                 const parsedDiscount = Number(req.body.discount);
                 if (!Number.isNaN(parsedDiscount)) updates.discount = parsedDiscount;
+            }
+            if (Object.prototype.hasOwnProperty.call(req.body, 'overtime_hours')) {
+                const parsedOvertime = Number(req.body.overtime_hours);
+                if (!Number.isNaN(parsedOvertime) && parsedOvertime >= 0) updates.overtime_hours = parsedOvertime;
             }
             if (!Object.keys(updates).length) {
                 return res.status(400).json({ error: 'No valid fields to update.' });

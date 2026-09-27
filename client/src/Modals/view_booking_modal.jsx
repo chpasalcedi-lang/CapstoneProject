@@ -23,6 +23,10 @@ function ViewBookingModal({ show, onClose, booking }) {
     const status = booking.res_status?.toLowerCase() || 'pending';
     const totalPrice = Number(booking.total_price) || 0;
     const discount = Number(booking.discount) || 0;
+    const overtimeHours = Number(booking.overtime_hours || 0);
+    const overtimeCharge = overtimeHours > 0 ? overtimeHours * 150 : 0;
+    const roomSubtotal = Math.max(0, totalPrice - overtimeCharge);
+    const receiptTotal = Math.max(0, roomSubtotal + overtimeCharge - discount);
     const guestName = `${booking.first_name || ''} ${booking.last_name || ''}`.trim() || '—';
 
     return (
@@ -127,9 +131,12 @@ function ViewBookingModal({ show, onClose, booking }) {
                                 <div><span>Room</span><strong>{booking.room_number || 'Unassigned'}</strong></div>
                                 <div><span>Guests</span><strong>{booking.num_guests ?? '—'}</strong></div>
                             </div>
-                            <div className="receipt-line"><span>Subtotal</span><strong>₱{formatCurrency(totalPrice + discount)}</strong></div>
+                            <div className="receipt-line"><span>Subtotal</span><strong>₱{formatCurrency(roomSubtotal)}</strong></div>
+                            {overtimeHours > 0 && (
+                                <div className="receipt-line"><span>Overtime ({overtimeHours} hrs)</span><strong>₱{formatCurrency(overtimeCharge)}</strong></div>
+                            )}
                             <div className="receipt-line"><span>Discount</span><strong>- ₱{formatCurrency(discount)}</strong></div>
-                            <div className="receipt-total"><span>Total</span><strong>₱{formatCurrency(totalPrice)}</strong></div>
+                            <div className="receipt-total"><span>Total</span><strong>₱{formatCurrency(receiptTotal)}</strong></div>
                         </div>
                     </div>
                 )}

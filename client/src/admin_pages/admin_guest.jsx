@@ -675,6 +675,7 @@ function AdminGuest() {
                                             <th>Email</th>
                                             <th>Check-in</th>
                                             <th>Check-out</th>
+                                            <th>Overtime</th>
                                             <th className="actions-header">Actions</th>
                                         </tr>
                                     </thead>    
@@ -700,6 +701,7 @@ function AdminGuest() {
                                                 <td>{booking.email}</td>
                                                 <td>{formatBookingDate(booking.check_in_date)}</td>
                                                 <td>{formatBookingDate(booking.check_out_date)}</td>
+                                                <td>{Number(booking.overtime_hours || 0)} hrs</td>
                                                 <td className="actions-cell">
                                                     <button className="btn guest btn-primary" onClick={() => handleView(booking)}>
                                                         view

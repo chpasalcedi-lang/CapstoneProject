@@ -456,20 +456,20 @@ function AdminBooking() {
                           </div>
                               <ul className="dashboard-nav-links">
                                   <p>dashboard</p>
-                                  <li><Link to="/Dashboard">Dashboard</Link></li>
-                                  <li><Link to="/Users">User</Link></li>
-                                  <li><Link to="/Sales">Sales</Link></li>
+                                  <li><Link to="/Dashboard" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-gauge-high"></i></span><span>Dashboard</span></Link></li>
+                                  <li><Link to="/Users" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-user"></i></span><span>User</span></Link></li>
+                                  <li><Link to="/Sales" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-chart-line"></i></span><span>Sales</span></Link></li>
                                   <p>management</p>
-                                  <li><Link to="/Rooms">Rooms</Link></li>
-                                  <li  className="active"><Link to="/Booking">Booking</Link></li>
-                                  <li><Link to="/Guest">Guest / Feedback</Link></li>
+                                  <li><Link to="/Rooms" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-bed"></i></span><span>Rooms</span></Link></li>
+                                  <li className="active"><Link to="/Booking" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-calendar-check"></i></span><span>Booking</span></Link></li>
+                                  <li><Link to="/Guest" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-users"></i></span><span>Guest / Feedback</span></Link></li>
                                   <div className="dasboard-admin-status">
                                       <Link to="/Profile">
                                           <div className="dasboard-admin-status-content">
                                               <h1>System admin</h1>
-                                              <p className="admin-status ">admin</p>
+                                              <p className="admin-status ">{adminData.role}</p>
                                           </div>
-                                          <div className="dasboard-admin-profile"> Ap </div>
+                                          <div className="dasboard-admin-profile">{adminData.name.charAt(0).toUpperCase()}</div>
                                       </Link>
                                   </div>
                             </ul>
@@ -482,13 +482,13 @@ function AdminBooking() {
                 </div>
                 <ul className="dashboard-nav-links" onClick={() => setDrawerOpen(false)}>
                     <p>dashboard</p>
-                    <li><Link to="/Dashboard">Dashboard</Link></li>
-                    <li><Link to="/Users">User</Link></li>
-                    <li><Link to="/Sales">Sales</Link></li>
+                    <li><Link to="/Dashboard" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-gauge-high"></i></span><span>Dashboard</span></Link></li>
+                    <li><Link to="/Users" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-user"></i></span><span>User</span></Link></li>
+                    <li><Link to="/Sales" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-chart-line"></i></span><span>Sales</span></Link></li>
                     <p>management</p>
-                    <li><Link to="/Rooms">Rooms</Link></li>
-                    <li className="active"><Link to="/Booking">Booking</Link></li>
-                    <li><Link to="/Guest">Guest / Feedback</Link></li>
+                    <li><Link to="/Rooms" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-bed"></i></span><span>Rooms</span></Link></li>
+                    <li className="active"><Link to="/Booking" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-calendar-check"></i></span><span>Booking</span></Link></li>
+                    <li><Link to="/Guest" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '16px', textAlign: 'center' }}><i className="fa-solid fa-users"></i></span><span>Guest / Feedback</span></Link></li>
                     <div className="dasboard-admin-status">
                         <Link to="/Profile">
                             <div className="dasboard-admin-status-content">

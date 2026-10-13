@@ -128,7 +128,7 @@ function LandingEventModal({ show, onClose, room, onSaved }) {
     };
   }, [show, room, form.start_date]);
 
-  if (!show || !room) return null;
+  if (!show) return null;
 
   const selectedRooms = eventRooms.filter((item) => selectedRoomIds.includes(String(item.id)));
   const selectedRoom = selectedRooms[0] || null;

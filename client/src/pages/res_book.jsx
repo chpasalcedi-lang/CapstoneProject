@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import "../pagescss/res_book.css"; 
 import BookReservationModal from "../Modals/book_reservation_modal.jsx";
 import EventBookingModal from "../Modals/event_booking_modal.jsx";
+import LandingEventModal from "../Modals/landing_event_modal.jsx";
 import ViewLanding from "../Modals/view_landing.jsx";
 import LandingUpdate from "../Modals/landingUpdate.jsx";
 import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
@@ -42,6 +43,9 @@ function ResBook() {
   const [showEditEventModal, setShowEditEventModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [loadingReservations, setLoadingReservations] = useState(false);
+  const [showEventBookingModal1, setShowEventBookingModal1] = useState(false);
+  
+
 
   const getDisplayStatus = (status, hasCancellationRequest = false) => {
     if (hasCancellationRequest) return 'Cancellation requested';
@@ -439,7 +443,18 @@ function ResBook() {
           })
         : updated;
 
-      return filtered;
+      const getRoomTypeOrder = (room) => {
+        const type = String(room.room_type || '').toLowerCase();
+        if (type.includes('family')) return 0;
+        if (type.includes('couple') || type.includes('double')) return 1;
+        if (type.includes('event')) return 2;
+        return 3;
+      };
+
+      return filtered
+        .map((room, index) => ({ room, index }))
+        .sort((a, b) => getRoomTypeOrder(a.room) - getRoomTypeOrder(b.room) || a.index - b.index)
+        .map(({ room }) => room);
     }, [roomType, checkIn, data, isRoomOccupiedNow, isRoomUnavailableOnDate]);
 
     useEffect(() => {
@@ -662,9 +677,19 @@ function ResBook() {
       <section className="booking-calendar">
         <div className="booking-calendar-content">
           <div className="booking-text">
-            <span className="booking-eyebrow">Find Your Perfect Room</span>
-            <h1>Room <strong>Availability</strong></h1>
+            <div className="booking-text-copy">
+              <span className="booking-eyebrow">Find Your Perfect Room</span>
+              <h1>Room <strong>Availability</strong></h1>
+              <span>Planning an event and need a function room or have special requests? Customize your booking by adding a function room, guest rooms, or both. Book now and secure your preferred spaces today!</span>
+            </div>
+            <div className="booking-text-action">
+              <button className="booking-btn booking-event-btn" type="button" onClick={() => setShowEventBookingModal1(true)}>
+                Book an event now
+              </button>
+            </div>
           </div>
+        
+          
        
           <div className="booking-search-wrap">
             <div className="booking-search-bar">
@@ -826,7 +851,17 @@ function ResBook() {
           setSelectedEventBooking(null);
           if (userEmail) fetchUserReservations(userEmail);
         }}
+          />
+      <LandingEventModal
+        show={showEventBookingModal1}
+        onClose={() => setShowEventBookingModal1(false)}
+        room={null}
+        onSaved={() => {
+          setShowEventBookingModal1(false);
+          fetchData();
+        }}
       />
+     
     </div>
   );
 }   

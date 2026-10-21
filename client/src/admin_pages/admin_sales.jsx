@@ -308,7 +308,7 @@ function AdminSales() {
                 }
             ]
         };
-    }, [chartMode, selectedYear, selectedMonthIndex, guestArrivals, bookings, parseDate, yearLabels]);
+    }, [chartMode, yearLabels, selectedYear, selectedMonthIndex, guestArrivals, bookings, eventBookings, parseDate]);
 
     const pieChartOptions = {
         responsive: true,

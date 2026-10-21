@@ -1,6 +1,7 @@
 import React from 'react';
 import Home from './pages/landing_page';
 import Reservation from './pages/res_book';
+import LandingGuide from './pages/landing-guide';
 import UserLogin from './admin_pages/user_login';
 import Dashboard from './admin_pages/admin_dasboard';
 import Rooms from './admin_pages/admin_rooms';
@@ -11,6 +12,7 @@ import AdminUsersAcc from './admin_pages/admin_usersAcc';
 import AdminProfile from './admin_pages/admin_profile';
 import AdminLoginForm from './admin_pages/admin_loginform';
 import AdminSales from './admin_pages/admin_sales';
+import AdminFloatingModal from './Modals/admin_flowting_modals';
 
 
 
@@ -26,25 +28,35 @@ function RequireAuth({ children }) {
   return children;
 }
 
+function AdminPage({ children }) {
+  return (
+    <RequireAuth>
+      {children}
+      <AdminFloatingModal />
+    </RequireAuth>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/Home" replace />} />
         <Route path="/Home" element={<Home />} />
+        <Route path="/Guide" element={<LandingGuide />} />
         <Route path="/Reservation" element={<Reservation />} />
         <Route path="/Login" element={<UserLogin />} />
 
         <Route path="/AdminLogin" element={<AdminLoginForm />} />
 
-        <Route path="/Dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
-        <Route path="/Rooms" element={<RequireAuth><Rooms /></RequireAuth>} />
-        <Route path="/Booking" element={<RequireAuth><Booking /></RequireAuth>} />
-        <Route path="/Guest" element={<RequireAuth><Guest /></RequireAuth>} />
-        <Route path="/AddGuest" element={<RequireAuth><AdminAddGuest /></RequireAuth>} />
-        <Route path="/Users" element={<RequireAuth><AdminUsersAcc /></RequireAuth>} />
-        <Route path="/Profile" element={<RequireAuth><AdminProfile /></RequireAuth>} />
-        <Route path="/Sales" element={<RequireAuth><AdminSales /></RequireAuth>} />
+        <Route path="/Dashboard" element={<AdminPage><Dashboard /></AdminPage>} />
+        <Route path="/Rooms" element={<AdminPage><Rooms /></AdminPage>} />
+        <Route path="/Booking" element={<AdminPage><Booking /></AdminPage>} />
+        <Route path="/Guest" element={<AdminPage><Guest /></AdminPage>} />
+        <Route path="/AddGuest" element={<AdminPage><AdminAddGuest /></AdminPage>} />
+        <Route path="/Users" element={<AdminPage><AdminUsersAcc /></AdminPage>} />
+        <Route path="/Profile" element={<AdminPage><AdminProfile /></AdminPage>} />
+        <Route path="/Sales" element={<AdminPage><AdminSales /></AdminPage>} />
 
         
 

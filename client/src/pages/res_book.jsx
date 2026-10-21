@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import apiClient from '../api';
 import Swal from "sweetalert2";
 import "../pagescss/res_book.css"; 
@@ -14,6 +14,7 @@ import EditEventModal from "../Modals/edit_event_modal.jsx";
 import "../pagescss/landing_page.css";
 
 function ResBook() {
+  const location = useLocation();
   const navigate = useNavigate();
   const userEmail = localStorage.getItem('userEmail');
 
@@ -45,6 +46,33 @@ function ResBook() {
   const [loadingReservations, setLoadingReservations] = useState(false);
   const [showEventBookingModal1, setShowEventBookingModal1] = useState(false);
   
+
+  const handleEventBookingClick = () => {
+    if (!userEmail) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Login required',
+        text: 'Please log in with your email before booking.',
+      }).then(() => {
+        navigate('/Login', {
+          state: { returnTo: '/Reservation', openEventBooking: true },
+        });
+      });
+      return;
+    }
+
+    setShowEventBookingModal1(true);
+  };
+
+  useEffect(() => {
+    if (location.state?.openEventBooking) {
+      setShowEventBookingModal1(true);
+      navigate(`${location.pathname}${location.search}${location.hash}`, {
+        replace: true,
+        state: null,
+      });
+    }
+  }, [location, navigate]);
 
 
   const getDisplayStatus = (status, hasCancellationRequest = false) => {
@@ -528,6 +556,7 @@ function ResBook() {
               <li><Link to="/Home" onClick={scrollToTop}>Home</Link></li>
               <li><Link to="/Reservation">Room</Link></li>
               <li><Link to="/Home#about-pool">About</Link></li>
+              <li><Link to="/Guide">Guide</Link></li>
             </ul>
 
             <div className="nav-actions">
@@ -671,6 +700,7 @@ function ResBook() {
           <Link to="/Home" onClick={() => { closeMenu(); scrollToTop(); }}>Home</Link>
           <Link to="/Reservation" onClick={closeMenu}>Room</Link>
           <Link to="/Home#about-pool" onClick={closeMenu}>About</Link>
+          <Link to="/Guide" onClick={closeMenu}>Guide</Link>
         </div>
       </nav>
 
@@ -683,7 +713,7 @@ function ResBook() {
               <span>Planning an event and need a function room or have special requests? Customize your booking by adding a function room, guest rooms, or both. Book now and secure your preferred spaces today!</span>
             </div>
             <div className="booking-text-action">
-              <button className="booking-btn booking-event-btn" type="button" onClick={() => setShowEventBookingModal1(true)}>
+              <button className="booking-btn booking-event-btn" type="button" onClick={handleEventBookingClick}>
                 Book an event now
               </button>
             </div>

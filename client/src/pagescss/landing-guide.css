@@ -1,0 +1,127 @@
+.landing-guide-page {
+  min-height: 100vh;
+  padding-top: 80px;
+  background: #f5f4f0;
+}
+
+.landing-guide-page .landing-btn {
+  text-decoration: none;
+}
+
+.landing-guide-logo {
+  text-decoration: none;
+}
+
+.landing-guide {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 72px 32px 96px;
+}
+
+.landing-guide-header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.landing-guide-eyebrow {
+  color: #b4861b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.landing-guide-header h1 {
+  margin: 12px 0;
+  color: #0f1e2e;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 5vw, 3.5rem);
+}
+
+.landing-guide-header p {
+  margin: 0;
+  color: #59616a;
+  font-size: 1.05rem;
+}
+
+.landing-guide-video-section {
+  margin-bottom: 28px;
+}
+
+.landing-guide-video-section h2 {
+  margin: 0 0 16px;
+  color: #0f1e2e;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+}
+
+.landing-guide-video {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  border-radius: 10px;
+  background: #0f1e2e;
+}
+
+.landing-guide-section {
+  margin-bottom: 18px;
+  padding: 24px 28px;
+  border: 1px solid rgba(15, 30, 46, 0.08);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.landing-guide-section h2 {
+  margin: 0 0 12px;
+  color: #0f1e2e;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+}
+
+.landing-guide-section h3 {
+  margin: 18px 0 8px;
+  color: #b4861b;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.landing-guide-section ul {
+  margin: 0;
+  padding-left: 22px;
+  color: #59616a;
+  line-height: 1.8;
+}
+
+.landing-guide-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.landing-guide-home-link {
+  color: #0f1e2e;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.landing-guide-home-link:hover,
+.landing-guide-home-link:focus {
+  color: #0f1e2e;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .landing-guide {
+    padding: 48px 20px 64px;
+  }
+
+  .landing-guide-section {
+    padding: 20px;
+  }
+
+  .landing-guide-actions {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

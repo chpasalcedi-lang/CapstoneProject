@@ -31,72 +31,65 @@ function AdminRooms() {
 
     const isAdmin = adminData.role?.toString().toLowerCase() === 'admin';
 
-    const fetchData = () => {
-        apiClient.get("/get_rooms")
-            .then((res) => {
-                const rooms = res.data || [];
-                
-                // If room has maintenance status set, use that. Otherwise calculate occupancy.
-                const mapped = rooms.map((room) => {
-                    // If admin set maintenance status, use that.
-                    if (room.room_status?.toLowerCase() === 'maintenance') {
-                        return {
-                            ...room,
-                            room_status: 'Maintenance',
-                            _isMaintenance: true
-                        };
-                    }
-                    return room;
-                });
-                setRoomsRaw(mapped);
-                
-                // For non-maintenance rooms, fetch reservations to determine occupancy
-                apiClient.get('/get_reservations')
-                    .then((rres) => {
-                        const reservations = rres.data || [];
-                        const today = new Date();
-                        const occupiedRoomIds = new Set();
-                        
-                        reservations.forEach((r) => {
-                            if (!r.room_id) return;
-                            const status = (r.res_status || '').toLowerCase();
-                            if (status !== 'confirmed' && status !== 'pending') return;
-                            const rStart = new Date(r.check_in_date);
-                            const rEnd = new Date(r.check_out_date);
-                            if (today >= rStart && today < rEnd) {
-                                occupiedRoomIds.add(Number(r.room_id));
-                            }
-                        });
-                        
-                        const finalMapped = mapped.map((room) => {
-                            // If maintenance, keep that status
-                            if (room._isMaintenance) {
-                                return room;
-                            }
-                            // Otherwise show occupancy
-                            return {
-                                ...room,
-                                room_status: occupiedRoomIds.has(Number(room.id)) ? 'Occupied' : 'Available'
-                            };
-                        });
-                        
-                        setReservations(reservations);
-                        setData(finalMapped);
-                    })
-                    .catch((err) => {
-                        console.error("Error fetching reservations:", err);
-                        const defaultMapped = mapped.map((room) => {
-                            if (room._isMaintenance) return room;
-                            return { ...room, room_status: 'Available' };
-                        });
-                        setData(defaultMapped);
-                    });
-            })
-            .catch((err) => console.error("Error sa pagkuha sang data:", err));
+    const fetchData = async () => {
+        const [roomsResult, reservationsResult] = await Promise.allSettled([
+            apiClient.get('/get_rooms'),
+            apiClient.get('/get_reservations'),
+        ]);
+
+        if (roomsResult.status === 'rejected') {
+            console.error("Error sa pagkuha sang data:", roomsResult.reason);
+            return;
+        }
+
+        const rooms = roomsResult.value.data || [];
+        const mapped = rooms.map((room) => {
+            if (room.room_status?.toLowerCase() === 'maintenance') {
+                return {
+                    ...room,
+                    room_status: 'Maintenance',
+                    _isMaintenance: true
+                };
+            }
+            return room;
+        });
+        setRoomsRaw(mapped);
+
+        if (reservationsResult.status === 'rejected') {
+            console.error("Error fetching reservations:", reservationsResult.reason);
+            setData(mapped.map((room) => (
+                room._isMaintenance ? room : { ...room, room_status: 'Available' }
+            )));
+            return;
+        }
+
+        const reservations = reservationsResult.value.data || [];
+        const today = new Date();
+        const occupiedRoomIds = new Set();
+
+        reservations.forEach((reservation) => {
+            if (!reservation.room_id) return;
+            const status = (reservation.res_status || '').toLowerCase();
+            if (status !== 'confirmed' && status !== 'pending') return;
+            const checkIn = new Date(reservation.check_in_date);
+            const checkOut = new Date(reservation.check_out_date);
+            if (today >= checkIn && today < checkOut) {
+                occupiedRoomIds.add(Number(reservation.room_id));
+            }
+        });
+
+        setReservations(reservations);
+        setData(mapped.map((room) => {
+            if (room._isMaintenance) return room;
+            return {
+                ...room,
+                room_status: occupiedRoomIds.has(Number(room.id)) ? 'Occupied' : 'Available'
+            };
+        }));
     };
 
     useEffect(() => {
-        fetchData();
+        Promise.resolve().then(fetchData);
     }, []);
 
     useEffect(() => {
@@ -383,7 +376,7 @@ function AdminRooms() {
                         {data.map((room, index) => (
                             <div className="rooms-stat-card" key={room.id ?? index}>
                                 <div className="rooms-room-card-img">
-                                    <img src={room.room_image} alt={room.room_name} />
+                                    <img src={room.room_image} alt={room.room_name} loading="lazy" decoding="async" />
                                     <span className="rooms-room-badge">{room.room_type}</span>
                                     {room.room_type?.toLowerCase() !== 'event' && (
                                         <span className="rooms-room-rating">Room : {room.room_number}</span>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import apiClient from '../api';
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -32,6 +32,7 @@ const formatRoomPrice = (value) => {
 
 function LandingPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [feedback, setFeedback] = useState({ name: '', email: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -174,6 +175,33 @@ function LandingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleEventBookingClick = () => {
+    if (!userEmail) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Login required',
+        text: 'Please log in with your email before booking.',
+      }).then(() => {
+        navigate('/Login', {
+          state: { returnTo: '/Home', openEventBooking: true },
+        });
+      });
+      return;
+    }
+
+    setShowEventBookingModal(true);
+  };
+
+  useEffect(() => {
+    if (location.state?.openEventBooking) {
+      setShowEventBookingModal(true);
+      navigate(`${location.pathname}${location.search}${location.hash}`, {
+        replace: true,
+        state: null,
+      });
+    }
+  }, [location, navigate]);
+
   useEffect(() => {
     if (location.hash === "#about-pool") {
       const section = document.getElementById("about-pool");
@@ -315,6 +343,7 @@ function LandingPage() {
               <li><Link to="/Home" onClick={scrollToTop}>Home</Link></li>
               <li><Link to="/Reservation">Room</Link></li>
               <li><Link to="/Home#about-pool">About</Link></li>
+              <li><Link to="/Guide">Guide</Link></li>
             </ul>
             <div className="nav-actions">
               {userEmail ? (
@@ -451,6 +480,7 @@ function LandingPage() {
           <Link to="/Home" tabIndex={menuOpen ? 0 : -1} onClick={() => { closeMenu(); scrollToTop(); }}>Home</Link>
           <Link to="/Reservation" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>Room</Link>
           <a href="#about-pool" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>About</a>
+          <Link to="/Guide" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>Guide</Link>
         </div>
       </nav>
       
@@ -644,7 +674,7 @@ function LandingPage() {
           <h1 className="event-info-title">A room for every kind of gathering.</h1>
           <div className="event-info-action-row">
             <p className="event-info-subtitle">Choose a private stay or an open, welcoming space for your next celebration at Messiah.</p>
-            <button className="event-info-cta" type="button" onClick={() => setShowEventBookingModal(true)}>
+            <button className="event-info-cta" type="button" onClick={handleEventBookingClick}>
               Book an event 
             </button>
           </div>
@@ -680,7 +710,7 @@ function LandingPage() {
                       <li>Free high-speed Wi-Fi</li>
                         <li>Private bathroom with hot and cold shower</li>
                       <li>Bath essentials and fresh towels</li>
-                      <li>Good for 2-3 guests</li>
+                      <li>Good for 2 guests</li>
                     </ul>
                   </div>
                 </div>
@@ -730,7 +760,7 @@ function LandingPage() {
               </div>
               <div className="event-note-strip event-note-strip--action">
                 <span className="event-note-dash">—</span>
-                <span>Planning an event without a function room or have special requests? Customize your booking by adding a function room, guest rooms, or both. Click here to <a className="event-note-link" onClick={() => setShowEventBookingModal(true)}>book an event</a>.</span>
+                <span>Planning an event without a function room or have special requests? Customize your booking by adding a function room, guest rooms, or both. Click here to <a className="event-note-link" onClick={handleEventBookingClick}>book an event</a>.</span>
               </div>
               <div className="event-note-strip event-note-strip--contact">
                 <span className="event-note-dash">—</span>
@@ -756,7 +786,7 @@ function LandingPage() {
         </div>
       </section>
 
-      <section className="landing-contact">
+      <section className="landing-contact" id="contact">
         <div className="landing-contact-content-wrapper">
           <div className="landing-contact-content-main">
             <span className="landing-contact-eyebrow">Get in Touch</span>
@@ -778,7 +808,7 @@ function LandingPage() {
             </div>
           </div>
 
-          <div className="landing-feedback">
+          <div className="landing-feedback" >
             <h1>Tell us about your experience</h1>
             <p>
               Your feedback helps us improve and provide the best
@@ -876,7 +906,7 @@ function LandingPage() {
             <Link to="/Home" onClick={scrollToTop}>Home</Link>
             <Link to="/Reservation">Rooms</Link>
             <a href="#about-pool">About</a>
-            <a href="mailto:messiahinlandresort@gmail.com">Contact</a>
+            <a href="#contact">Contact</a>
           </nav>
 
           <div className="landing-footer-contact">

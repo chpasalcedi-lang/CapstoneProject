@@ -73,7 +73,7 @@ const LandingGuide = () => (
         <h2>Facilities and Services</h2>
         <ul>
           <li>Enjoy our swimming pool and other resort amenities during your stay.</li>
-          <li>Room service is available from 7:00 AM to 10:00 PM.</li>
+          <li>Room service is available 24/7.</li>
           <li>Wi-Fi is available throughout the resort.</li>
         </ul>
       </section>

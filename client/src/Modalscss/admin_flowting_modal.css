@@ -1,19 +1,8 @@
-.admin-floating-control {
+.admin-floating-trigger {
   position: fixed;
   right: 24px;
   bottom: 24px;
   z-index: 950;
-}
-
-.admin-floating-label {
-  color: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.admin-floating-trigger {
-  position: relative;
   display: flex;
   box-sizing: border-box;
   width: auto;
@@ -179,21 +168,6 @@
   font-size: 12px;
 }
 
-.admin-today-list {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-color: #aabdb6 #f1f5f3;
-  scrollbar-width: thin;
-}
-
-.admin-today-list--reservations {
-  max-height: 300px;
-}
-
-.admin-today-list--guests {
-  max-height: 246px;
-}
-
 .admin-today-item {
   display: flex;
   box-sizing: border-box;
@@ -202,14 +176,6 @@
   gap: 12px;
   padding: 13px 0;
   border-top: 1px solid #edf1ef;
-}
-
-.admin-today-list--reservations .admin-today-item {
-  height: 100px;
-}
-
-.admin-today-list--guests .admin-today-item {
-  height: 82px;
 }
 
 .admin-today-item-details {
@@ -280,20 +246,13 @@
 }
 
 @media (max-width: 600px) {
-  .admin-floating-control {
+  .admin-floating-trigger {
     right: 16px;
     bottom: 16px;
-  }
-
-  .admin-floating-trigger {
     min-width: 54px;
     height: 54px;
     padding: 0 15px;
     gap: 7px;
-  }
-
-  .admin-floating-label {
-    font-size: 12px;
   }
 
   .admin-floating-trigger svg {

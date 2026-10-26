@@ -81,6 +81,10 @@ function AdminFloatingModal() {
   }, []);
 
   useEffect(() => {
+    fetchTodayItems();
+  }, [fetchTodayItems]);
+
+  useEffect(() => {
     if (isOpen) fetchTodayItems();
   }, [isOpen, fetchTodayItems]);
 
@@ -149,24 +153,21 @@ function AdminFloatingModal() {
     <>
       {!selectedReservation && !selectedGuest && (
         <>
-          <div className="admin-floating-control">
-            <button
-              type="button"
-              className="admin-floating-trigger"
-              onClick={() => setIsOpen((open) => !open)}
-              aria-label={isOpen ? 'Close today’s arrivals' : 'Open today’s arrivals'}
-              aria-expanded={isOpen}
-            >
-              <span className="admin-floating-label">Today’s arrivals</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 2v4m10-4v4M4 9h16M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
-                <path d="m8 15 2.2 2.2L16 12" />
-              </svg>
-              {(reservations.length + guestArrivals.length) > 0 && (
-                <span className="admin-floating-count">{reservations.length + guestArrivals.length}</span>
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            className="admin-floating-trigger"
+            onClick={() => setIsOpen((open) => !open)}
+            aria-label={isOpen ? 'Close today\'s arrivals' : 'Open today\'s arrivals'}
+            aria-expanded={isOpen}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 2v4m10-4v4M4 9h16M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+              <path d="m8 15 2.2 2.2L16 12" />
+            </svg>
+            {(reservations.length + guestArrivals.length) > 0 && (
+              <span className="admin-floating-count">{reservations.length + guestArrivals.length}</span>
+            )}
+          </button>
           {isOpen && (
             <div className="admin-today-overlay" onClick={() => setIsOpen(false)}>
               <section
@@ -179,7 +180,7 @@ function AdminFloatingModal() {
                 <header className="admin-today-header">
                   <div>
                     <p className="admin-today-eyebrow">ADMIN ARRIVALS</p>
-                    <h2 id="admin-today-title">Today’s list</h2>
+                    <h2 id="admin-today-title">Today's list</h2>
                     <p>{formatDate(today)}</p>
                   </div>
                   <button type="button" className="admin-today-close" onClick={() => setIsOpen(false)} aria-label="Close">
@@ -188,28 +189,20 @@ function AdminFloatingModal() {
                 </header>
                 <div className="admin-today-content">
                   {loading ? (
-                    <p className="admin-today-message">Loading today’s arrivals…</p>
+                    <p className="admin-today-message">Loading today's arrivals…</p>
                   ) : error ? (
                     <p className="admin-today-message admin-today-error">{error}</p>
                   ) : (
                     <>
                       <section className="admin-today-section">
                         <h3>Reservations <span>{reservations.length}</span></h3>
-                        {reservationItems.length ? (
-                          <div className="admin-today-list admin-today-list--reservations">
-                            {reservationItems}
-                          </div>
-                        ) : (
+                        {reservationItems.length ? reservationItems : (
                           <p className="admin-today-empty">No reservations checking in today.</p>
                         )}
                       </section>
                       <section className="admin-today-section">
                         <h3>Guest arrivals <span>{guestArrivals.length}</span></h3>
-                        {guestItems.length ? (
-                          <div className="admin-today-list admin-today-list--guests">
-                            {guestItems}
-                          </div>
-                        ) : (
+                        {guestItems.length ? guestItems : (
                           <p className="admin-today-empty">No guest arrivals added today.</p>
                         )}
                       </section>

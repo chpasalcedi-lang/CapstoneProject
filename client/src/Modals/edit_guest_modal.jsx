@@ -127,7 +127,8 @@ function getLegacyBreakdown(guest, corkage) {
 
 function EditGuestModal({ show, onClose, guest, onUpdate }) {
   const [form, setForm] = useState({
-    group_name: '',
+    full_name: '',
+    contact_number: '',
     number_of_children: 0,
     number_of_adults: 0,
     corkage: defaultCorkageState,
@@ -161,7 +162,8 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm({
-      group_name: guest.group_name || '',
+      full_name: guest.full_name || '',
+      contact_number: guest.contact_number || '',
       number_of_children: breakdown.children,
       number_of_adults: breakdown.adults,
       corkage: parsedCorkage,
@@ -253,7 +255,8 @@ function EditGuestModal({ show, onClose, guest, onUpdate }) {
 
         <div className="edit-guest-form-body">
           <form id="edit-guest-form" onSubmit={submit}>
-            <label>Group name<input value={form.group_name} onChange={(event) => setForm({ ...form, group_name: event.target.value })} /></label>
+            <label>Full name<input value={form.full_name} onChange={(event) => setForm({ ...form, full_name: event.target.value })} /></label>
+            <label>Contact number<input type="tel" maxLength="32" value={form.contact_number} onChange={(event) => setForm({ ...form, contact_number: event.target.value })} /></label>
             <div className="edit-guest-count-row">
               <label className="edit-guest-count-field">
                 <span className="edit-guest-count-label">Children / senior / PWD</span>

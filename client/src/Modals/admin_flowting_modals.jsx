@@ -135,7 +135,7 @@ function AdminFloatingModal() {
   const guestItems = guestArrivals.map((guest) => (
     <article className="admin-today-item" key={`guest-${guest.id}`}>
       <div className="admin-today-item-details">
-        <h3>{guest.group_name || 'Walk-in guest'}</h3>
+        <h3>{guest.full_name || 'Walk-in guest'}</h3>
         <p>{guest.number_of_guests || 0} guest(s){formatTime(guest.created_at) ? ` · Added ${formatTime(guest.created_at)}` : ''}</p>
         <p>Total ₱{formatCurrency(guest.total_price)}</p>
       </div>

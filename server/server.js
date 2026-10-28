@@ -137,11 +137,14 @@ class Server {
         this.crypto = new CryptoService(process.env.SECRET_KEY || DEFAULT_SECRET_KEY);
 
         this.setupMiddleware();
-        this.setupRoutes();
         this.reservationSourceReady = this.ensureReservationSourceColumn();
         this.reservationOvertimeReady = this.ensureReservationOvertimeColumn();
-        this.guestColumnsReady = this.ensureGuestColumns();
+        this.guestColumnsReady = this.ensureGuestColumns().catch((error) => {
+            console.error('Unable to prepare guest columns:', error.message);
+            return error;
+        });
         this.eventBookingRoomsReady = this.ensureEventBookingRoomsTable();
+        this.setupRoutes();
         this.db.verifyConnection();
     }
 
@@ -182,21 +185,36 @@ class Server {
     }
 
     async ensureGuestColumns() {
+        const existingColumns = await this.db.query(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'guest'"
+        );
+        const columnNames = new Set(existingColumns.map(({ COLUMN_NAME }) => COLUMN_NAME));
+
+        if (!columnNames.has('full_name')) {
+            await this.db.query('ALTER TABLE guest ADD COLUMN full_name VARCHAR(255) NULL');
+            if (columnNames.has('group_name')) {
+                await this.db.query(
+                    "UPDATE guest SET full_name = group_name WHERE (full_name IS NULL OR full_name = '') AND group_name IS NOT NULL"
+                );
+            }
+        } else if (columnNames.has('group_name')) {
+            await this.db.query(
+                "UPDATE guest SET full_name = group_name WHERE (full_name IS NULL OR full_name = '') AND group_name IS NOT NULL"
+            );
+        }
+
         const columns = [
             "ALTER TABLE guest ADD COLUMN number_of_children INT NOT NULL DEFAULT 0",
             "ALTER TABLE guest ADD COLUMN number_of_adults INT NOT NULL DEFAULT 0",
             "ALTER TABLE guest ADD COLUMN discount DECIMAL(10,2) NOT NULL DEFAULT 0",
             "ALTER TABLE guest ADD COLUMN equipment VARCHAR(255) NOT NULL DEFAULT 'No Equipment'",
+            "ALTER TABLE guest ADD COLUMN contact_number VARCHAR(32) NULL",
         ];
 
         for (const sql of columns) {
-            try {
-                await this.db.query(sql);
-            } catch (error) {
-                if (!String(error.message || '').includes('Duplicate column')) {
-                    console.error('Unable to prepare guest columns:', error.message);
-                }
-            }
+            await this.db.query(sql).catch((error) => {
+                if (!String(error.message || '').includes('Duplicate column')) throw error;
+            });
         }
     }
 
@@ -219,7 +237,7 @@ class Server {
         new AdminController(this.app, this.db, this.crypto);
         new ReservationController(this.app, this.db, this.crypto);
         new FeedbackController(this.app, this.db, this.crypto);
-        new GuestArrivalController(this.app, this.db);
+        new GuestArrivalController(this.app, this.db, this.guestColumnsReady);
     }
 }
 
@@ -1118,8 +1136,9 @@ class FeedbackController {
 }
 
 class GuestArrivalController {
-    constructor(app, db) {
+    constructor(app, db, guestColumnsReady) {
         this.db = db;
+        this.guestColumnsReady = guestColumnsReady;
         app.post('/add_guest_arrival', this.addGuestArrival.bind(this));
         app.get('/get_guest_arrivals', this.getGuestArrivals.bind(this));
         app.put('/update_guest_arrival/:id', this.updateGuestArrival.bind(this));
@@ -1150,7 +1169,13 @@ class GuestArrivalController {
 
     async addGuestArrival(req, res) {
         try {
-            const groupName = typeof req.body.group_name === 'string' ? req.body.group_name.trim() : null;
+            const schemaError = await this.guestColumnsReady;
+            if (schemaError) {
+                return res.status(500).json({ error: 'Guest table setup failed.', details: schemaError.message });
+            }
+
+            const fullName = typeof req.body.full_name === 'string' ? req.body.full_name.trim() : null;
+            const contactNumber = typeof req.body.contact_number === 'string' ? req.body.contact_number.trim() : '';
             const numberOfChildren = Number(req.body.number_of_children) || 0;
             const numberOfAdults = Number(req.body.number_of_adults) || 0;
             const numberOfGuests = numberOfChildren + numberOfAdults;
@@ -1165,9 +1190,10 @@ class GuestArrivalController {
                 return res.status(400).json({ error: 'Invalid guest arrival values.' });
             }
 
-            const sql = 'INSERT INTO guest (group_name, number_of_children, number_of_adults, number_of_guests, corkage, total_price, discount, created_at, equipment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            const sql = 'INSERT INTO guest (full_name, contact_number, number_of_children, number_of_adults, number_of_guests, corkage, total_price, discount, created_at, equipment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
             const values = [
-                groupName || null,
+                fullName || null,
+                contactNumber || null,
                 numberOfChildren,
                 numberOfAdults,
                 numberOfGuests,
@@ -1187,6 +1213,11 @@ class GuestArrivalController {
 
     async updateGuestArrival(req, res) {
         try {
+            const schemaError = await this.guestColumnsReady;
+            if (schemaError) {
+                return res.status(500).json({ error: 'Guest table setup failed.', details: schemaError.message });
+            }
+
             const guestId = Number(req.params.id);
             const numberOfChildren = Number(req.body.number_of_children) || 0;
             const numberOfAdults = Number(req.body.number_of_adults) || 0;
@@ -1198,9 +1229,17 @@ class GuestArrivalController {
                 return res.status(400).json({ error: 'Invalid guest arrival values.' });
             }
 
+            const updateContactNumber = Object.prototype.hasOwnProperty.call(req.body, 'contact_number');
+            const contactNumber = typeof req.body.contact_number === 'string'
+                ? req.body.contact_number.trim() || null
+                : null;
             const result = await this.db.query(
-                'UPDATE guest SET group_name = ?, number_of_children = ?, number_of_adults = ?, number_of_guests = ?, corkage = ?, total_price = ?, discount = ?, equipment = ? WHERE id = ?',
-                [req.body.group_name?.trim() || null, numberOfChildren, numberOfAdults, numberOfGuests, req.body.corkage || 'No Corkage', totalPrice, discount, equipmentValue, guestId]
+                updateContactNumber
+                    ? 'UPDATE guest SET full_name = ?, contact_number = ?, number_of_children = ?, number_of_adults = ?, number_of_guests = ?, corkage = ?, total_price = ?, discount = ?, equipment = ? WHERE id = ?'
+                    : 'UPDATE guest SET full_name = ?, number_of_children = ?, number_of_adults = ?, number_of_guests = ?, corkage = ?, total_price = ?, discount = ?, equipment = ? WHERE id = ?',
+                updateContactNumber
+                    ? [req.body.full_name?.trim() || null, contactNumber, numberOfChildren, numberOfAdults, numberOfGuests, req.body.corkage || 'No Corkage', totalPrice, discount, equipmentValue, guestId]
+                    : [req.body.full_name?.trim() || null, numberOfChildren, numberOfAdults, numberOfGuests, req.body.corkage || 'No Corkage', totalPrice, discount, equipmentValue, guestId]
             );
             if (result.affectedRows === 0) return res.status(404).json({ error: 'Guest arrival not found' });
             return res.status(200).json({ message: 'Guest arrival updated successfully' });
@@ -1212,14 +1251,19 @@ class GuestArrivalController {
 
     async getGuestArrivals(req, res) {
         try {
-            const rows = await this.db.query(`SELECT id, group_name, number_of_children,
+            const schemaError = await this.guestColumnsReady;
+            if (schemaError) {
+                return res.status(500).json({ error: 'Guest table setup failed.', details: schemaError.message });
+            }
+
+            const rows = await this.db.query(`SELECT id, full_name, contact_number, number_of_children,
                 number_of_adults, number_of_guests, corkage, total_price, discount, equipment,
                 DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
                 FROM guest ORDER BY created_at DESC`);
             return res.status(200).json(rows);
         } catch (error) {
             console.error('Error fetching guest arrivals:', error);
-            return res.status(500).json({ error: 'Database query error!' });
+            return res.status(500).json({ error: 'Database query error!', details: error.message });
         }
     }
 

@@ -61,7 +61,8 @@ function AdminAddGuest() {
     return n.toLocaleString('en-PH', { minimumFractionDigits: hasDecimals ? 2 : 0, maximumFractionDigits: hasDecimals ? 2 : 0 });
   };
   const [values, setValues] = useState({
-    group_name: "",
+    full_name: "",
+    contact_number: "",
     number_of_children: "",
     number_of_guests: "",
     corkage: defaultCorkageState,
@@ -200,7 +201,8 @@ function AdminAddGuest() {
       .join(", ") || "No Equipment";
 
     const payload = {
-      group_name: values.group_name.trim(),
+      full_name: values.full_name.trim(),
+      contact_number: values.contact_number.trim(),
       number_of_children: children,
       number_of_adults: adults,
       number_of_guests: totalGuests,
@@ -218,7 +220,8 @@ function AdminAddGuest() {
         text: 'Guest arrival recorded successfully!',
       });
       setValues({
-        group_name: "",
+        full_name: "",
+        contact_number: "",
         number_of_children: "",
         number_of_guests: "",
         corkage: defaultCorkageState,
@@ -324,8 +327,13 @@ function AdminAddGuest() {
                       <p className="price-display"> Corkage: Food ₱500/group, Beer ₱300/case, Whiskey ₱300/bottle</p>
 
                       <div className="add-form-group">
-                        <label htmlFor="group-name">Group name</label>
-                        <input id="group-name" type="text" name="group_name" value={values.group_name} onChange={handleChange} placeholder="e.g. Santos Family" />
+                        <label htmlFor="full-name">Full name</label>
+                        <input id="full-name" type="text" name="full_name" value={values.full_name} onChange={handleChange} placeholder="e.g. John Doe" />
+                      </div>
+
+                      <div className="add-form-group">
+                        <label htmlFor="contact-number">Contact number</label>
+                        <input id="contact-number" type="tel" name="contact_number" value={values.contact_number} onChange={handleChange} placeholder="e.g. 0917 123 4567" maxLength="32" />
                       </div>
 
                       <div className="add-form-row compact-row">

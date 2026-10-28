@@ -25,6 +25,7 @@ function AdminGuest() {
     const [eventBookings, setEventBookings] = useState([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [guestArrivals, setGuestArrivals] = useState([]);
+    const [guestLoadError, setGuestLoadError] = useState("");
     const [loadingBookings, setLoadingBookings] = useState(true);
     const [loadingEvents, setLoadingEvents] = useState(true);
     const [loadingGuests, setLoadingGuests] = useState(true);
@@ -206,8 +207,10 @@ function AdminGuest() {
             try {
                 const res = await apiClient.get("/get_guest_arrivals");
                 setGuestArrivals(res.data);
+                setGuestLoadError("");
             } catch (err) {
                 console.error("Error fetching guest arrivals:", err);
+                setGuestLoadError(err.response?.data?.details || err.response?.data?.error || err.message || "Unable to load guest records.");
             } finally {
                 setLoadingGuests(false);
             }
@@ -292,7 +295,8 @@ function AdminGuest() {
     const filteredGuestArrivals = guestArrivals.filter((guest) => {
         const query = guestSearchTerm.toLowerCase().trim();
         const searchMatch = [
-            guest.group_name,
+            guest.full_name,
+            guest.contact_number,
             guest.number_of_guests,
             guest.corkage,
             guest.total_price,
@@ -887,7 +891,7 @@ function AdminGuest() {
                     
                         <p className="Guest-section-label" id="guest-list"> Guest list </p>
                         <div className="guests-booking-headers">
-                            <input type="text" className="search-input" placeholder="Search by guest, group name..." value={guestSearchTerm} onChange={(e) => setGuestSearchTerm(e.target.value)}/>
+                            <input type="text" className="search-input" placeholder="Search by guest name or contact number..." value={guestSearchTerm} onChange={(e) => setGuestSearchTerm(e.target.value)}/>
                             <select className="search-options" value={selectedMonthGuest} onChange={(e) => setSelectedMonthGuest(e.target.value)}>
                                 <option value="">All Months</option>
                                 <option value="1">January</option>
@@ -909,7 +913,8 @@ function AdminGuest() {
                                 <table className="guests-tables">
                                     <thead>
                                         <tr>
-                                            <th>Group Name</th>
+                                            <th>Full Name</th>
+                                            <th>Contact Number</th>
                                             <th>Number of Guests</th>
                                             <th>Corkage</th>
                                             <th>Equipment</th>
@@ -921,20 +926,27 @@ function AdminGuest() {
                                     <tbody>
                                         {loadingGuests ? (
                                             <tr>
-                                                <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                                <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
                                                     Loading guest arrivals...
+                                                </td>
+                                            </tr>
+                                        ) : guestLoadError ? (
+                                            <tr>
+                                                <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                                    Unable to load guest records: {guestLoadError}
                                                 </td>
                                             </tr>
                                         ) : filteredGuestArrivals.length === 0 ? (
                                             <tr>
-                                                <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                                <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
                                                     No guest records found.
                                                 </td>
                                             </tr>
                                         ) : (
                                             paginatedGuestArrivals.map((guest) => (
                                                 <tr key={guest.id}>
-                                                    <td>{guest.group_name || '-'}</td>
+                                                    <td>{guest.full_name || '-'}</td>
+                                                    <td>{guest.contact_number || '-'}</td>
                                                     <td>{guest.number_of_guests}</td>
                                                     <td>{guest.corkage || 'No Corkage'}</td>
                                                     <td>{guest.equipment || 'No Equipment'}</td>

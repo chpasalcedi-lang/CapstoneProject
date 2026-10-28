@@ -56,9 +56,10 @@ function ViewGuestModal({ show, onClose, guest }) {
       <div className="guest-receipt-modal" onClick={(event) => event.stopPropagation()}>
         <button className="guest-modal-close" onClick={onClose} aria-label="Close receipt">&times;</button>
         <p className="guest-receipt-kicker">Guest arrival receipt</p>
-        <h2>{guest.group_name || 'Unnamed group'}</h2>
+        <h2>{guest.full_name || 'Unnamed guest'}</h2>
         <div className="guest-receipt-divider" />
-        <div className="guest-receipt-row"><span>Group name</span><strong>{guest.group_name || '-'}</strong></div>
+        <div className="guest-receipt-row"><span>Full name</span><strong>{guest.full_name || '-'}</strong></div>
+        <div className="guest-receipt-row"><span>Contact number</span><strong>{guest.contact_number || '-'}</strong></div>
         {Number(breakdown.children) > 0 && (
           <div className="guest-receipt-row"><span>Children / senior / PWD</span><strong>{breakdown.children} / ₱{(Number(breakdown.children) * CHILD_RATE).toLocaleString('en-PH')}</strong></div>
         )}

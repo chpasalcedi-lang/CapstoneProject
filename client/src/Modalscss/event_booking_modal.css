@@ -516,15 +516,48 @@
   }
 
   .event-booking-price-summary {
-    gap: 8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+    align-items: center;
+    justify-content: stretch;
+    gap: 6px;
+    padding: 10px;
   }
 
   .event-booking-price-divider {
-    display: none;
+    display: block;
+    width: 1px;
+    height: 34px;
   }
 
   .event-booking-price-item {
+    width: 100%;
     min-width: 0;
+    gap: 4px;
+  }
+
+  .event-booking-price-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .event-booking-price-item > div:last-child {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .event-booking-price-label {
+    font-size: 8px;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .event-booking-price-value {
+    font-size: 13px;
+    white-space: nowrap;
   }
 
   .event-booking-discount-results {

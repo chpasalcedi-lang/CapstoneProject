@@ -507,7 +507,12 @@
   }
 
   .walkin-reservation-form-row {
-    gap: 10px;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .walkin-reservation-form-row .walkin-reservation-form-group {
+    width: 100%;
   }
 
   .walkin-reservation-modal-footer {
@@ -556,4 +561,3 @@
     min-height: 32px;
   }
 }
-

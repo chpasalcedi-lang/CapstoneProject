@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import apiClient from '../api';
 import '../Modalscss/edit_event_modal.css';
+import { cacheRooms } from '../utils/roomCache';
+import { cacheRoomImages } from '../utils/roomImage';
 
 function normalizeRoomIds(roomIds, fallbackRooms) {
     const source = Array.isArray(roomIds) ? roomIds : [roomIds || fallbackRooms];
@@ -56,11 +58,10 @@ function EditEventModal({ show, onClose, booking, onUpdated, allowDiscount = tru
         apiClient.get('/get_rooms')
             .then((response) => {
                 showRooms(response.data || []);
-                try {
-                    localStorage.setItem('roomsCache', JSON.stringify(response.data || []));
-                } catch (cacheError) {
-                    console.warn('Unable to update room cache:', cacheError);
-                }
+                cacheRooms(response.data || []);
+                cacheRoomImages(response.data || []).catch((cacheError) => {
+                    console.warn('Unable to update room image cache:', cacheError);
+                });
             })
             .catch((error) => {
                 console.error('Error fetching rooms for edit event:', error);

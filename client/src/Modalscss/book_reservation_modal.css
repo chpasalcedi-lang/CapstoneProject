@@ -484,3 +484,9 @@
   }
 }
 
+@media (max-width: 560px) {
+  .book-reservation-form-row {
+    flex-direction: column;
+    gap: 14px;
+  }
+}

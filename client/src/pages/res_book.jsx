@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import apiClient from '../api';
 import Swal from "sweetalert2";
@@ -12,6 +12,8 @@ import CancelReserveModal from "../Modals/cancel_reserve_modal.jsx";
 import ViewEventModal from "../Modals/view_event_modal.jsx";
 import EditEventModal from "../Modals/edit_event_modal.jsx";
 import "../pagescss/landing_page.css";
+import { cacheRooms } from '../utils/roomCache';
+import { cacheRoomImages, getCachedRoomImages } from '../utils/roomImage';
 
 function ResBook() {
   const location = useLocation();
@@ -45,6 +47,7 @@ function ResBook() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [loadingReservations, setLoadingReservations] = useState(false);
   const [showEventBookingModal1, setShowEventBookingModal1] = useState(false);
+  const menuButtonRef = useRef(null);
   
 
   const handleEventBookingClick = () => {
@@ -362,9 +365,56 @@ function ResBook() {
 
   const toggleMenu = () => setMenuOpen((p) => !p);
   const closeMenu = () => setMenuOpen(false);
+
+  useEffect(() => {
+    if (!menuOpen && menuButtonRef.current) {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active.closest('.mobile-menu')) {
+        active.blur();
+        menuButtonRef.current.focus();
+      }
+    }
+  }, [menuOpen]);
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+    const fetchBookingStatus = useCallback(() => {
+      const bookingRequests = [
+        {
+          label: 'reservations',
+          request: apiClient.get('/get_reservations').then((response) => {
+            const bookings = response.data || [];
+            setReservations(bookings);
+            try {
+              localStorage.setItem('reservationsCache', JSON.stringify(bookings));
+            } catch (cacheError) {
+              console.warn('Unable to update reservation cache:', cacheError);
+            }
+          }),
+        },
+        {
+          label: 'event bookings',
+          request: apiClient.get('/get_event_bookings').then((response) => {
+            const bookings = response.data || [];
+            setEventBookings(bookings);
+            try {
+              localStorage.setItem('eventBookingsCache', JSON.stringify(bookings));
+            } catch (cacheError) {
+              console.warn('Unable to update event booking cache:', cacheError);
+            }
+          }),
+        },
+      ];
+
+      return Promise.all(bookingRequests.map(async ({ label, request }) => {
+        try {
+          await request;
+        } catch (error) {
+          console.error(`Error fetching ${label}:`, error);
+        }
+      }));
+    }, []);
 
     const fetchData = useCallback(async (showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -375,8 +425,23 @@ function ResBook() {
           const cachedRooms = localStorage.getItem('roomsCache');
           const parsedRooms = cachedRooms ? JSON.parse(cachedRooms) : null;
           if (Array.isArray(parsedRooms) && parsedRooms.length > 0) {
+            const cachedReservations = JSON.parse(localStorage.getItem('reservationsCache') || '[]');
+            const cachedEventBookings = JSON.parse(localStorage.getItem('eventBookingsCache') || '[]');
             setData(parsedRooms);
+            if (Array.isArray(cachedReservations)) setReservations(cachedReservations);
+            if (Array.isArray(cachedEventBookings)) setEventBookings(cachedEventBookings);
             setLoading(false);
+
+            getCachedRoomImages(parsedRooms.map((room) => room.id))
+              .then((cachedImages) => {
+                setData((currentRooms) => currentRooms.map((room) => ({
+                  ...room,
+                  room_image: room.room_image || cachedImages.get(String(room.id)) || '',
+                })));
+              })
+              .catch((cacheError) => {
+                console.warn('Unable to read room image cache:', cacheError);
+              });
           }
         } catch (cacheError) {
           console.warn('Unable to read room cache:', cacheError);
@@ -384,10 +449,7 @@ function ResBook() {
       }
 
       const roomsRequest = apiClient.get('/get_rooms');
-      const bookingsRequest = Promise.all([
-        apiClient.get('/get_reservations'),
-        apiClient.get('/get_event_bookings'),
-      ]);
+      const bookingsRequest = fetchBookingStatus();
 
       try {
         // Render rooms as soon as their request finishes. Booking status
@@ -397,11 +459,10 @@ function ResBook() {
         setData(rooms);
         setLoading(false);
 
-        try {
-          localStorage.setItem('roomsCache', JSON.stringify(rooms));
-        } catch (cacheError) {
-          console.warn('Unable to update room cache:', cacheError);
-        }
+        cacheRooms(rooms);
+        cacheRoomImages(rooms).catch((cacheError) => {
+          console.warn('Unable to update room image cache:', cacheError);
+        });
       } catch (error) {
         console.error('Error fetching room availability:', error);
         if (showLoading) {
@@ -417,22 +478,11 @@ function ResBook() {
       }
 
       try {
-        const [reservationsRes, eventsRes] = await bookingsRequest;
-        const reservationsList = reservationsRes.data || [];
-        const eventBookingsList = eventsRes.data || [];
-        setReservations(reservationsList);
-        setEventBookings(eventBookingsList);
-
-        try {
-          localStorage.setItem('reservationsCache', JSON.stringify(reservationsList));
-          localStorage.setItem('eventBookingsCache', JSON.stringify(eventBookingsList));
-        } catch (cacheError) {
-          console.warn('Unable to update reservation cache:', cacheError);
-        }
+        await bookingsRequest;
       } catch (error) {
         console.error('Error fetching reservation or event status:', error);
       }
-    }, []);
+    }, [fetchBookingStatus]);
 
     const computedFiltered = useMemo(() => {
       const normalizedType = roomType?.trim().toLowerCase();
@@ -527,10 +577,10 @@ function ResBook() {
 
     useEffect(() => {
       fetchData(true);
-      const availabilityRefresh = window.setInterval(() => fetchData(false), 10000);
+      const availabilityRefresh = window.setInterval(fetchBookingStatus, 5000);
 
       return () => window.clearInterval(availabilityRefresh);
-    }, [fetchData]);
+    }, [fetchData, fetchBookingStatus]);
 
     // Close profile dropdown when clicking outside
     useEffect(() => {
@@ -690,17 +740,17 @@ function ResBook() {
                   </button>
                 </Link>
               )}
-              <button className="hamburger-btn" onClick={toggleMenu} aria-label="Toggle menu" aria-expanded={menuOpen}>
+              <button ref={menuButtonRef} className="hamburger-btn" onClick={toggleMenu} aria-controls="reservation-mobile-menu" aria-label="Toggle menu" aria-expanded={menuOpen}>
                 <i className={`fa-solid ${menuOpen ? "fa-x" : "fa-bars"}`}></i>
               </button>
             </div>
         </div>
 
-        <div className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen}>
-          <Link to="/Home" onClick={() => { closeMenu(); scrollToTop(); }}>Home</Link>
-          <Link to="/Reservation" onClick={closeMenu}>Room</Link>
-          <Link to="/Home#about-pool" onClick={closeMenu}>About</Link>
-          <Link to="/Guide" onClick={closeMenu}>Guide</Link>
+        <div id="reservation-mobile-menu" className={`mobile-menu ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen} inert={!menuOpen}>
+          <Link to="/Home" tabIndex={menuOpen ? 0 : -1} onClick={() => { closeMenu(); scrollToTop(); }}>Home</Link>
+          <Link to="/Reservation" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>Room</Link>
+          <Link to="/Home#about-pool" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>About</Link>
+          <Link to="/Guide" tabIndex={menuOpen ? 0 : -1} onClick={closeMenu}>Guide</Link>
         </div>
       </nav>
 
@@ -784,7 +834,9 @@ function ResBook() {
                   return (
                   <div className="booking-room-card" key={room.id}>
                       <div className="booking-room-card-img">
-                        <img src={room.room_image} alt={room.room_name} loading="lazy" />
+                        {room.room_image && (
+                          <img src={room.room_image} alt={room.room_name} loading="lazy" />
+                        )}
                         <span className={`booking-room-status ${room.room_status === 'Occupied' ? 'occupied' : room.room_status === 'Maintenance' ? 'maintenance' : 'available'}`}>
                           {room.room_status === 'Maintenance'
                             ? 'Maintenance'
